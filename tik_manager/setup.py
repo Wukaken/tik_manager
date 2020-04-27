@@ -328,6 +328,10 @@ def mayaSetup(prompt=True):
     userHomeDir = os.path.normpath(os.path.join(os.path.expanduser("~")))
     userDocDir = os.path.join(userHomeDir, "Documents")
     userMayaDir = os.path.join(userDocDir, "maya")
+    if sys.platform == 'darwin':
+        mayaPart = 'Library/Preferences/Autodesk/maya'
+        userMayaDir = os.path.join(userHomeDir, mayaPart)
+
     userScriptsDir = os.path.join(userMayaDir, "scripts")
     userSetupFile = os.path.join(userScriptsDir, "userSetup.py")
 

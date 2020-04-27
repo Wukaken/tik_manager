@@ -504,6 +504,9 @@ class RootManager(object):
         dir = os.path.expanduser('~')
         if not "Documents" in dir:
             dir = os.path.join(dir, "Documents")
+        if self.currentPlatform == 'Darwin':
+            dir = mayaPart = 'Library/Preferences/Autodesk/maya'
+            userMayaDir = os.path.join(userHomeDir, mayaPart)
         return os.path.normpath(dir)
 
     def getOpenSceneInfo(self):
@@ -813,9 +816,7 @@ class RootManager(object):
         elif self.currentPlatform == "Linux":
             os.system('nautilus %s' % path)
         else:
-            msg = "%s is not supported" %self.currentPlatform
-            self._exception(210, msg)
-            return
+            os.system('open %s' % path) 
 
     def scanBaseScenes(self, categoryAs=None, subProjectAs=None):
         """Returns the basescene database files in current category"""
@@ -1440,10 +1441,12 @@ Elapsed Time:{6}
 
         # check platform
         currentOs = platform.system()
+        '''
         if currentOs != "Linux" and currentOs != "Windows":
             self._exception(210, "Operating System is not supported\nCurrently only Windows and Linux supported")
             return -1, ["OS Error", "Operating System is not supported",
                         "Scene Manager only supports Windows and Linux Operating Systems"]
+        '''
         ## check admin rights
         # try:
         #     is_admin = os.getuid() == 0
