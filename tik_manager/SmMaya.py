@@ -83,7 +83,7 @@ class MayaManager(RootManager):
         #         "scenesDir": "scenes",
         #         "pbSettingsFile": "pbSettings.json",
         #         "categoriesFile": "categoriesMaya.json",
-        #         "userSettingsDir": "SceneManager\\Maya",
+        #         "userSettingsDir": "SceneManager/Maya",
         #         }
 
 

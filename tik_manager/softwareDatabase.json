@@ -11,7 +11,7 @@
     "scenesDir": "scenes",
     "pbSettingsFile": "pbSettings.json",
     "categoriesFile": "categoriesMaya.json",
-    "userSettingsDir": "SceneManager\\Maya"
+    "userSettingsDir": "SceneManager/Maya"
   },
   "3dsMax": {
     "niceName": "3dsMax",
@@ -25,7 +25,7 @@
     "scenesDir": "scenes_3dsMax",
     "pbSettingsFile": "pbSettings_3dsMax.json",
     "categoriesFile": "categories3dsMax.json",
-    "userSettingsDir": "SceneManager\\3dsMax"
+    "userSettingsDir": "SceneManager/3dsMax"
   },
   "Houdini": {
     "niceName": "Houdini",
@@ -40,7 +40,7 @@
     "scenesDir": "scenes_houdini",
     "pbSettingsFile": "pbSettings_houdini.json",
     "categoriesFile": "categoriesHoudini.json",
-    "userSettingsDir": "SceneManager\\Houdini"
+    "userSettingsDir": "SceneManager/Houdini"
   },
   "Nuke": {
     "niceName": "Nuke",
@@ -73,6 +73,6 @@
     "scenesDir": "scenes_nuke",
     "pbSettingsFile": "pbSettings_nuke.json",
     "categoriesFile": "categoriesNuke.json",
-    "userSettingsDir": "SceneManager\\Nuke"
+    "userSettingsDir": "SceneManager/Nuke"
   }
 }
