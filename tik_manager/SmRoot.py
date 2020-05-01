@@ -505,8 +505,8 @@ class RootManager(object):
         if not "Documents" in dir:
             dir = os.path.join(dir, "Documents")
         if self.currentPlatform == 'Darwin':
-            dir = mayaPart = 'Library/Preferences/Autodesk/maya'
-            userMayaDir = os.path.join(userHomeDir, mayaPart)
+            mayaPart = 'Library/Preferences/Autodesk/maya'
+            userMayaDir = os.path.join(dir, mayaPart)
         return os.path.normpath(dir)
 
     def getOpenSceneInfo(self):
@@ -651,19 +651,17 @@ class RootManager(object):
     #     self._bookmarksList = self.loadFavorites(self.bookmarksFile)  # not immediate
     #     return self._bookmarksList
 
-    def createNewProject(self, projectRoot, projectName, brandName, client, settingsData=None):
+    def createNewProject(self, projectRoot, projectName, settingsData=None):
         """
         Creates New Project Structure
         :param projectRoot: (String) Path to where all projects are
         :param projectName: (String) Name of the project
-        :param brandName: (String) Optional. Brand name
-        :param client: (String) Client Name
         :return: None
         """
         logger.debug("Func: createNewProject")
 
         # resolve the project path
-        resolvedPath = self.resolveProjectPath(projectRoot, projectName, brandName, client)
+        resolvedPath = self.resolveProjectPath(projectRoot, projectName)
 
         # check if there is a duplicate
         if not os.path.isdir(os.path.normpath(resolvedPath)):
@@ -1487,11 +1485,11 @@ Elapsed Time:{6}
         basename = os.path.split(path)[1]
         return os.path.splitext(basename)[0]
 
-    def resolveProjectPath(self, projectRoot, projectName, brandName, client):
+    def resolveProjectPath(self, projectRoot, projectName):
         """Parses the info to the absolute project folder path"""
         logger.debug("Func: resolveProjectPath")
 
-        if projectName == "" or client == "" or projectRoot == "":
+        if projectName == "":
             msg = ("Fill the mandatory fields")
             # logger.warning(msg)
             # raise Exception([341, msg])
@@ -1500,11 +1498,7 @@ Elapsed Time:{6}
 
         projectDate = datetime.datetime.now().strftime("%y%m%d")
 
-        if brandName:
-            brandName = "%s_" % brandName
-        else:
-            brandName = ""
-        fullName = "{0}{1}_{2}_{3}".format(brandName, projectName, client, projectDate)
+        fullName = "{0}_{1}".format(projectName, projectDate)
         fullPath = os.path.join(os.path.normpath(str(projectRoot)), fullName)
         return fullPath
 

@@ -346,7 +346,6 @@ class MainUI(QtWidgets.QMainWindow):
         self.splitter.setOrientation(QtCore.Qt.Horizontal)
         self.splitter.setObjectName(("splitter"))
 
-
         self.scenes_listWidget = QtWidgets.QListWidget(self.splitter)
         self.scenes_listWidget.setObjectName(("listWidget"))
 
@@ -720,41 +719,17 @@ class MainUI(QtWidgets.QMainWindow):
         self.resolvedpath_label.setGeometry(QtCore.QRect(20, 70, 381, 21))
         self.resolvedpath_label.setObjectName(("resolvedpath_label"))
 
-        self.brandname_label = QtWidgets.QLabel(self.createproject_Dialog)
-        self.brandname_label.setGeometry(QtCore.QRect(20, 110, 111, 20))
-        self.brandname_label.setFrameShape(QtWidgets.QFrame.Box)
-        self.brandname_label.setText(("Brand Name"))
-        self.brandname_label.setAlignment(QtCore.Qt.AlignCenter)
-        self.brandname_label.setObjectName(("brandname_label"))
-
         self.projectname_label = QtWidgets.QLabel(self.createproject_Dialog)
-        self.projectname_label.setGeometry(QtCore.QRect(140, 110, 131, 20))
+        self.projectname_label.setGeometry(QtCore.QRect(20, 110, 381, 20))
         self.projectname_label.setFrameShape(QtWidgets.QFrame.Box)
         self.projectname_label.setText(("Project Name"))
         self.projectname_label.setAlignment(QtCore.Qt.AlignCenter)
         self.projectname_label.setObjectName(("projectname_label"))
 
-        self.client_label = QtWidgets.QLabel(self.createproject_Dialog)
-        self.client_label.setGeometry(QtCore.QRect(280, 110, 121, 20))
-        self.client_label.setFrameShape(QtWidgets.QFrame.Box)
-        self.client_label.setText(("Client"))
-        self.client_label.setAlignment(QtCore.Qt.AlignCenter)
-        self.client_label.setObjectName(("client_label"))
-
-        self.brandname_lineEdit = QtWidgets.QLineEdit(self.createproject_Dialog)
-        self.brandname_lineEdit.setGeometry(QtCore.QRect(20, 140, 111, 21))
-        self.brandname_lineEdit.setPlaceholderText(("(optional)"))
-        self.brandname_lineEdit.setObjectName(("brandname_lineEdit"))
-
         self.projectname_lineEdit = QtWidgets.QLineEdit(self.createproject_Dialog)
-        self.projectname_lineEdit.setGeometry(QtCore.QRect(140, 140, 131, 21))
+        self.projectname_lineEdit.setGeometry(QtCore.QRect(20, 140, 381, 21))
         self.projectname_lineEdit.setPlaceholderText(("Mandatory Field"))
         self.projectname_lineEdit.setObjectName(("projectname_lineEdit"))
-
-        self.client_lineEdit = QtWidgets.QLineEdit(self.createproject_Dialog)
-        self.client_lineEdit.setGeometry(QtCore.QRect(280, 140, 121, 21))
-        self.client_lineEdit.setPlaceholderText(("Mandatory Field"))
-        self.client_lineEdit.setObjectName(("client_lineEdit"))
 
         # TODO : ref
 
@@ -809,12 +784,10 @@ class MainUI(QtWidgets.QMainWindow):
         def onCreateNewProject():
             root = self.projectroot_lineEdit.text()
             pName = self.projectname_lineEdit.text()
-            bName = self.brandname_lineEdit.text()
-            cName = self.client_lineEdit.text()
             projectSettingsDB = {"Resolution": [resolutionX_spinBox.value(), resolutionY_spinBox.value()],
-                                   "FPS": int(fps_comboBox.currentText())}
+                                 "FPS": int(fps_comboBox.currentText())}
 
-            pPath = self.manager.createNewProject(root, pName, bName, cName, settingsData=projectSettingsDB)
+            pPath = self.manager.createNewProject(root, pName, settingsData=projectSettingsDB)
             if pPath:
                 self.manager.setProject(pPath)
             # self.onProjectChange()
@@ -823,34 +796,26 @@ class MainUI(QtWidgets.QMainWindow):
             self.createproject_Dialog.close()
 
         def resolve():
-            if self.projectname_lineEdit.text() == "" or self.client_lineEdit.text() == "" or self.projectroot_lineEdit.text() == "":
+            if self.projectname_lineEdit.text() == "" or self.projectroot_lineEdit.text() == "":
                 self.resolvedpath_label.setText("Fill the mandatory fields")
                 self.newProjectPath = None
                 return
-            resolvedPath = self.manager.resolveProjectPath(self.projectroot_lineEdit.text(),
-                                                           self.projectname_lineEdit.text(),
-                                                           self.brandname_lineEdit.text(),
-                                                           self.client_lineEdit.text())
+            resolvedPath = self.manager.resolveProjectPath(
+                self.projectroot_lineEdit.text(),
+                self.projectname_lineEdit.text())
             self.resolvedpath_label.setText(resolvedPath)
 
         resolve()
         self.browse_pushButton.clicked.connect(browseProjectRoot)
 
-        self.brandname_lineEdit.textEdited.connect(lambda: resolve())
         self.projectname_lineEdit.textEdited.connect(lambda: resolve())
-        self.client_lineEdit.textEdited.connect(lambda: resolve())
 
         self.createproject_buttonBox.accepted.connect(onCreateNewProject)
         self.createproject_buttonBox.rejected.connect(self.createproject_Dialog.reject)
 
-        self.brandname_lineEdit.textChanged.connect(
-            lambda: self._checkValidity(self.brandname_lineEdit.text(), self.cp_button,
-                                        self.brandname_lineEdit))
         self.projectname_lineEdit.textChanged.connect(
             lambda: self._checkValidity(self.projectname_lineEdit.text(), self.cp_button,
                                         self.projectname_lineEdit))
-        self.client_lineEdit.textChanged.connect(
-            lambda: self._checkValidity(self.client_lineEdit.text(), self.cp_button, self.client_lineEdit))
 
         self.createproject_Dialog.show()
 
