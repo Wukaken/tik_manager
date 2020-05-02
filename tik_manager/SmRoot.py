@@ -30,6 +30,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 # -----------------------------------------------------------------------------
 
+import getpass
 import platform
 import datetime
 import os
@@ -271,19 +272,12 @@ class RootManager(object):
     @property
     def currentUser(self):
         """Returns the current user"""
-        logger.debug("Func: currentUser/getter")
-
-        return self._currentsDict["currentUser"]
+        return getpass.getuser()
 
     @currentUser.setter
     def currentUser(self, name):
         """Sets the current user"""
         logger.debug("Func: currentUser/setter")
-        if name not in self._usersDict.keys():
-            msg="%s is not in the user list" %name
-            # raise Exception([101, msg])
-            self._exception(101, msg)
-            return
         self._setCurrents("currentUser", name)
 
     @property
@@ -1018,6 +1012,7 @@ Elapsed Time:{6}
         self._currentSceneInfo["Versions"][self._currentVersionIndex-1]["Note"] = self._currentNotes
         self._dumpJson(self._currentSceneInfo, self._baseScenesInCategory[self._currentBaseSceneName])
 
+    '''
     def addUser(self, fullName, initials):
         """
         Adds a new user to the database
@@ -1052,7 +1047,7 @@ Elapsed Time:{6}
         self._dumpJson(currentDB, self._pathsDict["usersFile"])
         self._usersDict = currentDB
         return None, None
-
+    '''
     def addCategory(self, categoryName):
         """Adds a new category to the database"""
         curCategories = self._loadCategories()
@@ -1557,19 +1552,10 @@ Elapsed Time:{6}
     def _loadUsers(self):
         """Load Users from file"""
         logger.debug("Func: _loadUsers")
-
-        # old Name
-        if not os.path.isfile(self._pathsDict["usersFile"]):
-            # userDB = {"Generic": "gn"}
-            defaultUsers = self._sceneManagerDefaults["defaultUsers"]
-            self._dumpJson(defaultUsers, self._pathsDict["usersFile"])
-            return defaultUsers
-        else:
-            userDB = self._loadJson(self._pathsDict["usersFile"])
-            if userDB == -2:
-                return -2
-            return userDB
-
+        user = getpass.getuser()
+        pat = re.compile('\W')
+        formatUser = pat.sub('_', user)
+        return {user: formatUser}
 
     def loadFavorites(self):
         """Loads Bookmarked projects"""

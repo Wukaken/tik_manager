@@ -469,10 +469,11 @@ class MainUI(QtWidgets.QMainWindow):
         createProject_fm = QtWidgets.QAction("&Create Project", self)
         self.saveVersion_fm = QtWidgets.QAction("&Save Version", self)
         self.saveBaseScene_fm = QtWidgets.QAction("&Save Base Scene", self)
+        self.saveSubVersion_fm = QtWidgets.QAction("&Save Sub Version", self)
 
         loadReferenceScene_fm = QtWidgets.QAction("&Load/Reference Scene", self)
 
-        add_remove_users_fm = QtWidgets.QAction("&Add/Remove Users", self)
+        # add_remove_users_fm = QtWidgets.QAction("&Add/Remove Users", self)
 
         add_remove_categories_fm = QtWidgets.QAction("&Add/Remove Categories", self)
         pb_settings_fm = QtWidgets.QAction("&Playblast Settings", self)
@@ -505,7 +506,7 @@ class MainUI(QtWidgets.QMainWindow):
         self.fileMenu.addSeparator()
 
         #settings
-        self.fileMenu.addAction(add_remove_users_fm)
+        # self.fileMenu.addAction(add_remove_users_fm)
         self.fileMenu.addAction(add_remove_categories_fm)
         self.fileMenu.addAction(pb_settings_fm)
         self.fileMenu.addAction(projectSettings_fm)
@@ -611,7 +612,7 @@ class MainUI(QtWidgets.QMainWindow):
 
         createProject_fm.triggered.connect(self.createProjectUI)
 
-        add_remove_users_fm.triggered.connect(self.addRemoveUserUI)
+        # add_remove_users_fm.triggered.connect(self.addRemoveUserUI)
         pb_settings_fm.triggered.connect(self.onPbSettings)
 
         add_remove_categories_fm.triggered.connect(self.addRemoveCategoryUI)
@@ -1645,6 +1646,7 @@ class MainUI(QtWidgets.QMainWindow):
 
         self.pbSettings_dialog.show()
 
+    '''
     def addRemoveUserUI(self):
         # This method is NOT Software Specific
         passw, ok = QtWidgets.QInputDialog.getText(self, "Password Query",
@@ -1795,7 +1797,7 @@ class MainUI(QtWidgets.QMainWindow):
         # buttonBox.rejected.connect(projectSettings_Dialog.reject)
 
         userControl_Dialog.show()
-
+    '''
     # def addRemoveUserUI(self):
     #     # This method is NOT Software Specific
     #     passw, ok = QtWidgets.QInputDialog.getText(self, "Password Query",
