@@ -322,7 +322,7 @@ class MainUI(QtWidgets.QMainWindow):
         self.r1_gridLayout.addWidget(self.baseScene_lineEdit, 0, 1, 1, 1)
 
         self.project_label = QtWidgets.QLabel(self.centralwidget)
-        self.project_label.setText(("Project:"))
+        self.project_label.setText(("ProjectPath:"))
         self.project_label.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter)
         self.project_label.setObjectName(("project_label"))
         self.r1_gridLayout.addWidget(self.project_label, 1, 0, 1, 1)
@@ -331,6 +331,7 @@ class MainUI(QtWidgets.QMainWindow):
         self.project_lineEdit.setText((""))
         self.project_lineEdit.setPlaceholderText((""))
         self.project_lineEdit.setObjectName(("project_lineEdit"))
+        self.project_lineEdit.setFocusPolicy(QtCore.Qt.NoFocus)
         # self.project_lineEdit.setReadOnly(True)
         self.r1_gridLayout.addWidget(self.project_lineEdit, 1, 1, 1, 1)
 
@@ -338,6 +339,16 @@ class MainUI(QtWidgets.QMainWindow):
         self.setProject_pushButton.setText(("SET"))
         self.setProject_pushButton.setObjectName(("setProject_pushButton"))
         self.r1_gridLayout.addWidget(self.setProject_pushButton, 1, 2, 1, 1)
+
+        self.projects_label = QtWidgets.QLabel(self.centralwidget)
+        self.projects_label.setText(("Project:"))
+        self.projects_label.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter)
+        self.projects_label.setObjectName(("projects_label"))
+        self.r1_gridLayout.addWidget(self.projects_label, 2, 0, 1, 1)
+
+        self.projects_comboBox = QtWidgets.QComboBox(self.centralwidget)
+        self.projects_comboBox.setObjectName(("projects_comboBox"))
+        self.r1_gridLayout.addWidget(self.projects_comboBox, 2, 1, 1, 1)
 
         self.main_gridLayout.addLayout(self.r1_gridLayout, 0, 0, 1, 1)
 
@@ -693,6 +704,7 @@ class MainUI(QtWidgets.QMainWindow):
         self.addSubProject_pushButton.clicked.connect(self.createSubProjectUI)
 
         self.setProject_pushButton.clicked.connect(self.setProjectUI)
+        self.projects_comboBox.currentIndexChanged.connect(self.renewProject)
 
         self.saveBaseScene_pushButton.clicked.connect(self.saveBaseSceneDialog)
         self.saveBaseScene_fm.triggered.connect(self.saveBaseSceneDialog)
@@ -724,6 +736,38 @@ class MainUI(QtWidgets.QMainWindow):
             else:
                 self.infoPop(textTitle="Naming Error", textHeader="Naming Error",
                              textInfo="Choose an unique name with latin characters without spaces", type="C")
+
+    def renewProject(self):
+        self.projects_comboBox.blockSignals(True)
+        projName = self.projects_comboBox.currentText()
+        projPath = self.manager.projectDir
+        upperDir = os.path.dirname(projPath)
+        newProjPath = os.path.normpath(os.path.join(upperDir, projName))
+        self.manager.setProject(newProjPath)
+        self.onProjectChange()
+        self.projects_comboBox.blockSignals(False)
+
+    def renewProjectComboBox(self):
+        self.projects_comboBox.blockSignals(True)
+        self.projects_comboBox.clear()
+        projPath = self.manager.projectDir
+        curProj = os.path.basename(projPath)
+        upperDir = os.path.dirname(projPath)
+        dirs = os.listdir(upperDir)
+        dirs.sort()
+        cid = 0
+        idx = -1
+        for i, d in enumerate(dirs):
+            full = os.path.join(upperDir, d)
+            if os.path.isdir(full):
+                self.projects_comboBox.addItem(d)
+                if d == curProj:
+                    idx = cid
+
+                cid += 1
+
+        self.projects_comboBox.setCurrentIndex(idx)
+        self.projects_comboBox.blockSignals(False)
 
     def createProjectUI(self):
 
@@ -2664,6 +2708,7 @@ class MainUI(QtWidgets.QMainWindow):
 
         # init project
         self.project_lineEdit.setText(self.manager.projectDir)
+        self.renewProjectComboBox()
 
         # init subproject
 
@@ -3180,6 +3225,7 @@ class MainUI(QtWidgets.QMainWindow):
         manager = self._getManager()
         if self.load_radioButton.isChecked() and manager.currentBaseSceneName:
             self.version_comboBox.setEnabled(True)
+            self.subVersion_comboBox.setEnabled(True)
             # if manager.getPreviews() is not []:
             #     self.showPreview_pushButton.setEnabled(True)
             # else:
@@ -3190,6 +3236,7 @@ class MainUI(QtWidgets.QMainWindow):
             self.subVersion_label.setEnabled(True)
         else:
             self.version_comboBox.setEnabled(False)
+            self.subVersion_comboBox.setEnabled(False)
             self.showPreview_pushButton.setEnabled(False)
             self.makeReference_pushButton.setEnabled(False)
             self.addNote_pushButton.setEnabled(False)
