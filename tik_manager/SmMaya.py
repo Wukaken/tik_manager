@@ -37,6 +37,7 @@ reload(SmUIRoot)
 
 from SmUIRoot import MainUI as baseUI
 import os
+import re
 # import SmRoot
 # reload(SmRoot)
 from SmRoot import RootManager
@@ -159,87 +160,50 @@ class MayaManager(RootManager):
         """
         logger.debug("Func: saveBaseScene")
 
+        projectPath = self.projectDir
         now = datetime.datetime.now().strftime("%d/%m/%Y-%H:%M")
         completeNote = "[%s] on %s\n%s\n" % (self.currentUser, now, versionNotes)
 
-        # Check if the base name is unique
-        scenesToCheck = self.scanBaseScenes(categoryAs=categoryName, subProjectAs=subProjectIndex)
-        for key in scenesToCheck.keys():
-            if baseName.lower() == key.lower():
-                msg = ("Base Scene Name is not unique!\nABORTING")
-                self._exception(360, msg)
-                return -1, msg
+        info = self.getOutputFileInfo(
+            categoryName, baseName, 1, 1, sceneFormat, checkUniqueBaseName=1,
+            subProjectIndex=subProjectIndex, makeReference=makeReference)
 
-        projectPath = self.projectDir
-        databaseDir = self._pathsDict["databaseDir"]
-        scenesPath = self._pathsDict["scenesDir"]
-        categoryPath = os.path.normpath(os.path.join(scenesPath, categoryName))
-        self._folderCheck(categoryPath)
+        sceneDir = info['sceneDir']
+        sceneFile = info['sceneFile']
+        jsonFile = info['jsonFile']
+        thumbFile = info['thumbFile']
+        referenceFile = info['referenceFile']
+        referenceVersion = info['referenceVersion']
+        referenceSubVersion = info['referenceSubVersion']
 
-        ## if its going to be saved as a subproject
-        if not subProjectIndex == 0:
-            subProjectPath = os.path.normpath(os.path.join(categoryPath, self._subProjectsList[subProjectIndex]))
-            self._folderCheck(subProjectPath)
-            shotPath = os.path.normpath(os.path.join(subProjectPath, baseName))
-            self._folderCheck(shotPath)
-
-            jsonCategoryPath = os.path.normpath(os.path.join(databaseDir, categoryName))
-            self._folderCheck(jsonCategoryPath)
-            jsonCategorySubPath = os.path.normpath(os.path.join(jsonCategoryPath, self._subProjectsList[subProjectIndex]))
-            self._folderCheck(jsonCategorySubPath)
-            jsonFile = os.path.join(jsonCategorySubPath, "{}.json".format(baseName))
-
-        else:
-            shotPath = os.path.normpath(os.path.join(categoryPath, baseName))
-            self._folderCheck(shotPath)
-
-            jsonCategoryPath = os.path.normpath(os.path.join(databaseDir, categoryName))
-            self._folderCheck(jsonCategoryPath)
-            jsonFile = os.path.join(jsonCategoryPath, "{}.json".format(baseName))
-
-
-        version = 1
-        sceneName = "{0}_{1}_{2}_v{3}".format(baseName, categoryName, self._usersDict[self.currentUser], str(version).zfill(3))
-        sceneFile = os.path.join(shotPath, "{0}.{1}".format(sceneName, sceneFormat))
-        ## relativity update
-        relSceneFile = os.path.relpath(sceneFile, start=projectPath)
-        # killTurtle()
-        # TODO // cmds may be used instead
-        # pm.saveAs(sceneFile)
         cmds.file(rename=sceneFile)
         cmds.file(save=True, type=self.formatDict[sceneFormat])
-
-        thumbPath = self.createThumbnail(dbPath=jsonFile, versionInt=version)
+        self.doCreateThumbnail(thumbFile)
+        if referenceFile is not None:
+            shutil.copyfile(sceneFile, referenceFile)
 
         jsonInfo = {}
-
-        if makeReference:
-            # TODO // Find an elegant solution and add MA compatibility. Can be merged with makeReference function in derived class
-            referenceName = "{0}_{1}_forReference".format(baseName, categoryName)
-            referenceFile = os.path.join(shotPath, "{0}.{1}".format(referenceName, sceneFormat))
-            ## relativity update
-            relReferenceFile = os.path.relpath(referenceFile, start=projectPath)
-            shutil.copyfile(sceneFile, referenceFile)
-            jsonInfo["ReferenceFile"] = relReferenceFile
-            jsonInfo["ReferencedVersion"] = version
-        else:
-            jsonInfo["ReferenceFile"] = None
-            jsonInfo["ReferencedVersion"] = None
-
         jsonInfo["ID"] = "SmMayaV02_sceneFile"
         jsonInfo["MayaVersion"] = cmds.about(q=True, api=True)
         jsonInfo["Name"] = baseName
-        jsonInfo["Path"] = os.path.relpath(shotPath, start=projectPath)
+        jsonInfo["Path"] = os.path.relpath(sceneDir, start=projectPath)
         jsonInfo["Category"] = categoryName
         jsonInfo["Creator"] = self.currentUser
         jsonInfo["CreatorHost"] = (socket.gethostname())
+        if referenceFile:
+            jsonInfo["ReferenceFile"] = os.path.relpath(referenceFile, start=projectPath)
+        else:
+            jsonInfo["ReferenceFile"] = None
+            
+        jsonInfo["ReferencedVersion"] = referenceVersion
+        jsonInfo["ReferencedSubVersion"] = referenceSubVersion
         jsonInfo["Versions"] = [ # PATH => Notes => User Initials => Machine ID => Playblast => Thumbnail
-            {"RelativePath": relSceneFile,
+            {"RelativePath": os.path.relpath(sceneFile, start=projectPath),
              "Note": completeNote,
              "User": self._usersDict[self.currentUser],
              "Workstation": socket.gethostname(),
              "Preview": {},
-             "Thumb": thumbPath,
+             "Thumb": thumbFile,
              "Ranges": self._getTimelineRanges()
              }
         ]
@@ -263,60 +227,44 @@ class MayaManager(RootManager):
         """
         logger.debug("Func: saveVersion")
 
-
-
-        now = datetime.datetime.now().strftime("%d/%m/%Y-%H:%M")
-        completeNote = "[%s] on %s\n%s\n" % (self.currentUser, now, versionNotes)
-
-        sceneName = self.getSceneFile()
-        if not sceneName:
-            msg = "This is not a base scene (Untitled)"
-            cmds.warning(msg)
-            return -1, msg
-
         sceneInfo = self.getOpenSceneInfo()
-
         if sceneInfo: ## getCurrentJson returns None if the resolved json path is missing
+            projectPath = self.projectDir
+            
+            now = datetime.datetime.now().strftime("%d/%m/%Y-%H:%M")
+            completeNote = "[%s] on %s\n%s\n" % (self.currentUser, now, versionNotes)
+
             jsonFile = sceneInfo["jsonFile"]
-            jsonInfo = self._loadJson(jsonFile)
-
-            currentVersion = len(jsonInfo["Versions"]) + 1
-            sceneName = "{0}_{1}_{2}_v{3}".format(jsonInfo["Name"], jsonInfo["Category"], self._usersDict[self.currentUser],
-                                                  str(currentVersion).zfill(3))
-            relSceneFile = os.path.join(jsonInfo["Path"], "{0}.{1}".format(sceneName, sceneFormat))
-
-            sceneFile = os.path.join(sceneInfo["projectPath"], relSceneFile)
-
-            # killTurtle()
-            # TODO // cmds?
-            # pm.saveAs(sceneFile)
-
+            versionUp = kwargs.get('versionUp', 1)
+            info = self.getOutputVersionUpFileInfo(jsonFile, versionUp, sceneFormat,
+                                                   makeReference=makeReference)
+            sceneFile = info['sceneFile']
+            thumbFile = info['thumbFile']
+            referenceFile = info['referenceFile']
+            referenceVersion = info['referenceVersion']
+            referenceSubVersion = info['referenceSubVersion']
+            
             cmds.file(rename=sceneFile)
             cmds.file(save=True, type=self.formatDict[sceneFormat])
-
-            thumbPath = self.createThumbnail(dbPath=jsonFile, versionInt=currentVersion)
-
+            self.doCreateThumbnail(thumbFile)
+                
+            jsonInfo = self._loadJson(jsonFile)
             jsonInfo["Versions"].append(
-                # PATH => Notes => User Initials => Machine ID => Playblast => Thumbnail
-            # TODO : ref => Dict
-                {"RelativePath": relSceneFile,
+                {"RelativePath": os.path.relpath(sceneFile, start=projectPath),
                  "Note": completeNote,
                  "User": self._usersDict[self.currentUser],
                  "Workstation": socket.gethostname(),
                  "Preview": {},
-                 "Thumb": thumbPath,
-                 "Ranges": self._getTimelineRanges()
-                 }
-                )
+                 "Thumb": thumbFile,
+                 "Ranges": self._getTimelineRanges()})
 
-            if makeReference:
-                referenceName = "{0}_{1}_forReference".format(jsonInfo["Name"], jsonInfo["Category"])
-                relReferenceFile = os.path.join(jsonInfo["Path"], "{0}.{1}".format(referenceName, sceneFormat))
-                referenceFile = os.path.join(sceneInfo["projectPath"], relReferenceFile)
-
+            if referenceFile is not None:
                 shutil.copyfile(sceneFile, referenceFile)
-                jsonInfo["ReferenceFile"] = relReferenceFile
-                jsonInfo["ReferencedVersion"] = currentVersion
+                jsonInfo["ReferenceFile"] = os.path.relpath(
+                    referenceFile, start=projectPath)
+                jsonInfo["ReferencedVersion"] = referenceVersion
+                jsonInfo["ReferencedSubVersion"] = referenceSubVersion
+
             self._dumpJson(jsonInfo, jsonFile)
         else:
             msg = "This is not a base scene (Json file cannot be found)"
@@ -414,8 +362,7 @@ class MayaManager(RootManager):
                        useDefaultMaterial=pbSettings["UseDefaultMaterial"],
                        polymeshes=True,
                        imagePlane=True,
-                       hud=True
-                       )
+                       hud=True)
 
         cmds.camera(currentCam, e=True, overscan=True, displayFilmGate=False, displayResolution=False)
 
@@ -471,8 +418,6 @@ class MayaManager(RootManager):
 
         ## Check here: http://download.autodesk.com/us/maya/2011help/pymel/generated/functions/pymel.core.windows/pymel.core.windows.headsUpDisplay.html
         # print "playBlastFile", playBlastFile
-        normPB = os.path.normpath(playBlastFile)
-        # print "normPath", normPB
         cmds.playblast(format=pbSettings["Format"],
                        sequenceTime=False,
                      filename=playBlastFile,
@@ -526,7 +471,8 @@ class MayaManager(RootManager):
     def loadBaseScene(self, force=False):
         """Loads the scene at cursor position"""
         logger.debug("Func: loadBaseScene")
-        relSceneFile = self._currentSceneInfo["Versions"][self._currentVersionIndex-1]["RelativePath"]
+        idx = self.getRealVersionIndex()
+        relSceneFile = self._currentSceneInfo["Versions"][idx]["RelativePath"]
         absSceneFile = os.path.join(self.projectDir, relSceneFile)
         if os.path.isfile(absSceneFile):
             cmds.file(absSceneFile, o=True, force=force)
@@ -539,7 +485,8 @@ class MayaManager(RootManager):
     def importBaseScene(self):
         """Imports the scene at cursor position"""
         logger.debug("Func: importBaseScene")
-        relSceneFile = self._currentSceneInfo["Versions"][self._currentVersionIndex-1]["RelativePath"]
+        idx = self.getRealVersionIndex()
+        relSceneFile = self._currentSceneInfo["Versions"][idx]["RelativePath"]
         absSceneFile = os.path.join(self.projectDir, relSceneFile)
         if os.path.isfile(absSceneFile):
             cmds.file(absSceneFile, i=True)
@@ -572,7 +519,13 @@ class MayaManager(RootManager):
         else:
             cmds.warning("There is no reference set for this scene. Nothing changed")
 
-    def createThumbnail(self, useCursorPosition=False, dbPath = None, versionInt = None):
+    def doCreateThumbnail(self, thumbnailFile):
+        logger.debug("Func: doCreateThumbnail")
+        frame = cmds.currentTime(query=True)
+        cmds.playblast(cf=thumbnailFile, fo=1, format='image', wh=[221, 124],
+                       orn=0, os=1, p=100, c="jpg", fr=[frame])
+            
+    def createThumbnail(self, useCursorPosition=False, dbPath=None, versionInt=None):
         """
         Creates the thumbnail file.
         :param databaseDir: (String) If defined, this folder will be used to store the created database.
@@ -616,7 +569,7 @@ class MayaManager(RootManager):
         # return thumbPath
         return relThumbPath
 
-    def replaceThumbnail(self, filePath=None ):
+    def replaceThumbnail(self, filePath=None):
         """
         Replaces the thumbnail with given file or current view
         :param filePath: (String)  if a filePath is defined, this image (.jpg or .gif) will be used as thumbnail
@@ -626,7 +579,8 @@ class MayaManager(RootManager):
         if not filePath:
             filePath = self.createThumbnail(useCursorPosition=True)
 
-        self._currentSceneInfo["Versions"][self.currentVersionIndex-1]["Thumb"]=filePath
+        idx = self.getRealVersionIndex()
+        self._currentSceneInfo["Versions"][idx]["Thumb"]=filePath
 
         self._dumpJson(self._currentSceneInfo, self.currentDatabasePath)
 

@@ -34,6 +34,7 @@
 
 import os
 import webbrowser
+from functools import partial
 
 # PyInstaller and Standalone version compatibility
 FORCE_QT4 = bool(os.getenv("FORCE_QT4"))
@@ -193,7 +194,7 @@ class MainUI(QtWidgets.QMainWindow):
                             "3dsMax": "rgb(150, 247, 81, 255)",
                             "Houdini": "rgb(247, 172, 81, 255)",
                             "Nuke": "rgb(246, 100, 100, 255)",
-                            "":  "rgb(0, 0, 0, 0)"
+                            "": "rgb(0, 0, 0, 0)"
                             }
         # self.initMainUI(newborn=True)
 
@@ -236,6 +237,13 @@ class MainUI(QtWidgets.QMainWindow):
         self.saveVersion_pushButton.setText(("Save As Version"))
         self.saveVersion_pushButton.setObjectName(("saveVersion_pushButton"))
         self.main_horizontalLayout.addWidget(self.saveVersion_pushButton)
+
+        self.saveSubVersion_pushButton = QtWidgets.QPushButton(self.centralwidget)
+        self.saveSubVersion_pushButton.setMinimumSize(QtCore.QSize(150, 45))
+        self.saveSubVersion_pushButton.setMaximumSize(QtCore.QSize(150, 45))
+        self.saveSubVersion_pushButton.setText(("Save As Sub Version"))
+        self.saveSubVersion_pushButton.setObjectName(("saveSubVersion_pushButton"))
+        self.main_horizontalLayout.addWidget(self.saveSubVersion_pushButton)
 
         spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.main_horizontalLayout.addItem(spacerItem)
@@ -406,6 +414,10 @@ class MainUI(QtWidgets.QMainWindow):
         self.horizontalLayout_4.setSpacing(1)
         self.horizontalLayout_4.setObjectName(("horizontalLayout_4"))
 
+        self.horizontalLayout_5 = QtWidgets.QHBoxLayout()
+        self.horizontalLayout_5.setSpacing(1)
+        self.horizontalLayout_5.setObjectName(("horizontalLayout_5"))
+
         self.version_label = QtWidgets.QLabel(self.frame)
         self.version_label.setMinimumSize(QtCore.QSize(60, 30))
         self.version_label.setMaximumSize(QtCore.QSize(60, 30))
@@ -415,20 +427,36 @@ class MainUI(QtWidgets.QMainWindow):
         self.version_label.setObjectName(("version_label"))
         self.horizontalLayout_4.addWidget(self.version_label)
 
+        self.subVersion_label = QtWidgets.QLabel(self.frame)
+        self.subVersion_label.setMinimumSize(QtCore.QSize(60, 30))
+        self.subVersion_label.setMaximumSize(QtCore.QSize(60, 30))
+        self.subVersion_label.setFrameShape(QtWidgets.QFrame.Box)
+        self.subVersion_label.setText(("SubVer:"))
+        self.subVersion_label.setAlignment(QtCore.Qt.AlignCenter)
+        self.subVersion_label.setObjectName(("subVersion_label"))
+        self.horizontalLayout_5.addWidget(self.subVersion_label)
+
         self.version_comboBox = QtWidgets.QComboBox(self.frame)
         self.version_comboBox.setMinimumSize(QtCore.QSize(60, 30))
         self.version_comboBox.setMaximumSize(QtCore.QSize(100, 30))
         self.version_comboBox.setObjectName(("version_comboBox"))
         self.horizontalLayout_4.addWidget(self.version_comboBox)
 
+        self.subVersion_comboBox = QtWidgets.QComboBox(self.frame)
+        self.subVersion_comboBox.setMinimumSize(QtCore.QSize(60, 30))
+        self.subVersion_comboBox.setMaximumSize(QtCore.QSize(100, 30))
+        self.subVersion_comboBox.setObjectName(("subVersion_comboBox"))
+        self.horizontalLayout_5.addWidget(self.subVersion_comboBox)
+
         self.gridLayout_7.addLayout(self.horizontalLayout_4, 0, 0, 1, 1)
+        self.gridLayout_7.addLayout(self.horizontalLayout_5, 1, 0, 1, 1)
 
         self.makeReference_pushButton = QtWidgets.QPushButton(self.frame)
         self.makeReference_pushButton.setMinimumSize(QtCore.QSize(100, 30))
         self.makeReference_pushButton.setMaximumSize(QtCore.QSize(300, 30))
         self.makeReference_pushButton.setText(("Make Reference"))
         self.makeReference_pushButton.setObjectName(("makeReference_pushButton"))
-        self.gridLayout_7.addWidget(self.makeReference_pushButton, 1, 0, 1, 1)
+        self.gridLayout_7.addWidget(self.makeReference_pushButton, 2, 0, 1, 1)
 
         self.addNote_pushButton = QtWidgets.QPushButton(self.frame)
         self.addNote_pushButton.setMinimumSize(QtCore.QSize(100, 30))
@@ -440,7 +468,7 @@ class MainUI(QtWidgets.QMainWindow):
         self.addNote_pushButton.setAccessibleDescription((""))
         self.addNote_pushButton.setText(("Add Note"))
         self.addNote_pushButton.setObjectName(("addNote_pushButton"))
-        self.gridLayout_7.addWidget(self.addNote_pushButton, 1, 3, 1, 1)
+        self.gridLayout_7.addWidget(self.addNote_pushButton, 2, 3, 1, 1)
 
         self.gridLayout_6.addLayout(self.gridLayout_7, 0, 0, 1, 1)
 
@@ -482,7 +510,7 @@ class MainUI(QtWidgets.QMainWindow):
 
         changeAdminPass_fm = QtWidgets.QAction("&Change Admin Password", self)
 
-        self.changeCommonFolder =  QtWidgets.QAction("&Change Common Database", self)
+        self.changeCommonFolder = QtWidgets.QAction("&Change Common Database", self)
         self.changeCommonFolder.setVisible(False)
 
 
@@ -496,6 +524,7 @@ class MainUI(QtWidgets.QMainWindow):
         #save
         self.fileMenu.addAction(createProject_fm)
         self.fileMenu.addAction(self.saveVersion_fm)
+        self.fileMenu.addAction(self.saveSubVersion_fm)
         self.fileMenu.addAction(self.saveBaseScene_fm)
 
         self.fileMenu.addSeparator()
@@ -651,6 +680,7 @@ class MainUI(QtWidgets.QMainWindow):
         self.scenes_listWidget.currentItemChanged.connect(self.onBaseSceneChange)
 
         self.version_comboBox.activated.connect(self.onVersionChange)
+        self.subVersion_comboBox.activated.connect(self.onSubVersionChange)
 
         self.makeReference_pushButton.clicked.connect(self.onMakeReference)
 
@@ -667,8 +697,11 @@ class MainUI(QtWidgets.QMainWindow):
         self.saveBaseScene_pushButton.clicked.connect(self.saveBaseSceneDialog)
         self.saveBaseScene_fm.triggered.connect(self.saveBaseSceneDialog)
 
-        self.saveVersion_pushButton.clicked.connect(self.saveAsVersionDialog)
-        self.saveVersion_fm.triggered.connect(self.saveAsVersionDialog)
+        self.saveVersion_pushButton.clicked.connect(partial(self.saveAsVersionDialog, 1))
+        self.saveVersion_fm.triggered.connect(partial(self.saveAsVersionDialog, 1))
+
+        self.saveSubVersion_pushButton.clicked.connect(partial(self.saveAsVersionDialog, 0))
+        self.saveSubVersion_fm.triggered.connect(partial(self.saveAsVersionDialog, 0))
 
         self.scenes_listWidget.doubleClicked.connect(self.onLoadScene)
         self.loadScene_pushButton.clicked.connect(self.onLoadScene)
@@ -761,6 +794,14 @@ class MainUI(QtWidgets.QMainWindow):
         fps_comboBox.addItems(self.manager.fpsList)
         fps_comboBox.setCurrentIndex(2)
 
+        maxSubVer_label = QtWidgets.QLabel(self.createproject_Dialog)
+        maxSubVer_label.setGeometry(QtCore.QRect(4, 240 , 111, 21))
+        maxSubVer_label.setText("SubVer Num")
+
+        maxSubVer_lineEdit = QtWidgets.QLineEdit(self.createproject_Dialog)
+        maxSubVer_lineEdit.setGeometry(QtCore.QRect(80, 240 , 60, 21))
+        maxSubVer_lineEdit.setText("20")
+
         self.createproject_buttonBox = QtWidgets.QDialogButtonBox(self.createproject_Dialog)
         self.createproject_buttonBox.setGeometry(QtCore.QRect(30, 250, 371, 32))
         self.createproject_buttonBox.setOrientation(QtCore.Qt.Horizontal)
@@ -785,8 +826,16 @@ class MainUI(QtWidgets.QMainWindow):
         def onCreateNewProject():
             root = self.projectroot_lineEdit.text()
             pName = self.projectname_lineEdit.text()
+            maxSubVerNumStr= maxSubVer_lineEdit.text()
+            maxSubVerNum = 20
+            try:
+                maxSubVerNum = max(int(maxSubVerNumStr), 1)
+            except:
+                maxSubVerNum = 20
+                
             projectSettingsDB = {"Resolution": [resolutionX_spinBox.value(), resolutionY_spinBox.value()],
-                                 "FPS": int(fps_comboBox.currentText())}
+                                 "FPS": int(fps_comboBox.currentText()),
+                                 "MaxSubVerNum": maxSubVerNum}
 
             pPath = self.manager.createNewProject(root, pName, settingsData=projectSettingsDB)
             if pPath:
@@ -817,7 +866,7 @@ class MainUI(QtWidgets.QMainWindow):
         self.projectname_lineEdit.textChanged.connect(
             lambda: self._checkValidity(self.projectname_lineEdit.text(), self.cp_button,
                                         self.projectname_lineEdit))
-
+        
         self.createproject_Dialog.show()
 
     def setProjectUI(self):
@@ -2366,7 +2415,7 @@ class MainUI(QtWidgets.QMainWindow):
         saveBaseScene_Dialog.show()
 
 
-    def saveAsVersionDialog(self):
+    def saveAsVersionDialog(self, versionUp=1):
         # This method IS Software Specific
         saveV_Dialog = QtWidgets.QDialog(parent=self)
         saveV_Dialog.setModal(True)
@@ -2374,7 +2423,10 @@ class MainUI(QtWidgets.QMainWindow):
         saveV_Dialog.resize(255, 290)
         saveV_Dialog.setMinimumSize(QtCore.QSize(255, 290))
         saveV_Dialog.setMaximumSize(QtCore.QSize(255, 290))
-        saveV_Dialog.setWindowTitle(("Save As Version"))
+        if versionUp:
+            saveV_Dialog.setWindowTitle(("Save As Version"))
+        else:
+            saveV_Dialog.setWindowTitle(("Save As Sub Version"))
 
         horizontalLayout = QtWidgets.QHBoxLayout(saveV_Dialog)
         right_verticalLayout = QtWidgets.QVBoxLayout()
@@ -2472,7 +2524,7 @@ class MainUI(QtWidgets.QMainWindow):
         #
         # sv_buttonBox.setObjectName(("sd_buttonBox"))
 
-        def saveAsVersionCommand():
+        def saveAsVersionCommand(versionUp=1):
             # TODO : ref
             checklist = self.manager.preSaveChecklist()
             for msg in checklist:
@@ -2490,12 +2542,17 @@ class MainUI(QtWidgets.QMainWindow):
             # print "sceneFormat", sceneFormat
             sceneInfo = self.manager.saveVersion(makeReference=makeReference_checkBox.checkState(),
                                                  versionNotes=notes_plainTextEdit.toPlainText(),
-                                                 sceneFormat=sceneFormat)
+                                                 sceneFormat=sceneFormat,
+                                                 versionUp=versionUp)
 
             if not sceneInfo == -1:
                 self.statusBar().showMessage("Status | Version Saved => %s" % len(sceneInfo["Versions"]))
             self.manager.currentBaseSceneName = sceneInfo["Name"]
-            self.manager.currentVersionIndex = len(sceneInfo["Versions"])
+            verIds = self.manager._currentVersionDetailInfo.keys()
+            verIds.sort()
+            subVerIds = self.manager._currentVersionDetailInfo[verIds[-1]]
+            self.manager.currentVersionIndex = len(verIds)
+            self.manager.currentSubVersionIndex = len(subVerIds)
 
             currentRow = self.scenes_listWidget.currentRow()
             self.populateBaseScenes()
@@ -2506,7 +2563,7 @@ class MainUI(QtWidgets.QMainWindow):
 
         # SIGNALS
         # -------
-        sv_buttonBox.accepted.connect(saveAsVersionCommand)
+        sv_buttonBox.accepted.connect(partial(saveAsVersionCommand, versionUp))
         sv_buttonBox.rejected.connect(saveV_Dialog.reject)
 
 
@@ -2562,7 +2619,7 @@ class MainUI(QtWidgets.QMainWindow):
 
         addNotes_buttonBox.setObjectName(("addNotes_buttonBox"))
         addNotes_buttonBox.accepted.connect(lambda: manager.addNote(addNotes_textEdit.toPlainText()))
-        addNotes_buttonBox.accepted.connect(self.onVersionChange)
+        addNotes_buttonBox.accepted.connect(self.onSubVersionChange)
         addNotes_buttonBox.accepted.connect(addNotes_Dialog.accept)
 
         addNotes_buttonBox.rejected.connect(addNotes_Dialog.reject)
@@ -2620,6 +2677,7 @@ class MainUI(QtWidgets.QMainWindow):
 
         # disable the version related stuff
         self.version_comboBox.setStyleSheet("background-color: rgb(80,80,80); color: white")
+        self.subVersion_comboBox.setStyleSheet("background-color: rgb(80,80,80); color: white")
         # self._vEnableDisable()
         self.onModeChange()
         # print "ASDFASDFASDFASDF"
@@ -2789,8 +2847,10 @@ class MainUI(QtWidgets.QMainWindow):
         # This method IS Software Specific
         manager = self._getManager()
         self.version_comboBox.blockSignals(True)
+        self.subVersion_comboBox.blockSignals(True)
         #clear version_combobox
         self.version_comboBox.clear()
+        self.subVersion_comboBox.clear()
 
         row = self.scenes_listWidget.currentRow()
         if row == -1:
@@ -2800,22 +2860,50 @@ class MainUI(QtWidgets.QMainWindow):
 
         self._vEnableDisable()
         #get versions and add it to the combobox
-        versionData = manager.getVersions()
-        for num in range(len(versionData)):
-            self.version_comboBox.addItem("v{0}".format(str(num + 1).zfill(3)))
-        self.version_comboBox.setCurrentIndex(manager.currentVersionIndex-1)
+        verIdInfo = manager.getVersionDetailInfo()
+
+        if verIdInfo:
+            verIds = verIdInfo.keys()
+            verIds.sort()
+            for verId in verIds:
+                self.version_comboBox.addItem("v%03d" % verId)
+
+            self.version_comboBox.setCurrentIndex(len(verIds) - 1)
+            lastVerInfo = verIdInfo[verIds[-1]]
+            subVerIds = sorted(
+                lastVerInfo, key=lambda x: lastVerInfo[x])
+
+            for subVerId in subVerIds:
+                self.subVersion_comboBox.addItem("%03d" % subVerId)
+
+            self.subVersion_comboBox.setCurrentIndex(len(subVerIds) - 1)
+
         self.onVersionChange()
-
         self.version_comboBox.blockSignals(False)
-
+        self.subVersion_comboBox.blockSignals(False)
 
     def onVersionChange(self):
         # This method IS Software Specific
         manager = self._getManager()
 
-
         if self.version_comboBox.currentIndex() is not -1:
             manager.currentVersionIndex = self.version_comboBox.currentIndex() + 1
+
+            subVerIdInfo = manager._currentVersionDetailInfo[manager.currentVersionIndex]
+            subVerIds = sorted(subVerIdInfo, key=lambda x: subVerIdInfo[x])
+
+            self.subVersion_comboBox.clear()
+            for subVerId in subVerIds:
+                self.subVersion_comboBox.addItem('%03d' % subVerId)
+
+            self.subVersion_comboBox.setCurrentIndex(len(subVerIds) - 1)
+            self.onSubVersionChange()
+
+    def onSubVersionChange(self):
+        manager = self._getManager()
+
+        if not self.subVersion_comboBox.currentIndex() == -1:
+            manager.currentSubVersionIndex = self.subVersion_comboBox.currentIndex() + 1
 
         # self.version_comboBox.blockSignals(True)
 
@@ -2834,13 +2922,17 @@ class MainUI(QtWidgets.QMainWindow):
         # self.tPixmap = QtGui.QPixmap(self.manager.getThumbnail())
         self.thumbnail_label.setPixmap(self.tPixmap)
 
-        if manager.currentVersionIndex != len(manager.getVersions()) and manager.currentVersionIndex != -1:
+        if not manager.currentVersionIndex > len(manager._currentVersionDetailInfo) and \
+           not manager.currentVersionIndex == -1 and \
+           not manager.currentSubVersionIndex > len(manager._currentVersionDetailInfo[manager._currentVersionIndex]) and \
+           not manager.currentSubVersionIndex == -1:
             self.version_comboBox.setStyleSheet("background-color: rgb(80,80,80); color: yellow")
         else:
             self.version_comboBox.setStyleSheet("background-color: rgb(80,80,80); color: white")
 
         # self.version_comboBox.blockSignals(False)
         self._vEnableDisable()
+
 
 
     def populateBaseScenes(self, deepCheck=False):
@@ -2919,9 +3011,11 @@ class MainUI(QtWidgets.QMainWindow):
         manager = self._getManager()
 
         manager.makeReference()
-        self.onVersionChange()
+
+        idx = manager.getRealVersionIndex()
         self.statusBar().showMessage(
-            "Status | Version {1} is the new reference of {0}".format(manager.currentBaseSceneName, manager.currentVersionIndex))
+            "Status | Version {1} is the new reference of {0}".format(manager.currentBaseSceneName, idx))
+
         currentRow = self.scenes_listWidget.currentRow()
         self.populateBaseScenes()
         self.scenes_listWidget.setCurrentRow(currentRow)
@@ -3093,12 +3187,14 @@ class MainUI(QtWidgets.QMainWindow):
             self.makeReference_pushButton.setEnabled(True)
             self.addNote_pushButton.setEnabled(True)
             self.version_label.setEnabled(True)
+            self.subVersion_label.setEnabled(True)
         else:
             self.version_comboBox.setEnabled(False)
             self.showPreview_pushButton.setEnabled(False)
             self.makeReference_pushButton.setEnabled(False)
             self.addNote_pushButton.setEnabled(False)
             self.version_label.setEnabled(False)
+            self.subVersion_label.setEnabled(False)
 
         if manager.getPreviews():
             self.showPreview_pushButton.setEnabled(True)

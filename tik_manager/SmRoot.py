@@ -169,9 +169,11 @@ class RootManager(object):
         self._baseScenesInCategory = []
         self._currentBaseSceneName = ""
         self._currentSceneInfo = {}
+        self._currentVersionDetailInfo = {}
 
         #Scene Specific
         self._currentVersionIndex = -1
+        self._currentSubVersionIndex = -1
         self._currentPreviewsDict = {}
         self._currentPreviewCamera = ""
         self._currentNotes = ""
@@ -237,6 +239,7 @@ class RootManager(object):
         self.scanBaseScenes()
         self.currentBaseSceneName = ""
         self._currentVersionIndex = -1
+        self._currentSubVersionIndex = -1
         self._currentPreviewCamera = ""
         self.cursorInfo()
 
@@ -266,6 +269,7 @@ class RootManager(object):
         # de-select previous base scene
         self._currentBaseSceneName = ""
         self._currentVersionIndex = -1
+        self._currentSubVersionIndex = -1
         self._currentPreviewCamera = ""
         self.cursorInfo()
 
@@ -319,10 +323,12 @@ class RootManager(object):
         if not sceneName:
             self._currentBaseSceneName = ""
             self.currentVersionIndex = -1
+            self.currentSubVersionIndex = -1
             return
         if sceneName not in self._baseScenesInCategory.keys():
 
             self.currentVersionIndex = -1
+            self.currentSubVersionIndex = -1
             # msg = "There is no scene called %s in current category" %sceneName
 
             # self._exception(101, msg)
@@ -331,22 +337,28 @@ class RootManager(object):
         self._currentBaseSceneName = sceneName
         self._currentSceneInfo = self._loadSceneInfo()
 
-
         # assert (self._currentSceneInfo == -2)
         if self._currentSceneInfo == -2: # corrupted db file
             # self._currentSceneInfo == {}
             self._currentBaseSceneName = ""
             self.currentVersionIndex = -1
+            self.currentSubVersionIndex = -1
+            self._currentVersionDetailInfo = {}
             msg = "Database file %s is corrupted"
             # raise Exception ([200, "Database file %s is corrupted\nDo you want to fix it manually?" %sceneName, self._baseScenesInCategory[sceneName]] )
             self._exception(200, msg)
             return
 
+        self._currentVersionDetailInfo = self.getVersionDetailInfo()
 
         if self._currentSceneInfo["ReferencedVersion"]:
             self.currentVersionIndex = self._currentSceneInfo["ReferencedVersion"]
+            self.currentSubVersionIndex = self._currentSceneInfo.get("ReferencedSubVersion", 1)
         else:
-            self.currentVersionIndex = len(self._currentSceneInfo["Versions"])
+            self.currentVersionIndex = len(self._currentVersionDetailInfo)
+            vIds = self._currentVersionDetailInfo.keys()
+            vIds.sort()
+            self.currentSubVersionIndex = len(self._currentVersionDetailInfo[vIds[-1]])
 
         self.cursorInfo()
         # self._currentPreviewIndex = 0
@@ -363,7 +375,8 @@ class RootManager(object):
         """Returns absolute path of Base Scene Version at cursor position"""
         logger.debug("Func: currentBaseScenePath/getter")
 
-        return os.path.join(self.projectDir, self._currentSceneInfo["Versions"][self.currentVersionIndex-1]["RelativePath"])
+        idx = self.getRealVersionIndex()
+        return os.path.join(self.projectDir, self._currentSceneInfo["Versions"][idx]["RelativePath"])
 
     @property
     def currentPreviewPath(self):
@@ -396,6 +409,7 @@ class RootManager(object):
 
         if indexData <= 0:
             self._currentVersionIndex = -1
+            self._currentSubVersionIndex = -1
             self._currentThumbFile = ""
             self._currentNotes = ""
             self._currentPreviewCamera = ""
@@ -403,8 +417,10 @@ class RootManager(object):
         if not self._currentSceneInfo:
             # logger.warning(("BaseScene not Selected"))
             return
-        if not 1 <= indexData <= len(self._currentSceneInfo["Versions"]):
-            msg = "out of range! %s" %indexData
+
+        versions = self._currentVersionDetailInfo.keys()
+        if not 1 <= indexData <= len(versions):
+            msg = "out of version range! %s" % indexData
             # logger.error(msg)
             # raise Exception([101, msg])
             self._exception(101, msg)
@@ -413,15 +429,48 @@ class RootManager(object):
         #     logger.warning("Cursor is already at %s" % indexData)
         #     return
         self._currentVersionIndex = indexData
-        self._currentNotes = self._currentSceneInfo["Versions"][self._currentVersionIndex-1]["Note"]
-        self._currentPreviewsDict = self._currentSceneInfo["Versions"][self._currentVersionIndex-1]["Preview"]
+        subVersionInfo = self._currentVersionDetailInfo[self._currentVersionIndex]
+        subVerIds = sorted(subVersionInfo, key=lambda x: subVersionInfo[x])
+        self.currentSubVersionIndex = subVerIds[-1]
+        self.cursorInfo()
+
+    @property
+    def currentSubVersionIndex(self):
+        return self._currentSubVersionIndex
+
+    @currentSubVersionIndex.setter
+    def currentSubVersionIndex(self, indexData):
+        """Moves the cursor to given Version index"""
+        logger.debug("Func: currentVersionIndex/setter")
+
+        if indexData <= 0:
+            self._currentSubVersionIndex = -1
+            return
+        if not self._currentSceneInfo:
+            return
+        if self.currentVersionIndex == -1:
+            self._currentSubVersionIndex = -1
+            return
+        
+        subVersions = self._currentVersionDetailInfo[self.currentVersionIndex]
+        if not 1 <= indexData <= len(subVersions):
+            msg = "out of subversion range! %s" % indexData
+            # logger.error(msg)
+            # raise Exception([101, msg])
+            self._exception(101, msg)
+            return
+
+        self._currentSubVersionIndex = indexData
+        idx = self.getRealVersionIndex()
+        self._currentNotes = self._currentSceneInfo["Versions"][idx]["Note"]
+        self._currentPreviewsDict = self._currentSceneInfo["Versions"][idx]["Preview"]
         # print self._currentPreviewsDict
         if not self._currentPreviewsDict.keys():
             self._currentPreviewCamera = ""
         else:
             self._currentPreviewCamera = sorted(self._currentPreviewsDict.keys())[0]
 
-        self._currentThumbFile = self._currentSceneInfo["Versions"][self._currentVersionIndex-1]["Thumb"]
+        self._currentThumbFile = self._currentSceneInfo["Versions"][idx]["Thumb"]
         self.cursorInfo()
 
     # @property
@@ -481,26 +530,25 @@ class RootManager(object):
         BaseScenes Under: {2}
         Current BaseScene: {3}
         Version: {4}
-        Preview: {5}
-        Thumbnail: {6}
+        SubVersion: {5}
+        Preview: {6}
+        Thumbnail: {7}
         """.format(
             self._categories[self.currentTabIndex],
             self._subProjectsList[self.currentSubIndex],
             sorted(self._baseScenesInCategory.keys()),
             self._currentBaseSceneName,
             self._currentVersionIndex,
+            self._currentSubVersionIndex,
             self._currentPreviewCamera,
-            self._currentThumbFile
-            ))
+            self._currentThumbFile))
 
     def getUserDirectory(self):
         """Returns Documents Directory"""
         dir = os.path.expanduser('~')
         if not "Documents" in dir:
             dir = os.path.join(dir, "Documents")
-        if self.currentPlatform == 'Darwin':
-            mayaPart = 'Library/Preferences/Autodesk/maya'
-            userMayaDir = os.path.join(dir, mayaPart)
+
         return os.path.normpath(dir)
 
     def getOpenSceneInfo(self):
@@ -514,46 +562,27 @@ class RootManager(object):
         if not self._pathsDict["sceneFile"]:
             return None
 
-        # get name of the upper directory to find out base name
-        sceneDir = os.path.abspath(os.path.join(self._pathsDict["sceneFile"], os.pardir))
-        baseSceneName = os.path.basename(sceneDir)
+        dbDir = self._pathsDict["databaseDir"]
+        resPart = os.path.relpath(self._pathsDict["sceneFile"], start=self.projectDir)
+        rResPart = resPart.split(os.path.sep, 1)[1]
+        jsonPart = '%s.json' % os.path.dirname(rResPart)
+        jsonFile = os.path.normpath(os.path.join(dbDir, jsonPart))
 
-        upperSceneDir = os.path.abspath(os.path.join(sceneDir, os.pardir))
-        upperSceneDirName = os.path.basename(upperSceneDir)
-
-        if upperSceneDirName in self._subProjectsList:
-            subProjectDir = upperSceneDir
-            subProject = upperSceneDirName
-            categoryDir = os.path.abspath(os.path.join(subProjectDir, os.pardir))
-            category = os.path.basename(categoryDir)
-
-            dbCategoryPath = os.path.normpath(os.path.join(self._pathsDict["databaseDir"], category))
-            dbPath = os.path.normpath(os.path.join(dbCategoryPath, subProject))
-
-            pbCategoryPath = os.path.normpath(os.path.join(self._pathsDict["previewsDir"], category))
-            pbSubPath = os.path.normpath(os.path.join(pbCategoryPath, subProject))
-            pbPath = os.path.normpath(os.path.join(pbSubPath, baseSceneName))
-
-        else:
-            subProject = self._subProjectsList[0]
-            categoryDir = upperSceneDir
-            category = upperSceneDirName
-            dbPath = os.path.normpath(os.path.join(self._pathsDict["databaseDir"], category))
-            pbCategoryPath = os.path.normpath(os.path.join(self._pathsDict["previewsDir"], category))
-            pbPath = os.path.normpath(os.path.join(pbCategoryPath, baseSceneName))
-
-        jsonFile = os.path.join(dbPath, "{}.json".format(baseSceneName))
         if os.path.isfile(jsonFile):
-            version = (self.niceName(self._pathsDict["sceneFile"])[-4:])
+            jsonInfo = self._loadJson(jsonFile)
+
+            category = jsonInfo['Category']
+            baseName = jsonInfo['Name']
+            subProject = jsonInfo['SubProject']
+            pbPath = self.getPreviewFolder(category, baseName, subProject)
             self._openSceneInfo = {
-                    "jsonFile":jsonFile,
-                    "projectPath":self._pathsDict["projectDir"],
-                    "subProject":subProject,
-                    "category":category,
-                    "shotName":baseSceneName,
-                    "version":version,
-                    "previewPath":pbPath
-                    }
+                "jsonFile": jsonFile,
+                "projectPath": self._pathsDict["projectDir"],
+                "subProject": jsonInfo['SubProject'],
+                "category": jsonInfo['Category'],
+                "shotName": jsonInfo['Name'],
+                "previewPath": pbPath
+            }
             return self._openSceneInfo
         else:
             return None
@@ -1004,12 +1033,13 @@ Elapsed Time:{6}
         if not self._currentBaseSceneName:
             logger.warning("No Base Scene file selected")
             return
-        if self._currentVersionIndex == -1:
+        if self._currentVersionIndex == -1 or self._currentSubVersionIndex == -1:
             logger.warning("No Version selected")
             return
         now = datetime.datetime.now().strftime("%d/%m/%Y-%H:%M")
         self._currentNotes = "%s\n[%s] on %s\n%s\n" % (self._currentNotes, self.currentUser, now, note)
-        self._currentSceneInfo["Versions"][self._currentVersionIndex-1]["Note"] = self._currentNotes
+        idx = self.getRealVersionIndex()
+        self._currentSceneInfo["Versions"][idx]["Note"] = self._currentNotes
         self._dumpJson(self._currentSceneInfo, self._baseScenesInCategory[self._currentBaseSceneName])
 
     '''
@@ -1157,7 +1187,8 @@ Elapsed Time:{6}
             previewFile = self._currentPreviewsDict[self._currentPreviewCamera]
             os.remove(os.path.join(self.projectDir, self._currentPreviewsDict[self._currentPreviewCamera]))
             del self._currentPreviewsDict[self._currentPreviewCamera]
-            self._currentSceneInfo["Versions"][self._currentVersionIndex-1]["Preview"] = self._currentPreviewsDict
+            idx = self.getRealVersionIndex()
+            self._currentSceneInfo["Versions"][idx]["Preview"] = self._currentPreviewsDict
             self._dumpJson(self._currentSceneInfo, self._baseScenesInCategory[self.currentBaseSceneName])
             logger.info("""Preview file deleted and removed from database successfully 
             Preview Name: {0}
@@ -1253,7 +1284,7 @@ Elapsed Time:{6}
         """Creates a Reference copy from the base scene version at cursor position"""
         logger.debug("Func: makeReference")
 
-        if self._currentVersionIndex == -1:
+        if self._currentVersionIndex == -1 or self._currentSubVersionIndex == -1:
             msg = "Cursor is not on a Base Scene Version. Cancelling"
             # logger.warning(msg)
             # raise Exception([101, msg])
@@ -1261,7 +1292,8 @@ Elapsed Time:{6}
             return
             # return
 
-        absVersionFile = os.path.join(self.projectDir, self._currentSceneInfo["Versions"][self._currentVersionIndex-1]["RelativePath"])
+        idx = self.getRealVersionIndex()
+        absVersionFile = os.path.join(self.projectDir, self._currentSceneInfo["Versions"][idx]["RelativePath"])
         name = os.path.split(absVersionFile)[1]
         filename, extension = os.path.splitext(name)
         referenceName = "{0}_{1}_forReference".format(self._currentSceneInfo["Name"], self._currentSceneInfo["Category"])
@@ -1271,6 +1303,7 @@ Elapsed Time:{6}
         self._currentSceneInfo["ReferenceFile"] = relReferenceFile
         # SET the referenced version as the 'VISUAL INDEX NUMBER' starting from 1
         self._currentSceneInfo["ReferencedVersion"] = self._currentVersionIndex
+        self._currentSceneInfo["ReferencedSubVersion"] = self._currentSubVersionIndex
 
         self._dumpJson(self._currentSceneInfo, self._baseScenesInCategory[self.currentBaseSceneName])
 
@@ -1433,7 +1466,7 @@ Elapsed Time:{6}
         logger.debug("Func: _checkRequirements")
 
         # check platform
-        currentOs = platform.system()
+        # currentOs = platform.system()
         '''
         if currentOs != "Linux" and currentOs != "Windows":
             self._exception(210, "Operating System is not supported\nCurrently only Windows and Linux supported")
@@ -1764,10 +1797,196 @@ Elapsed Time:{6}
             vMsg = "Tik Manager is up to date"
             return vMsg, None, None
 
+    def checkBaseNameUnique(self, categoryName, baseName, subProjectIndex=0):
+        scenesToCheck = self.scanBaseScenes(categoryAs=categoryName, subProjectAs=subProjectIndex)
+        for key in scenesToCheck.keys():
+            if baseName.lower() == key.lower():
+                msg = ("Base Scene Name is not unique!\nABORTING")
+                self._exception(360, msg)
+                return -1, msg
 
+        return 0
 
+    def getFileVersionInfo(self, filePath):
+        pat = re.compile('_v([\d]{3})_([\d]{3})$', re.I)
+        cName = os.path.splitext(os.path.basename(filePath))[0]
+        m = pat.search(cName)
+        curVersion = 0
+        curSubVersion = 0
+        if m:
+            curVersion = int(m.group(1))
+            curSubVersion = int(m.group(2))
+        else:
+            curVersion = int(cName[-3:])
+            curSubVersion = 1
 
+        info = {'currentVersion': curVersion,
+                'currentSubVersion': curSubVersion}
+        return info
 
+    def getSubProject(self, subProjectIndex):
+        subProject = self._subProjectsList[subProjectIndex]
+        if subProject == 'None':
+            subProject = ''
 
+        return subProject
 
+    def getOutputSceneFolder(self, categoryName, baseName, subProjectIndex=0, checkUniqueBaseName=0):
+        if checkUniqueBaseName:
+            self.checkBaseNameUnique(categoryName, baseName, subProjectIndex=0)
 
+        scenesDir = self._pathsDict["scenesDir"]
+        subProject = self.getSubProject(subProjectIndex)
+        outFolder = os.path.normpath(os.path.join(
+            scenesDir, categoryName, subProject, baseName))
+        self._folderCheck(outFolder)
+        return outFolder
+
+    def getOutputJsonFolder(self, categoryName, baseName, subProjectIndex=0):
+        databaseDir = self._pathsDict["databaseDir"]
+        subProject = self.getSubProject(subProjectIndex)
+        outFolder = os.path.normpath(os.path.join(
+            databaseDir, categoryName, subProject))
+        self._folderCheck(outFolder)
+        return outFolder
+
+    def getPreviewFolder(self, categoryName, baseName, subProject=None, subProjectIndex=0):
+        if subProject is None:
+            subProject = self.getSubProject(subProjectIndex)
+
+        pbDir = self._pathsDict["previewsDir"]
+        outFolder = os.path.normpath(os.path.join(
+            pbDir, categoryName, subProject, baseName))
+        self._folderCheck(outFolder)
+        return outFolder
+
+    def getOutputFileName(self, baseName, categoryName, version, subVersion, fileFormat):
+        sceneName = "{0}_{1}_{2}_v{3}_{4}.{5}".format(
+            baseName, categoryName, self._usersDict[self.currentUser],
+            str(version).zfill(3), str(subVersion).zfill(3), fileFormat)
+        return sceneName
+
+    def getOutputJsonName(self, baseName):
+        return '%s.json' % baseName
+
+    def getReferenceFileName(self, baseName, categoryName, fileFormat):
+        referenceName = "{0}_{1}_forReference".format(baseName, categoryName)
+        return referenceName
+
+    def getThumbnailName(self, baseName, version, subVersion):
+        thumbName = "%s_v%03d_%03d_thumb.jpg" % (
+            baseName, version, subVersion)
+        return thumbName
+
+    def getOutputFileInfo(self, categoryName, baseName, version, subVersion,
+                          sceneFormat, checkUniqueBaseName=0, subProjectIndex=0,
+                          makeReference=True, *args, **kwargs):
+        sceneDir = self.getOutputSceneFolder(
+            categoryName, baseName, subProjectIndex=subProjectIndex,
+            checkUniqueBaseName=checkUniqueBaseName)
+        sceneName = self.getOutputFileName(baseName, categoryName,
+                                           version, subVersion, sceneFormat)
+        sceneFile = os.path.normpath(os.path.join(sceneDir, sceneName))
+
+        jsonDir = self.getOutputJsonFolder(categoryName, baseName,
+                                           subProjectIndex=subProjectIndex)
+        jsonName = self.getOutputJsonName(baseName)
+        jsonFile = os.path.normpath(os.path.join(jsonDir, jsonName))
+
+        thumbName = self.getThumbnailName(baseName, version, subVersion)
+        thumbFile = os.path.normpath(os.path.join(jsonDir, thumbName))
+
+        referenceFile = None
+        referenceVersion = None
+        referenceSubVersion = None
+        if makeReference:
+            referenceName = self.getReferenceFileName(
+                baseName, categoryName, sceneFormat)
+            referenceFile = os.path.normpath(os.path.join(sceneDir, referenceName))
+            referenceVersion = version
+            referenceSubVersion = subVersion
+
+        info = {'sceneDir': sceneDir,
+                'sceneFile': sceneFile,
+                'jsonFile': jsonFile,
+                'thumbFile': thumbFile,
+                'referenceFile': referenceFile,
+                'referenceVersion': referenceVersion,
+                'referenceSubVersion': referenceSubVersion}
+        return info
+
+    def getOutputVersionUpFileInfo(self, jsonFile, versionUp, fileFormat,
+                                   makeReference=True, *args, **kwargs):
+        jsonInfo = self._loadJson(jsonFile)
+
+        versions = jsonInfo["Versions"]
+        lastVersion = versions[-1]
+        lastRp = lastVersion['RelativePath']
+
+        verInfo = self.getFileVersionInfo(lastRp)
+        curVersion = verInfo['currentVersion']
+        curSubVersion = verInfo['currentSubVersion']
+
+        version = 0
+        subVersion = 0
+        if versionUp:
+            version = curVersion + 1
+            subVersion = 1
+        else:
+            version = curVersion
+            projSetting = self.loadProjectSettings()
+            maxSubVerNum = projSetting.get('MaxSubVerNum', 20)
+            subVersion = curSubVersion % maxSubVerNum + 1
+
+        baseName = jsonInfo['Name']
+        category = jsonInfo['Category']
+        outName = self.getOutputFileName(
+            baseName, category, version, subVersion, fileFormat)
+
+        relPath = jsonInfo["Path"]
+        relSceneFile = os.path.join(relPath, outName)
+        sceneFile = os.path.join(self._pathsDict["projectDir"], relSceneFile)
+
+        jsonDir = os.path.dirname(jsonFile)
+        thumbName = self.getThumbnailName(baseName, version, subVersion)
+        thumbFile = os.path.normpath(os.path.join(jsonDir, thumbName))
+
+        referenceFile = None
+        referenceVersion = None
+        referenceSubVersion = None
+
+        sceneDir = os.path.dirname(sceneFile)
+        if makeReference:
+            referenceName = self.getReferenceFileName(
+                baseName, category, fileFormat)
+            referenceFile = os.path.normpath(os.path.join(sceneDir, referenceName))
+            referenceVersion = version
+            referenceSubVersion = subVersion
+
+        info = {'sceneDir': sceneDir,
+                'sceneFile': sceneFile,
+                'jsonFile': jsonFile,
+                'thumbFile': thumbFile,
+                'referenceFile': referenceFile,
+                'referenceVersion': referenceVersion,
+                'referenceSubVersion': referenceSubVersion}
+        return info
+
+    def getVersionDetailInfo(self):
+        versionData = self.getVersions()
+
+        verIdInfo = {}
+        for i, curVersionData in enumerate(versionData):
+            relPath = curVersionData['RelativePath']
+            verInfo = self.getFileVersionInfo(relPath)
+            version = verInfo['currentVersion']
+            subVersion = verInfo['currentSubVersion']
+
+            verIdInfo.setdefault(version, {})
+            verIdInfo[version][subVersion] = i
+
+        return verIdInfo
+
+    def getRealVersionIndex(self):
+        idx = self._currentVersionDetailInfo[self._currentVersionIndex][self._currentSubVersionIndex]
+        return idx
