@@ -209,7 +209,7 @@ class MayaManager(RootManager):
              "User": self._usersDict[self.currentUser],
              "Workstation": socket.gethostname(),
              "Preview": {},
-             "Thumb": thumbFile,
+             "Thumb": os.path.relpath(thumbFile, start=projectPath),
              "Ranges": self._getTimelineRanges()
              }
         ]
@@ -261,7 +261,7 @@ class MayaManager(RootManager):
                  "User": self._usersDict[self.currentUser],
                  "Workstation": socket.gethostname(),
                  "Preview": {},
-                 "Thumb": thumbFile,
+                 "Thumb": os.path.relpath(thumbFile, start=projectPath),
                  "Ranges": self._getTimelineRanges()})
 
             if referenceFile is not None:
@@ -586,7 +586,9 @@ class MayaManager(RootManager):
             filePath = self.createThumbnail(useCursorPosition=True)
 
         idx = self.getRealVersionIndex()
-        self._currentSceneInfo["Versions"][idx]["Thumb"]=filePath
+        projectPath = self.projectDir
+        self._currentSceneInfo["Versions"][idx]["Thumb"] = os.path.relpath(
+            filePath, start=projectPath)
 
         self._dumpJson(self._currentSceneInfo, self.currentDatabasePath)
 
@@ -802,7 +804,7 @@ class MayaManager(RootManager):
                         path = fileData["Path"]
                         name = fileData["Name"]
                         cate = fileData["Category"]
-                        parts = path.split("\\")
+                        parts = path.split(os.path.sep)
                         diff = list(set(parts) - set([name, cate, "scenes"]))
                         if diff:
                             fileData["SubProject"] = diff[0]
@@ -811,7 +813,9 @@ class MayaManager(RootManager):
                         newVersions = []
                         for vers in fileData["Versions"]:
                             try:
-                                thumb = vers[5].replace("data\\SMdata", "smDatabase\\mayaDB") # relative thumbnail path
+                                thumb = vers[5].replace("data%sSMdata" % os.path.sep,
+                                                        "smDatabase%smayaDB" % os.path.sep)
+                                # relative thumbnail path
                             except IndexError:
                                 thumb = ""
                             versDict = {"RelativePath": vers[0],
@@ -822,7 +826,9 @@ class MayaManager(RootManager):
                                         "Thumb": thumb}
 
                             for key in versDict["Preview"].keys(): # Playblast dictionary
-                                versDict["Preview"][key] = versDict["Preview"][key].replace("data\\SMdata", "smDatabase\\mayaDB")
+                                versDict["Preview"][key] = versDict["Preview"][key].replace(
+                                    "data%sSMdata" % os.path.sep,
+                                    "smDatabase%smayaDB" % os.path.sep)
 
                             newVersions.append(versDict)
                         fileData["Versions"] = newVersions
