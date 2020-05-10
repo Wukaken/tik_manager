@@ -2751,6 +2751,8 @@ class MainUI(QtWidgets.QMainWindow):
         self._initUsers()
 
         # disable the version related stuff
+        self.version_comboBox.clear()
+        self.subVersion_comboBox.clear()
         self.version_comboBox.setStyleSheet("background-color: rgb(80,80,80); color: white")
         self.subVersion_comboBox.setStyleSheet("background-color: rgb(80,80,80); color: white")
         # self._vEnableDisable()
