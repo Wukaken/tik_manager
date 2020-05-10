@@ -1861,9 +1861,9 @@ Elapsed Time:{6}
         return outFolder
 
     def getOutputFileName(self, baseName, categoryName, version, subVersion, fileFormat):
-        sceneName = "{0}_{1}_{2}_v{3}_{4}.{5}".format(
-            baseName, categoryName, self._usersDict[self.currentUser],
-            str(version).zfill(3), str(subVersion).zfill(3), fileFormat)
+        sceneName = "{0}_{1}_v{2}_{3}.{4}".format(
+            baseName, categoryName, str(version).zfill(3),
+            str(subVersion).zfill(3), fileFormat)
         return sceneName
 
     def getOutputJsonName(self, baseName):
