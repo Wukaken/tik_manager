@@ -465,7 +465,7 @@ class MainUI(QtWidgets.QMainWindow):
         self.makeReference_pushButton = QtWidgets.QPushButton(self.frame)
         self.makeReference_pushButton.setMinimumSize(QtCore.QSize(100, 30))
         self.makeReference_pushButton.setMaximumSize(QtCore.QSize(300, 30))
-        self.makeReference_pushButton.setText(("Make Reference"))
+        self.makeReference_pushButton.setText(("Make Final"))
         self.makeReference_pushButton.setObjectName(("makeReference_pushButton"))
         self.gridLayout_7.addWidget(self.makeReference_pushButton, 2, 0, 1, 1)
 
@@ -2390,7 +2390,7 @@ class MainUI(QtWidgets.QMainWindow):
         makeReference_checkBox = QtWidgets.QCheckBox(verticalLayoutWidget_2)
         makeReference_checkBox.setLayoutDirection(QtCore.Qt.LeftToRight)
         makeReference_checkBox.setCheckable(True)
-        makeReference_checkBox.setText("Make Reference")
+        makeReference_checkBox.setText("Make Final")
         formLayout.setWidget(4, QtWidgets.QFormLayout.FieldRole, makeReference_checkBox)
 
         if BoilerDict["Environment"] == "Houdini" or BoilerDict["Environment"] == "Nuke":
@@ -2448,15 +2448,21 @@ class MainUI(QtWidgets.QMainWindow):
         ######
 
         def saveCommand():
+            name = lineEdit.text()
+            if not name:
+                msg = 'File name empty, do nothing!!'
+                self.queryPop(type="okCancel", textTitle="Error Empty File Name", textHeader=msg)
+                return
+
             checklist = self.manager.preSaveChecklist()
             for msg in checklist:
                 q = self.queryPop(type="yesNo", textTitle="Checklist", textHeader=msg)
                 if q == "no":
                     return
                 else:
-                    self.manager.errorLogger(title = "Disregarded warning" , errorMessage=msg)
+                    self.manager.errorLogger(title="Disregarded warning", errorMessage=msg)
+
             category = category_comboBox.currentText()
-            name = lineEdit.text()
             subIndex = subProject_comboBox.currentIndex()
             makeReference = makeReference_checkBox.checkState()
             notes = notes_plainTextEdit.toPlainText()
@@ -2464,6 +2470,7 @@ class MainUI(QtWidgets.QMainWindow):
                 if button.isChecked():
                     sceneFormat = button.text()
                     break
+
             AssertionError(sceneFormat)
             state = self.manager.saveBaseScene(category, name, subIndex, makeReference, notes, sceneFormat)
             if state[0] != -1:
@@ -2542,7 +2549,7 @@ class MainUI(QtWidgets.QMainWindow):
         makeReference_checkBox = QtWidgets.QCheckBox(saveV_Dialog)
         makeReference_checkBox.setLayoutDirection(QtCore.Qt.LeftToRight)
         makeReference_checkBox.setInputMethodHints(QtCore.Qt.ImhPreferUppercase)
-        makeReference_checkBox.setText("Make Reference")
+        makeReference_checkBox.setText("Make Final")
         makeReference_checkBox.setCheckable(True)
 
         if BoilerDict["Environment"] == "Houdini" or BoilerDict["Environment"] == "Nuke":
@@ -2559,7 +2566,11 @@ class MainUI(QtWidgets.QMainWindow):
         horizontalLayout.addLayout(right_verticalLayout)
 
         buttonS = sv_buttonBox.button(QtWidgets.QDialogButtonBox.Ok)
-        buttonS.setText('Save As Version')
+        if versionUp:
+            buttonS.setWindowTitle(("Save As Version"))
+        else:
+            buttonS.setWindowTitle(("Save As Sub Version"))
+
         buttonS.setMinimumSize(QtCore.QSize(100, 30))
         buttonC = sv_buttonBox.button(QtWidgets.QDialogButtonBox.Cancel)
         buttonC.setText('Cancel')
