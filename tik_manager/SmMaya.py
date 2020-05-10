@@ -528,7 +528,7 @@ class MayaManager(RootManager):
     def doCreateThumbnail(self, thumbnailFile):
         logger.debug("Func: doCreateThumbnail")
         frame = cmds.currentTime(query=True)
-        cmds.playblast(cf=thumbnailFile, fo=1, format='image', wh=[221, 124],
+        cmds.playblast(cf=thumbnailFile, fo=1, format='image', wh=[221, 124], v=0,
                        orn=0, os=1, p=100, c="jpg", fr=[frame])
             
     def createThumbnail(self, useCursorPosition=False, dbPath=None, versionInt=None):
