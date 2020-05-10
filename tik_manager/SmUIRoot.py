@@ -758,8 +758,8 @@ class MainUI(QtWidgets.QMainWindow):
         cid = 0
         idx = -1
         for i, d in enumerate(dirs):
-            full = os.path.join(upperDir, d)
-            if os.path.isdir(full):
+            full = os.path.join(upperDir, d, 'workspace.mel')
+            if os.path.isfile(full):
                 self.projects_comboBox.addItem(d)
                 if d == curProj:
                     idx = cid

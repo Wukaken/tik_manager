@@ -135,6 +135,12 @@ class MayaManager(RootManager):
         """Sets the project"""
         logger.debug("Func: setProject")
 
+        wsMel = os.path.join(path, 'workspace.mel')
+        if not os.path.isfile(wsMel):
+            msg = 'This is not a standard maya project,\ndo nothing!'
+            cmds.confirmDialog(t='Error In Setting Project', m=msg, db='OK')
+            return
+
         # totally software specific or N/A
         melCompPath = path.replace("\\", "/") # mel is picky
         command = 'setProject "%s";' %melCompPath
