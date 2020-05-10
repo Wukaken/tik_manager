@@ -774,7 +774,7 @@ class MainUI(QtWidgets.QMainWindow):
         # This method is NOT Software Specific
         self.createproject_Dialog = QtWidgets.QDialog(parent=self)
         self.createproject_Dialog.setObjectName(("createproject_Dialog"))
-        self.createproject_Dialog.resize(419, 300)
+        self.createproject_Dialog.resize(419, 340)
         self.createproject_Dialog.setWindowTitle(("Create New Project"))
 
         self.projectroot_label = QtWidgets.QLabel(self.createproject_Dialog)
@@ -869,8 +869,21 @@ class MainUI(QtWidgets.QMainWindow):
         maxSubVer_lineEdit.setAlignment(QtCore.Qt.AlignVCenter)
         maxSubVer_lineEdit.setText("20")
 
+        directorySet_label = QtWidgets.QLabel(self.createproject_Dialog)
+        directorySet_label.setGeometry(QtCore.QRect(20, 270, 110, 21))
+        directorySet_label.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+        directorySet_label.setText("Directory Set")
+
+        directorySet_comboBox = QtWidgets.QComboBox(self.createproject_Dialog)
+        directorySet_comboBox.setGeometry(QtCore.QRect(135, 270, 140, 26))
+        projectTypes = self.manager._projectDirectoryDefaultInfo.keys()
+        if not projectTypes:
+            projectTypes.append('default')
+
+        directorySet_comboBox.addItems(projectTypes)
+
         self.createproject_buttonBox = QtWidgets.QDialogButtonBox(self.createproject_Dialog)
-        self.createproject_buttonBox.setGeometry(QtCore.QRect(30, 250, 371, 32))
+        self.createproject_buttonBox.setGeometry(QtCore.QRect(30, 300, 371, 32))
         self.createproject_buttonBox.setOrientation(QtCore.Qt.Horizontal)
         self.createproject_buttonBox.setStandardButtons(
             QtWidgets.QDialogButtonBox.Cancel | QtWidgets.QDialogButtonBox.Ok)
@@ -893,7 +906,12 @@ class MainUI(QtWidgets.QMainWindow):
         def onCreateNewProject():
             root = self.projectroot_lineEdit.text()
             pName = self.projectname_lineEdit.text()
-            maxSubVerNumStr= maxSubVer_lineEdit.text()
+            if not pName:
+                msg = "Project Name Empty"
+                self.queryPop(type="okCancel", textTitle="Error Project Name", textHeader=msg)
+                return
+            
+            maxSubVerNumStr = maxSubVer_lineEdit.text()
             maxSubVerNum = 20
             try:
                 maxSubVerNum = max(int(maxSubVerNumStr), 1)
@@ -906,10 +924,12 @@ class MainUI(QtWidgets.QMainWindow):
                     defaultFileFormat = rb.text()
 
             defaultFileFormatKey = '%sDefaultFileFormat' % BoilerDict['Environment']
+            projectType = directorySet_comboBox.currentText()
             projectSettingsDB = {"Resolution": [resolutionX_spinBox.value(), resolutionY_spinBox.value()],
                                  "FPS": int(fps_comboBox.currentText()),
                                  "MaxSubVerNum": maxSubVerNum,
-                                 defaultFileFormatKey: defaultFileFormat}
+                                 defaultFileFormatKey: defaultFileFormat,
+                                 'ProjectType': projectType}
 
             pPath = self.manager.createNewProject(root, pName, settingsData=projectSettingsDB)
             if pPath:

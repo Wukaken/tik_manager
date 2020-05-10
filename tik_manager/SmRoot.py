@@ -134,6 +134,7 @@ class RootManager(object):
 
         self._pathsDict["softwareDatabase"] = os.path.normpath(os.path.join(self._pathsDict["generalSettingsDir"], "softwareDatabase.json"))
         self._pathsDict["sceneManagerDefaults"] = os.path.normpath(os.path.join(self._pathsDict["generalSettingsDir"], "sceneManagerDefaults.json"))
+        self._pathsDict["projectDirectoryDatabase"] = os.path.normpath(os.path.join(self._pathsDict["generalSettingsDir"], "projectDirectoryDatabase.json"))
 
     def getSoftwarePaths(self):
         """This method must be overridden to return the software currently working on"""
@@ -158,6 +159,10 @@ class RootManager(object):
 
         # defaults dictionary holding "defaultCategories", "defaultPreviewSettings", "defaultUsers"
         self._sceneManagerDefaults = self._loadJson(self._pathsDict["sceneManagerDefaults"])
+        self._projectDirectoryDefaultInfo = {}
+        if os.path.isfile(self._pathsDict["projectDirectoryDatabase"]):
+            self._projectDirectoryDefaultInfo = self._loadJson(
+                self._pathsDict["projectDirectoryDatabase"])
 
         # self.currentPlatform = platform.system()
         self._categories = self._loadCategories()
@@ -689,6 +694,8 @@ class RootManager(object):
         # resolve the project path
         resolvedPath = self.resolveProjectPath(projectRoot, projectName)
 
+        projectType = settingsData.get('ProjectType', 'default')
+
         # check if there is a duplicate
         if not os.path.isdir(os.path.normpath(resolvedPath)):
             os.makedirs(os.path.normpath(resolvedPath))
@@ -699,40 +706,7 @@ class RootManager(object):
             self._exception(340, msg)
             return
 
-        # create Directory structure:
-        os.mkdir(os.path.join(resolvedPath, "_COMP"))
-        # os.makedirs(os.path.join(resolvedPath, "maxScenes", "Animation"))
-        # os.makedirs(os.path.join(resolvedPath, "maxScenes", "Model"))
-        # os.makedirs(os.path.join(resolvedPath, "maxScenes", "Render"))
-        # os.mkdir(os.path.join(resolvedPath, "_SCULPT"))
-        # os.mkdir(os.path.join(resolvedPath, "_REALFLOW"))
-        # os.mkdir(os.path.join(resolvedPath, "_HOUDINI"))
-        os.mkdir(os.path.join(resolvedPath, "_REF"))
-        # os.mkdir(os.path.join(resolvedPath, "_TRACK"))
-        os.makedirs(os.path.join(resolvedPath, "_TRANSFER", "FBX"))
-        os.makedirs(os.path.join(resolvedPath, "_TRANSFER", "ALEMBIC"))
-        os.makedirs(os.path.join(resolvedPath, "_TRANSFER", "OBJ"))
-        os.makedirs(os.path.join(resolvedPath, "_TRANSFER", "MA"))
-        # os.mkdir(os.path.join(resolvedPath, "assets"))
-        os.mkdir(os.path.join(resolvedPath, "cache"))
-        # os.mkdir(os.path.join(resolvedPath, "clips"))
-        os.mkdir(os.path.join(resolvedPath, "data"))
-        os.makedirs(os.path.join(resolvedPath, "images", "_CompRenders"))
-        # os.mkdir(os.path.join(resolvedPath, "movies"))
-        os.mkdir(os.path.join(resolvedPath, "particles"))
-        os.mkdir(os.path.join(resolvedPath, "Playblasts"))
-        os.makedirs(os.path.join(resolvedPath, "renderData", "depth"))
-        os.makedirs(os.path.join(resolvedPath, "renderData", "fur"))
-        os.makedirs(os.path.join(resolvedPath, "renderData", "iprImages"))
-        os.makedirs(os.path.join(resolvedPath, "renderData", "mentalray"))
-        os.makedirs(os.path.join(resolvedPath, "renderData", "shaders"))
-        os.mkdir(os.path.join(resolvedPath, "scenes"))
-        os.mkdir(os.path.join(resolvedPath, "scripts"))
-        os.mkdir(os.path.join(resolvedPath, "sound"))
-        os.makedirs(os.path.join(resolvedPath, "sourceimages", "_FOOTAGE"))
-        os.makedirs(os.path.join(resolvedPath, "sourceimages", "_HDR"))
-        os.makedirs(os.path.join(resolvedPath, "smDatabase"))
-
+        self.createProjectDirectory(resolvedPath, projectType)
         # Create project settings file
         if not settingsData:
             settingsData = {"Resolution": [1920, 1080],
@@ -740,77 +714,7 @@ class RootManager(object):
 
         self._dumpJson(settingsData, os.path.join(resolvedPath, "smDatabase", "projectSettings.json"))
 
-
-        filePath = os.path.join(resolvedPath, "workspace.mel")
-        file = open(filePath, "w")
-
-        file.write('workspace -fr "scene" "scenes";\n')
-        file.write('workspace -fr "3dPaintTextures" "sourceimages/3dPaintTextures";\n')
-        file.write('workspace -fr "eps" "data";\n')
-        file.write('workspace -fr "mentalRay" "renderData/mentalray";\n')
-        file.write('workspace -fr "OBJexport" "_TRANSFER/OBJ";\n')
-        file.write('workspace -fr "mel" "scripts";\n')
-        file.write('workspace -fr "particles" "particles";\n')
-        file.write('workspace -fr "STEP_DC" "data";\n')
-        file.write('workspace -fr "CATIAV5_DC" "data";\n')
-        file.write('workspace -fr "sound" "sound";\n')
-        file.write('workspace -fr "furFiles" "renderData/fur/furFiles";\n')
-        file.write('workspace -fr "depth" "renderData/depth";\n')
-        file.write('workspace -fr "CATIAV4_DC" "data";\n')
-        file.write('workspace -fr "autoSave" "autosave";\n')
-        file.write('workspace -fr "diskCache" "cache";\n')
-        file.write('workspace -fr "fileCache" "";\n')
-        file.write('workspace -fr "IPT_DC" "data";\n')
-        file.write('workspace -fr "SW_DC" "data";\n')
-        file.write('workspace -fr "DAE_FBX export" "data";\n')
-        file.write('workspace -fr "Autodesk Packet File" "";\n')
-        file.write('workspace -fr "DAE_FBX" "data";\n')
-        file.write('workspace -fr "DXF_DCE" "";\n')
-        file.write('workspace -fr "mayaAscii" "scenes";\n')
-        file.write('workspace -fr "iprImages" "renderData/iprImages";\n')
-        file.write('workspace -fr "move" "data";\n')
-        file.write('workspace -fr "mayaBinary" "scenes";\n')
-        file.write('workspace -fr "fluidCache" "cache/fluid";\n')
-        file.write('workspace -fr "clips" "clips";\n')
-        file.write('workspace -fr "animExport" "data";\n')
-        file.write('workspace -fr "templates" "assets";\n')
-        file.write('workspace -fr "DWG_DC" "data";\n')
-        file.write('workspace -fr "offlineEdit" "scenes/edits";\n')
-        file.write('workspace -fr "translatorData" "data";\n')
-        file.write('workspace -fr "renderData" "renderData";\n')
-        file.write('workspace -fr "DXF_DC" "data";\n')
-        file.write('workspace -fr "SPF_DCE" "";\n')
-        file.write('workspace -fr "ZPR_DCE" "";\n')
-        file.write('workspace -fr "furShadowMap" "renderData/fur/furShadowMap";\n')
-        file.write('workspace -fr "audio" "sound";\n')
-        file.write('workspace -fr "scripts" "scripts";\n')
-        file.write('workspace -fr "IV_DC" "data";\n')
-        file.write('workspace -fr "studioImport" "data";\n')
-        file.write('workspace -fr "STL_DCE" "";\n')
-        file.write('workspace -fr "furAttrMap" "renderData/fur/furAttrMap";\n')
-        file.write('workspace -fr "FBX export" "data";\n')
-        file.write('workspace -fr "JT_DC" "data";\n')
-        file.write('workspace -fr "sourceImages" "sourceimages";\n')
-        file.write('workspace -fr "DWG_DCE" "";\n')
-        file.write('workspace -fr "animImport" "data";\n')
-        file.write('workspace -fr "FBX" "data";\n')
-        file.write('workspace -fr "movie" "movies";\n')
-        file.write('workspace -fr "Alembic" "";\n')
-        file.write('workspace -fr "furImages" "renderData/fur/furImages";\n')
-        file.write('workspace -fr "IGES_DC" "data";\n')
-        file.write('workspace -fr "furEqualMap" "renderData/fur/furEqualMap";\n')
-        file.write('workspace -fr "illustrator" "data";\n')
-        file.write('workspace -fr "UG_DC" "";\n')
-        file.write('workspace -fr "images" "images";\n')
-        file.write('workspace -fr "SPF_DC" "data";\n')
-        file.write('workspace -fr "PTC_DC" "data";\n')
-        file.write('workspace -fr "OBJ" "_TRANSFER/OBJ";\n')
-        file.write('workspace -fr "CSB_DC" "data";\n')
-        file.write('workspace -fr "STL_DC" "data";\n')
-        file.write('workspace -fr "IGES_DCE" "";\n')
-        file.write('workspace -fr "shaders" "renderData/shaders";\n')
-        file.write('workspace -fr "UG_DCE" "";\n')
-        file.close()
+        self.createProjectWorkspaceFile(resolvedPath, projectType)
 
         return resolvedPath
 
@@ -1990,3 +1894,45 @@ Elapsed Time:{6}
     def getRealVersionIndex(self):
         idx = self._currentVersionDetailInfo[self._currentVersionIndex][self._currentSubVersionIndex]
         return idx
+
+    def createProjectDirectory(self, resolvedPath, projectType):
+        defaultProjectDirs = [
+            "_COMP",
+            "_REF",
+            "_TRANSFER/FBX",
+            "_TRANSFER/ALEMBIC",
+            "_TRANSFER/OBJ",
+            "_TRANSFER/MA",
+            "cache",
+            "data",
+            "images/_CompRenders",
+            "particles",
+            "Playblasts",
+            "renderData/depth",
+            "renderData/fur",
+            "renderData/iprImages",
+            "renderData/mentalray",
+            "renderData/shaders",
+            "scenes",
+            "scripts",
+            "sound",
+            "sourceimages/_FOOTAGE",
+            "sourceimages/_HDR",
+            "smDatabase"]
+        
+        projDirs = self._projectDirectoryDefaultInfo.get(projectType, defaultProjectDirs)
+        projDirs.append(resolvedPath)
+        for projDir in projDirs:
+            outDir = os.path.join(resolvedPath, projDir)
+            if not os.path.isdir(outDir):
+                os.makedirs(outDir)
+
+    def createProjectWorkspaceFile(self, resolvedPath, projectType):
+        wsFile = os.path.join(self._pathsDict["generalSettingsDir"],
+                              "%sWorkspace.mel" % projectType)
+        if not os.path.isfile(wsFile):
+            wsFile = os.path.join(self._pathsDict["generalSettingsDir"],
+                                  "defaultWorkspace.mel")
+
+        toWsFile = os.path.join(resolvedPath, "workspace.mel")
+        shutil.copy(wsFile, toWsFile)

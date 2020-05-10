@@ -1,0 +1,16 @@
+{
+    "game": [
+        "_COMP", 
+        "_REF", 
+        "_TRANSFER/FBX", 
+        "_TRANSFER/ALEMBIC", 
+        "_TRANSFER/OBJ", 
+        "_TRANSFER/MA",
+        "smDatabase"
+    ], 
+    "CG": [
+        "Animation/Cache", 
+        "Animation/Scene",
+        "smDatabase"
+    ]
+}
