@@ -563,6 +563,9 @@ class RootManager(object):
             return None
 
         dbDir = self._pathsDict["databaseDir"]
+        if not self._pathsDict['sceneFile'].startswith(self.projectDir):
+            return None
+        
         resPart = os.path.relpath(self._pathsDict["sceneFile"], start=self.projectDir)
         rResPart = resPart.split(os.path.sep, 1)[1]
         jsonPart = '%s.json' % os.path.dirname(rResPart)
@@ -733,7 +736,7 @@ class RootManager(object):
         # Create project settings file
         if not settingsData:
             settingsData = {"Resolution": [1920, 1080],
-                                   "FPS": 25}
+                            "FPS": 25}
 
         self._dumpJson(settingsData, os.path.join(resolvedPath, "smDatabase", "projectSettings.json"))
 
@@ -1524,10 +1527,7 @@ Elapsed Time:{6}
             self._exception(341, msg)
             return
 
-        projectDate = datetime.datetime.now().strftime("%y%m%d")
-
-        fullName = "{0}_{1}".format(projectName, projectDate)
-        fullPath = os.path.join(os.path.normpath(str(projectRoot)), fullName)
+        fullPath = os.path.join(os.path.normpath(str(projectRoot)), projectName)
         return fullPath
 
     ## Database loading / saving functions

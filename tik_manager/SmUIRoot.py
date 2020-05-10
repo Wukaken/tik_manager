@@ -90,7 +90,7 @@ try:
     from maya import OpenMayaUI as omui
     BoilerDict["Environment"] = "Maya"
     BoilerDict["WindowTitle"] = "Scene Manager Maya v%s" %_version.__version__
-    BoilerDict["SceneFormats"] = ["mb", "ma"]
+    BoilerDict["SceneFormats"] = ["ma", "mb"]
     if Qt.__binding__ == "PySide":
         from shiboken import wrapInstance
     elif Qt.__binding__.startswith('PyQt'):
@@ -798,52 +798,75 @@ class MainUI(QtWidgets.QMainWindow):
         self.resolvedpath_label.setObjectName(("resolvedpath_label"))
 
         self.projectname_label = QtWidgets.QLabel(self.createproject_Dialog)
-        self.projectname_label.setGeometry(QtCore.QRect(20, 110, 381, 20))
+        self.projectname_label.setGeometry(QtCore.QRect(20, 110, 100, 20))
         self.projectname_label.setFrameShape(QtWidgets.QFrame.Box)
         self.projectname_label.setText(("Project Name"))
         self.projectname_label.setAlignment(QtCore.Qt.AlignCenter)
         self.projectname_label.setObjectName(("projectname_label"))
 
         self.projectname_lineEdit = QtWidgets.QLineEdit(self.createproject_Dialog)
-        self.projectname_lineEdit.setGeometry(QtCore.QRect(20, 140, 381, 21))
+        self.projectname_lineEdit.setGeometry(QtCore.QRect(130, 110, 270, 22))
         self.projectname_lineEdit.setPlaceholderText(("Mandatory Field"))
         self.projectname_lineEdit.setObjectName(("projectname_lineEdit"))
 
         # TODO : ref
 
-        resolution_label = QtWidgets.QLabel(self.createproject_Dialog)
-        resolution_label.setGeometry(QtCore.QRect(24, 180 , 111, 21))
-        resolution_label.setText("Resolution")
+        defaultFileFormat_label = QtWidgets.QLabel(self.createproject_Dialog)
+        defaultFileFormat_label.setGeometry(QtCore.QRect(20, 150, 110, 21))
+        defaultFileFormat_label.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+        defaultFileFormat_label.setText("Default File Format")
 
+        radioButtonList = []
+        baseOff = 135
+        off = 50
+        for fileFormat in BoilerDict["SceneFormats"]:
+            radioButton = QtWidgets.QRadioButton(self.createproject_Dialog)
+            radioButton.setText(fileFormat)
+            radioButton.setGeometry(QtCore.QRect(baseOff, 150, off, 22))
+            radioButtonList.append(radioButton)
+            baseOff += off + 5
+
+        radioButtonList[0].setChecked(True)
+
+        resolution_label = QtWidgets.QLabel(self.createproject_Dialog)
+        resolution_label.setGeometry(QtCore.QRect(20, 180, 110, 22))
+        resolution_label.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+        resolution_label.setText("Resolution")
+        
         resolutionX_spinBox = QtWidgets.QSpinBox(self.createproject_Dialog)
-        resolutionX_spinBox.setGeometry(QtCore.QRect(80, 180, 60, 21))
+        resolutionX_spinBox.setGeometry(QtCore.QRect(135, 180, 60, 22))
         resolutionX_spinBox.setObjectName(("resolutionX_spinBox"))
         resolutionX_spinBox.setButtonSymbols(QtWidgets.QAbstractSpinBox.NoButtons)
-        resolutionX_spinBox.setRange(1,99999)
+        resolutionX_spinBox.setAlignment(QtCore.Qt.AlignVCenter)
+        resolutionX_spinBox.setRange(1, 99999)
         resolutionX_spinBox.setValue(1920)
 
         resolutionY_spinBox = QtWidgets.QSpinBox(self.createproject_Dialog)
-        resolutionY_spinBox.setGeometry(QtCore.QRect(145, 180, 60, 21))
+        resolutionY_spinBox.setGeometry(QtCore.QRect(200, 180, 60, 22))
         resolutionY_spinBox.setObjectName(("resolutionY_spinBox"))
         resolutionY_spinBox.setButtonSymbols(QtWidgets.QAbstractSpinBox.NoButtons)
-        resolutionY_spinBox.setRange(1,99999)
+        resolutionY_spinBox.setAlignment(QtCore.Qt.AlignVCenter)
+        resolutionY_spinBox.setRange(1, 99999)
         resolutionY_spinBox.setValue(1080)
 
         fps_label = QtWidgets.QLabel(self.createproject_Dialog)
-        fps_label.setGeometry(QtCore.QRect(54, 210 , 111, 21))
+        fps_label.setGeometry(QtCore.QRect(20, 210, 110, 21))
+        fps_label.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
         fps_label.setText("FPS")
 
         fps_comboBox = QtWidgets.QComboBox(self.createproject_Dialog)
-        fps_comboBox.setGeometry(QtCore.QRect(80, 210 , 60, 21))
+        fps_comboBox.setGeometry(QtCore.QRect(135, 210, 60, 22))
         fps_comboBox.addItems(self.manager.fpsList)
         fps_comboBox.setCurrentIndex(2)
 
         maxSubVer_label = QtWidgets.QLabel(self.createproject_Dialog)
-        maxSubVer_label.setGeometry(QtCore.QRect(4, 240 , 111, 21))
-        maxSubVer_label.setText("SubVer Num")
+        maxSubVer_label.setGeometry(QtCore.QRect(20, 240, 110, 21))
+        maxSubVer_label.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignVCenter)
+        maxSubVer_label.setText("Sub Version Number")
 
         maxSubVer_lineEdit = QtWidgets.QLineEdit(self.createproject_Dialog)
-        maxSubVer_lineEdit.setGeometry(QtCore.QRect(80, 240 , 60, 21))
+        maxSubVer_lineEdit.setGeometry(QtCore.QRect(135, 240, 50, 22))
+        maxSubVer_lineEdit.setAlignment(QtCore.Qt.AlignVCenter)
         maxSubVer_lineEdit.setText("20")
 
         self.createproject_buttonBox = QtWidgets.QDialogButtonBox(self.createproject_Dialog)
@@ -876,10 +899,17 @@ class MainUI(QtWidgets.QMainWindow):
                 maxSubVerNum = max(int(maxSubVerNumStr), 1)
             except:
                 maxSubVerNum = 20
-                
+
+            defaultFileFormat = BoilerDict["SceneFormats"][0]
+            for rb in radioButtonList:
+                if rb.isChecked():
+                    defaultFileFormat = rb.text()
+
+            defaultFileFormatKey = '%sDefaultFileFormat' % BoilerDict['Environment']
             projectSettingsDB = {"Resolution": [resolutionX_spinBox.value(), resolutionY_spinBox.value()],
                                  "FPS": int(fps_comboBox.currentText()),
-                                 "MaxSubVerNum": maxSubVerNum}
+                                 "MaxSubVerNum": maxSubVerNum,
+                                 defaultFileFormatKey: defaultFileFormat}
 
             pPath = self.manager.createNewProject(root, pName, settingsData=projectSettingsDB)
             if pPath:
