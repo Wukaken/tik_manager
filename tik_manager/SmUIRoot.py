@@ -2400,14 +2400,19 @@ class MainUI(QtWidgets.QMainWindow):
 
         # If there are multiple formats create radio buttons for each
         radioButtonList = []
-        for format in BoilerDict["SceneFormats"]:
+        projSetting = self.manager.loadProjectSettings()
+        sceneFormatIdx = 0
+        defaultSceneFormatKey = '%sDefaultFileFormat' % BoilerDict['Environment']
+        defaultSceneFormat = projSetting.get(defaultSceneFormatKey)
+        for i, fileFormat in enumerate(BoilerDict["SceneFormats"]):
             radioButton = QtWidgets.QRadioButton(verticalLayoutWidget_2)
-            radioButton.setText(format)
+            radioButton.setText(fileFormat)
             formats_horizontalLayout.addWidget(radioButton)
             radioButtonList.append(radioButton)
+            if defaultSceneFormat is not None and fileFormat == defaultSceneFormat:
+                sceneFormatIdx = i
 
-        # select the first radio button
-        radioButtonList[0].setChecked(True)
+        radioButtonList[sceneFormatIdx].setChecked(True)
 
         # hide radiobutton if only one format exists
         if len(radioButtonList) == 1:
@@ -2527,16 +2532,20 @@ class MainUI(QtWidgets.QMainWindow):
         spacerItem = QtWidgets.QSpacerItem(80, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         formats_horizontalLayout.addItem(spacerItem)
 
-
         radioButtonList = []
-        for format in BoilerDict["SceneFormats"]:
+        projSetting = self.manager.loadProjectSettings()
+        sceneFormatIdx = 0
+        defaultSceneFormatKey = '%sDefaultFileFormat' % BoilerDict['Environment']
+        defaultSceneFormat = projSetting.get(defaultSceneFormatKey)
+        for i, fileFormat in enumerate(BoilerDict["SceneFormats"]):
             radioButton = QtWidgets.QRadioButton(saveV_Dialog)
-            radioButton.setText(format)
+            radioButton.setText(fileFormat)
             formats_horizontalLayout.addWidget(radioButton)
             radioButtonList.append(radioButton)
+            if defaultSceneFormat is not None and fileFormat == defaultSceneFormat:
+                sceneFormatIdx = i
 
-        # select the first radio button
-        radioButtonList[0].setChecked(True)
+        radioButtonList[sceneFormatIdx].setChecked(True)
 
         # hide radiobutton if only one format exists
         if len(radioButtonList) == 1:
@@ -2617,7 +2626,7 @@ class MainUI(QtWidgets.QMainWindow):
                 if q == "no":
                     return
                 else:
-                    self.manager.errorLogger(title = "Disregarded warning" , errorMessage=msg)
+                    self.manager.errorLogger(title="Disregarded warning", errorMessage=msg)
 
             for button in radioButtonList:
                 if button.isChecked():
@@ -2631,7 +2640,14 @@ class MainUI(QtWidgets.QMainWindow):
                                                  versionUp=versionUp)
 
             if not sceneInfo == -1:
-                self.statusBar().showMessage("Status | Version Saved => %s" % len(sceneInfo["Versions"]))
+                versionData = sceneInfo["Versions"][-1]
+                relPath = versionData['RelativePath']
+                verInfo = self.manager.getFileVersionInfo(relPath)
+                version = verInfo['currentVersion']
+                subVersion = verInfo['currentSubVersion']
+                self.statusBar().showMessage("Status | Saved Version => %s, SubVersion => %s" % (
+                    version, subVersion))
+
             self.manager.currentBaseSceneName = sceneInfo["Name"]
             verIds = self.manager._currentVersionDetailInfo.keys()
             verIds.sort()
@@ -3100,9 +3116,11 @@ class MainUI(QtWidgets.QMainWindow):
 
         manager.makeReference()
 
-        idx = manager.getRealVersionIndex()
+        version = self.manager.currentVersionIndex
+        subVersion = self.manager.currentSubVersionIndex
         self.statusBar().showMessage(
-            "Status | Version {1} is the new reference of {0}".format(manager.currentBaseSceneName, idx))
+            "Status | Version {0}, SubVersion {1} is the new reference of {2}".format(
+                version, subVersion, manager.currentBaseSceneName))
 
         currentRow = self.scenes_listWidget.currentRow()
         self.populateBaseScenes()
