@@ -3027,7 +3027,7 @@ class MainUI(QtWidgets.QMainWindow):
         manager = self._getManager()
 
         if not self.subVersion_comboBox.currentIndex() == -1:
-            manager.currentSubVersionIndex = self.subVersion_comboBox.currentIndex() + 1
+            manager.currentSubVersionIndex = int(self.subVersion_comboBox.currentText())
 
         # self.version_comboBox.blockSignals(True)
 
