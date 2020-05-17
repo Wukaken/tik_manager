@@ -123,6 +123,12 @@ class RootManager(object):
         self._pathsDict["subprojectsFile"] = os.path.normpath(os.path.join(self._pathsDict["masterDir"], "subPdata.json"))
         self._pathsDict["categoriesFile"] = os.path.normpath(os.path.join(self._pathsDict["databaseDir"], _softwarePathsDict["categoriesFile"]))
 
+        parts = os.path.splitext(_softwarePathsDict["categoriesFile"])
+        categoriesNickNameFileName = _softwarePathsDict.get(
+            "categoriesNickNameFile",
+            "%sNickName%s" % (parts[0], parts[1]))
+        self._pathsDict["categoriesNickNameFile"] = os.path.normpath(os.path.join(self._pathsDict["databaseDir"], categoriesNickNameFileName))
+
         self._pathsDict["previewsDir"] = os.path.normpath(os.path.join(self._pathsDict["projectDir"], "Playblasts", _softwarePathsDict["niceName"])) # dont change
         self._folderCheck(self._pathsDict["previewsDir"])
 
@@ -583,12 +589,14 @@ class RootManager(object):
             baseName = jsonInfo['Name']
             subProject = jsonInfo['SubProject']
             pbPath = self.getPreviewFolder(category, baseName, subProject)
+            sceneFormat = os.path.splitext(self._pathsDict["sceneFile"])[1][1:]
             self._openSceneInfo = {
                 "jsonFile": jsonFile,
                 "projectPath": self._pathsDict["projectDir"],
                 "subProject": jsonInfo['SubProject'],
                 "category": jsonInfo['Category'],
                 "shotName": jsonInfo['Name'],
+                "sceneFormat": sceneFormat,
                 "previewPath": pbPath
             }
             return self._openSceneInfo
@@ -1895,7 +1903,7 @@ Elapsed Time:{6}
         idx = self._currentVersionDetailInfo[self._currentVersionIndex][self._currentSubVersionIndex]
         return idx
 
-    def createProjectDirectory(self, resolvedPath, projectType):
+    def getDefaultProjectDirectory(self):
         defaultProjectDirs = [
             "_COMP",
             "_REF",
@@ -1919,7 +1927,10 @@ Elapsed Time:{6}
             "sourceimages/_FOOTAGE",
             "sourceimages/_HDR",
             "smDatabase"]
-        
+        return defaultProjectDirs
+
+    def createProjectDirectory(self, resolvedPath, projectType):
+        defaultProjectDirs = self.getDefaultProjectDirectory()
         projDirs = self._projectDirectoryDefaultInfo.get(projectType, defaultProjectDirs)
         projDirs.append(resolvedPath)
         for projDir in projDirs:
@@ -1936,3 +1947,19 @@ Elapsed Time:{6}
 
         toWsFile = os.path.join(resolvedPath, "workspace.mel")
         shutil.copy(wsFile, toWsFile)
+
+    def checkProjectFolder(self):
+        projSetting = self.loadProjectSettings()
+        projectType = projSetting['ProjectType']
+        self._projectDirectoryDefaultInfo = self._loadJson(
+            self._pathsDict["projectDirectoryDatabase"])
+
+        defaultProjectDirs = self.getDefaultProjectDirectory()
+        projDirs = self._projectDirectoryDefaultInfo.get(
+            projectType, defaultProjectDirs)
+
+        resolvedPath = self.getProjectDir()
+        for projDir in projDirs:
+            outDir = os.path.join(resolvedPath, projDir)
+            if not os.path.isdir(outDir):
+                os.makedirs(outDir)

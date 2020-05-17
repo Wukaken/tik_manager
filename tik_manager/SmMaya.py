@@ -141,6 +141,12 @@ class MayaManager(RootManager):
             cmds.confirmDialog(t='Error In Setting Project', m=msg, db='OK')
             return
 
+        projSettingFile = os.path.join(path, 'smDatabase', 'projectSettings.json')
+        status, verMsg = self.compareProjectSoftWareVersion(projSettingFile)
+        if status:
+            cmds.confirmDialog(t='Error In Maya Version', m=verMsg, db='OK')
+            return
+
         # totally software specific or N/A
         melCompPath = path.replace("\\", "/") # mel is picky
         command = 'setProject "%s";' %melCompPath
@@ -235,6 +241,9 @@ class MayaManager(RootManager):
 
         sceneInfo = self.getOpenSceneInfo()
         if sceneInfo: ## getCurrentJson returns None if the resolved json path is missing
+            if sceneFormat is None:
+                sceneFormat = sceneInfo['sceneFormat']
+                
             projectPath = self.projectDir
             
             now = datetime.datetime.now().strftime("%d/%m/%Y-%H:%M")
@@ -839,6 +848,27 @@ class MayaManager(RootManager):
                 logger.info("Old database folder renamed to 'SMdata_oldVersion'")
             except WindowsError:
                 logger.warning("Cannot rename the old database folder because of windows bullshit")
+
+    def getSoftwareVersion(self):
+        return cmds.about(api=1)
+
+    def compareProjectSoftWareVersion(self, projSettingFile):
+        swVer = self.getSoftwareVersion()
+        projSetting = self._loadJson(projSettingFile)
+        projVerKey = 'MayaVersion'
+        projVer = projSetting.get(projVerKey)
+        status = 0
+        msg = ''
+        if projVer is None:
+            status = 1
+            msg = 'Project not defined maya version'
+        elif not str(projVer)[:4] == str(swVer)[:4]:
+            status = 2
+            msg = 'Project version: %d, current maya version: %d, not match' % (
+                projVer, swVer)
+
+        return status, msg
+        
 
 class MainUI(baseUI):
     def __init__(self, callback=None):

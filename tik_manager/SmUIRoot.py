@@ -33,6 +33,7 @@
 # Abstract Module for main UI
 
 import os
+import datetime
 import webbrowser
 from functools import partial
 
@@ -506,6 +507,7 @@ class MainUI(QtWidgets.QMainWindow):
 
         self.fileMenu = self.menubar.addMenu("File")
         createProject_fm = QtWidgets.QAction("&Create Project", self)
+        checkProjectFolder_fm = QtWidgets.QAction("&Check Project Folders", self)
         self.saveVersion_fm = QtWidgets.QAction("&Save Version", self)
         self.saveBaseScene_fm = QtWidgets.QAction("&Save Base Scene", self)
         self.saveSubVersion_fm = QtWidgets.QAction("&Save Sub Version", self)
@@ -515,6 +517,7 @@ class MainUI(QtWidgets.QMainWindow):
         # add_remove_users_fm = QtWidgets.QAction("&Add/Remove Users", self)
 
         add_remove_categories_fm = QtWidgets.QAction("&Add/Remove Categories", self)
+        add_remove_category_nickname_fm = QtWidgets.QAction("&Add/Remove Category nicknames", self)
         pb_settings_fm = QtWidgets.QAction("&Playblast Settings", self)
 
         projectSettings_fm = QtWidgets.QAction("&Project Settings", self)
@@ -534,6 +537,7 @@ class MainUI(QtWidgets.QMainWindow):
 
         #save
         self.fileMenu.addAction(createProject_fm)
+        self.fileMenu.addAction(checkProjectFolder_fm)
         self.fileMenu.addAction(self.saveVersion_fm)
         self.fileMenu.addAction(self.saveSubVersion_fm)
         self.fileMenu.addAction(self.saveBaseScene_fm)
@@ -548,6 +552,7 @@ class MainUI(QtWidgets.QMainWindow):
         #settings
         # self.fileMenu.addAction(add_remove_users_fm)
         self.fileMenu.addAction(add_remove_categories_fm)
+        self.fileMenu.addAction(add_remove_category_nickname_fm)
         self.fileMenu.addAction(pb_settings_fm)
         self.fileMenu.addAction(projectSettings_fm)
         self.fileMenu.addAction(changeAdminPass_fm)
@@ -651,11 +656,13 @@ class MainUI(QtWidgets.QMainWindow):
         # ------------------
 
         createProject_fm.triggered.connect(self.createProjectUI)
+        checkProjectFolder_fm.triggered.connect(self.checkProjectFolder)
 
         # add_remove_users_fm.triggered.connect(self.addRemoveUserUI)
         pb_settings_fm.triggered.connect(self.onPbSettings)
 
         add_remove_categories_fm.triggered.connect(self.addRemoveCategoryUI)
+        add_remove_category_nickname_fm.triggered.connect(self.addRemoveCategoryNicknameUI)
 
         projectSettings_fm.triggered.connect(self.projectSettingsUI)
 
@@ -758,7 +765,7 @@ class MainUI(QtWidgets.QMainWindow):
         cid = 0
         idx = -1
         for i, d in enumerate(dirs):
-            full = os.path.join(upperDir, d, 'workspace.mel')
+            full = os.path.join(upperDir, d, 'smDatabase', 'projectSettings.json')
             if os.path.isfile(full):
                 self.projects_comboBox.addItem(d)
                 if d == curProj:
@@ -925,11 +932,19 @@ class MainUI(QtWidgets.QMainWindow):
 
             defaultFileFormatKey = '%sDefaultFileFormat' % BoilerDict['Environment']
             projectType = directorySet_comboBox.currentText()
+
+            swVersion = self.manager.getSoftwareVersion()
+            swVerKey = '%sVersion' % BoilerDict['Environment']
+
+            projectDate = datetime.datetime.now().strftime("%y%m%d")
+
             projectSettingsDB = {"Resolution": [resolutionX_spinBox.value(), resolutionY_spinBox.value()],
                                  "FPS": int(fps_comboBox.currentText()),
                                  "MaxSubVerNum": maxSubVerNum,
                                  defaultFileFormatKey: defaultFileFormat,
-                                 'ProjectType': projectType}
+                                 'ProjectType': projectType,
+                                 swVerKey: swVersion,
+                                 'ProjectDate': projectDate}
 
             pPath = self.manager.createNewProject(root, pName, settingsData=projectSettingsDB)
             if pPath:
@@ -962,6 +977,9 @@ class MainUI(QtWidgets.QMainWindow):
                                         self.projectname_lineEdit))
         
         self.createproject_Dialog.show()
+
+    def checkProjectFolder(self):
+        self.manager.checkProjectFolder()
 
     def setProjectUI(self):
 
@@ -1789,282 +1807,6 @@ class MainUI(QtWidgets.QMainWindow):
 
         self.pbSettings_dialog.show()
 
-    '''
-    def addRemoveUserUI(self):
-        # This method is NOT Software Specific
-        passw, ok = QtWidgets.QInputDialog.getText(self, "Password Query",
-                                               "Enter Admin Password:", QtWidgets.QLineEdit.Password)
-
-        if ok:
-            if self.manager.checkPassword(passw):
-                pass
-            else:
-                self.infoPop(textTitle="Incorrect Password", textHeader="The Password is invalid")
-                return
-        else:
-            return
-
-        userControl_Dialog = QtWidgets.QDialog(parent=self)
-        userControl_Dialog.setObjectName(("userControl_Dialog"))
-        userControl_Dialog.resize(349, 285)
-        userControl_Dialog.setWindowTitle(("Add/Remove Users"))
-
-        verticalLayout_2 = QtWidgets.QVBoxLayout(userControl_Dialog)
-
-        users_label = QtWidgets.QLabel(userControl_Dialog)
-        users_label.setText("Users:")
-        verticalLayout_2.addWidget(users_label)
-
-        horizontalLayout = QtWidgets.QHBoxLayout()
-
-        users_listWidget = QtWidgets.QListWidget(userControl_Dialog)
-        horizontalLayout.addWidget(users_listWidget)
-
-        verticalLayout = QtWidgets.QVBoxLayout()
-        verticalLayout.setSizeConstraint(QtWidgets.QLayout.SetDefaultConstraint)
-
-        add_pushButton = QtWidgets.QPushButton(userControl_Dialog)
-        add_pushButton.setText(("Add..."))
-        verticalLayout.addWidget(add_pushButton)
-
-        remove_pushButton = QtWidgets.QPushButton(userControl_Dialog)
-        remove_pushButton.setText(("Remove"))
-        verticalLayout.addWidget(remove_pushButton)
-
-        spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
-        verticalLayout.addItem(spacerItem)
-
-        horizontalLayout.addLayout(verticalLayout)
-        verticalLayout_2.addLayout(horizontalLayout)
-
-        buttonBox = QtWidgets.QDialogButtonBox(userControl_Dialog)
-        CloseButton = buttonBox.addButton("Close", QtWidgets.QDialogButtonBox.RejectRole)
-        CloseButton.setMinimumSize(QtCore.QSize(100, 30))
-
-        verticalLayout_2.addWidget(buttonBox)
-
-        # list the users
-        def updateUsers():
-            user_list_sorted = self.manager.getUsers()
-            users_listWidget.clear()
-            users_listWidget.addItems(user_list_sorted)
-
-        def onRemoveUser():
-            row = users_listWidget.currentRow()
-            if row == -1:
-                return
-            self.manager.removeUser(str(users_listWidget.currentItem().text()))
-            self.manager.currentUser = self.manager.getUsers()[0]
-            self._initUsers()
-            updateUsers()
-
-        def addNewUserUI():
-            addUser_Dialog = QtWidgets.QDialog(parent=self)
-            addUser_Dialog.resize(260, 114)
-            addUser_Dialog.setMaximumSize(QtCore.QSize(16777215, 150))
-            addUser_Dialog.setFocusPolicy(QtCore.Qt.ClickFocus)
-            addUser_Dialog.setWindowTitle(("Add New User"))
-
-            verticalLayout = QtWidgets.QVBoxLayout(addUser_Dialog)
-
-            addNewUser_label = QtWidgets.QLabel(addUser_Dialog)
-            addNewUser_label.setText("Add New User:")
-            verticalLayout.addWidget(addNewUser_label)
-
-            formLayout = QtWidgets.QFormLayout()
-            formLayout.setSizeConstraint(QtWidgets.QLayout.SetDefaultConstraint)
-            formLayout.setFieldGrowthPolicy(QtWidgets.QFormLayout.AllNonFixedFieldsGrow)
-            formLayout.setRowWrapPolicy(QtWidgets.QFormLayout.DontWrapRows)
-            formLayout.setLabelAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter)
-            formLayout.setFormAlignment(QtCore.Qt.AlignLeading | QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop)
-
-            fullname_label = QtWidgets.QLabel(addUser_Dialog)
-            fullname_label.setFocusPolicy(QtCore.Qt.StrongFocus)
-            fullname_label.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter)
-            fullname_label.setText("Full Name:")
-            formLayout.setWidget(0, QtWidgets.QFormLayout.LabelRole, fullname_label)
-
-            fullname_lineEdit = QtWidgets.QLineEdit(addUser_Dialog)
-            # fullname_lineEdit.setFocusPolicy(QtCore.Qt.TabFocus)
-            fullname_lineEdit.setPlaceholderText("e.g \'Jon Snow\'")
-            formLayout.setWidget(0, QtWidgets.QFormLayout.FieldRole, fullname_lineEdit)
-
-            initials_label = QtWidgets.QLabel(addUser_Dialog)
-            initials_label.setText("Initials:")
-            formLayout.setWidget(1, QtWidgets.QFormLayout.LabelRole, initials_label)
-
-            initials_lineEdit = QtWidgets.QLineEdit(addUser_Dialog)
-            # initials_lineEdit.setAlignment(QtCore.Qt.AlignLeading | QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
-            initials_lineEdit.setPlaceholderText("e.g \'js\' (must be unique)")
-            formLayout.setWidget(1, QtWidgets.QFormLayout.FieldRole, initials_lineEdit)
-            verticalLayout.addLayout(formLayout)
-
-            buttonBox = QtWidgets.QDialogButtonBox(addUser_Dialog)
-            buttonBox.setOrientation(QtCore.Qt.Horizontal)
-            buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.Cancel | QtWidgets.QDialogButtonBox.Ok)
-            verticalLayout.addWidget(buttonBox)
-            addUser_Dialog.show()
-
-
-            # sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
-            # sizePolicy.setHorizontalStretch(0)
-            # sizePolicy.setVerticalStretch(0)
-            buttonBox.setMaximumSize(QtCore.QSize(16777215, 30))
-            buttonBox.button(QtWidgets.QDialogButtonBox.Ok).setMinimumSize(QtCore.QSize(100, 30))
-            buttonBox.button(QtWidgets.QDialogButtonBox.Cancel).setMinimumSize(QtCore.QSize(100, 30))
-
-            def onAddUser():
-                ret, msg = self.manager.addUser(str(fullname_lineEdit.text()), str(initials_lineEdit.text()))
-                if ret == -1:
-                    self.infoPop(textTitle="Cannot Add User", textHeader=msg)
-                    return
-                self.manager.currentUser = fullname_lineEdit.text()
-                self._initUsers()
-                updateUsers()
-                addUser_Dialog.close()
-
-            buttonBox.accepted.connect(onAddUser)
-            buttonBox.rejected.connect(addUser_Dialog.reject)
-
-
-
-
-        updateUsers()
-
-        add_pushButton.clicked.connect(addNewUserUI)
-        remove_pushButton.clicked.connect(onRemoveUser)
-
-        buttonBox.rejected.connect(userControl_Dialog.reject)
-
-        # buttonBox.accepted.connect(onAccepted)
-        # buttonBox.rejected.connect(projectSettings_Dialog.reject)
-
-        userControl_Dialog.show()
-    '''
-    # def addRemoveUserUI(self):
-    #     # This method is NOT Software Specific
-    #     passw, ok = QtWidgets.QInputDialog.getText(self, "Password Query",
-    #                                            "Enter Admin Password:", QtWidgets.QLineEdit.Password)
-    #
-    #     if ok:
-    #         if self.manager.checkPassword(passw):
-    #             pass
-    #         else:
-    #             self.infoPop(textTitle="Incorrect Password", textHeader="The Password is invalid")
-    #             return
-    #     else:
-    #         return
-    #
-    #
-    #     users_Dialog = QtWidgets.QDialog(parent=self)
-    #     users_Dialog.setModal(True)
-    #     users_Dialog.setObjectName(("users_Dialog"))
-    #     users_Dialog.resize(380, 483)
-    #     users_Dialog.setMinimumSize(QtCore.QSize(342, 177))
-    #     users_Dialog.setMaximumSize(QtCore.QSize(342, 177))
-    #     users_Dialog.setWindowTitle(("Add/Remove Users"))
-    #     users_Dialog.setFocus()
-    #
-    #     addnewuser_groupBox = QtWidgets.QGroupBox(users_Dialog)
-    #     addnewuser_groupBox.setGeometry(QtCore.QRect(10, 10, 321, 91))
-    #     addnewuser_groupBox.setTitle(("Add New User"))
-    #     addnewuser_groupBox.setObjectName(("addnewuser_groupBox"))
-    #
-    #     fullname_label = QtWidgets.QLabel(addnewuser_groupBox)
-    #     fullname_label.setGeometry(QtCore.QRect(0, 30, 81, 21))
-    #     fullname_label.setLayoutDirection(QtCore.Qt.LeftToRight)
-    #     fullname_label.setText(("Full Name:"))
-    #     fullname_label.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter)
-    #     fullname_label.setObjectName(("fullname_label"))
-    #
-    #     self.fullname_lineEdit = QtWidgets.QLineEdit(addnewuser_groupBox)
-    #     self.fullname_lineEdit.setGeometry(QtCore.QRect(90, 30, 151, 20))
-    #     self.fullname_lineEdit.setPlaceholderText(("e.g \"John Doe\""))
-    #     self.fullname_lineEdit.setObjectName(("fullname_lineEdit"))
-    #
-    #     initials_label = QtWidgets.QLabel(addnewuser_groupBox)
-    #     initials_label.setGeometry(QtCore.QRect(0, 60, 81, 21))
-    #     initials_label.setLayoutDirection(QtCore.Qt.LeftToRight)
-    #     initials_label.setText(("Initials:"))
-    #     initials_label.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter)
-    #     initials_label.setObjectName(("initials_label"))
-    #
-    #     self.initials_lineEdit = QtWidgets.QLineEdit(addnewuser_groupBox)
-    #     self.initials_lineEdit.setGeometry(QtCore.QRect(90, 60, 151, 20))
-    #     self.initials_lineEdit.setText((""))
-    #     self.initials_lineEdit.setPlaceholderText(("e.g \"jd\" (must be unique)"))
-    #     self.initials_lineEdit.setObjectName(("initials_lineEdit"))
-    #
-    #     addnewuser_pushButton = QtWidgets.QPushButton(addnewuser_groupBox)
-    #     addnewuser_pushButton.setGeometry(QtCore.QRect(250, 30, 61, 51))
-    #     addnewuser_pushButton.setText(("Add"))
-    #     addnewuser_pushButton.setObjectName(("addnewuser_pushButton"))
-    #
-    #     deleteuser_groupBox = QtWidgets.QGroupBox(users_Dialog)
-    #     deleteuser_groupBox.setGeometry(QtCore.QRect(10, 110, 321, 51))
-    #     deleteuser_groupBox.setTitle(("Delete User"))
-    #     deleteuser_groupBox.setObjectName(("deleteuser_groupBox"))
-    #
-    #     self.selectuser_comboBox = QtWidgets.QComboBox(deleteuser_groupBox)
-    #     self.selectuser_comboBox.setGeometry(QtCore.QRect(10, 20, 231, 22))
-    #     self.selectuser_comboBox.setObjectName(("selectuser_comboBox"))
-    #
-    #     # userListSorted = sorted(self.manager._usersDict.keys())
-    #     userListSorted = self.manager.getUsers()
-    #     for num in range(len(userListSorted)):
-    #         self.selectuser_comboBox.addItem((userListSorted[num]))
-    #         self.selectuser_comboBox.setItemText(num, (userListSorted[num]))
-    #
-    #     deleteuser_pushButton = QtWidgets.QPushButton(deleteuser_groupBox)
-    #     deleteuser_pushButton.setGeometry(QtCore.QRect(250, 20, 61, 21))
-    #     deleteuser_pushButton.setText(("Delete"))
-    #     deleteuser_pushButton.setObjectName(("deleteuser_pushButton"))
-    #
-    #
-    #     def onAddUser():
-    #         ret, msg = self.manager.addUser(str(self.fullname_lineEdit.text()), str(self.initials_lineEdit.text()))
-    #         if ret == -1:
-    #             self.infoPop(textTitle="Cannot Add User", textHeader=msg)
-    #             return
-    #         self.manager.currentUser = self.fullname_lineEdit.text()
-    #         self._initUsers()
-    #         # userListSorted = sorted(self.manager._usersDict.keys())
-    #         userListSorted = self.manager.getUsers()
-    #         self.selectuser_comboBox.clear()
-    #         for num in range(len(userListSorted)):
-    #             self.selectuser_comboBox.addItem((userListSorted[num]))
-    #             self.selectuser_comboBox.setItemText(num, (userListSorted[num]))
-    #         self.statusBar().showMessage("Status | User Added => %s" % self.fullname_lineEdit.text())
-    #         self.fullname_lineEdit.setText("")
-    #         self.initials_lineEdit.setText("")
-    #
-    #         pass
-    #
-    #     def onRemoveUser():
-    #         self.manager.removeUser(str(self.selectuser_comboBox.currentText()))
-    #         # self.manager.currentUser = self.manager._usersDict.keys()[0]
-    #         self.manager.currentUser = self.manager.getUsers()[0]
-    #         self._initUsers()
-    #         # userListSorted = sorted(self.manager._usersDict.keys())
-    #         userListSorted = self.manager.getUsers()
-    #         self.selectuser_comboBox.clear()
-    #         for num in range(len(userListSorted)):
-    #             self.selectuser_comboBox.addItem((userListSorted[num]))
-    #             self.selectuser_comboBox.setItemText(num, (userListSorted[num]))
-    #         pass
-    #
-    #     addnewuser_pushButton.clicked.connect(onAddUser)
-    #     deleteuser_pushButton.clicked.connect(onRemoveUser)
-    #
-    #     self.fullname_lineEdit.textChanged.connect(
-    #         lambda: self._checkValidity(self.fullname_lineEdit.text(), addnewuser_pushButton,
-    #                                     self.fullname_lineEdit, allowSpaces=True))
-    #     self.initials_lineEdit.textChanged.connect(
-    #         lambda: self._checkValidity(self.initials_lineEdit.text(), addnewuser_pushButton,
-    #                                     self.initials_lineEdit))
-    #
-    #     users_Dialog.show()
-
     def addRemoveCategoryUI(self):
         # This method IS Software Specific
         manager = self._getManager()
@@ -2168,6 +1910,73 @@ class MainUI(QtWidgets.QMainWindow):
 
 
         categories_dialog.show()
+
+
+    def addRemoveCategoryNicknameUI(self):
+        # This method IS Software Specific
+        manager = self._getManager()
+        '''
+        passw, ok = QtWidgets.QInputDialog.getText(self, "Password Query",
+                                                   "Enter Admin Password:", QtWidgets.QLineEdit.Password)
+
+        if ok:
+            if manager.checkPassword(passw):
+                pass
+            else:
+                self.infoPop(textTitle="Incorrect Password", textHeader="The Password is invalid")
+                return
+        else:
+            return
+        '''
+        categoryNickname_dialog = QtWidgets.QDialog(parent=self)
+        categoryNickname_dialog.setModal(True)
+        categoryNickname_dialog.setObjectName(("category_nickname_Dialog"))
+        categoryNickname_dialog.setMinimumSize(QtCore.QSize(342, 177))
+        categoryNickname_dialog.setMaximumSize(QtCore.QSize(342, 177))
+        categoryNickname_dialog.setWindowTitle(("Add/Remove Category Nickname"))
+        categoryNickname_dialog.setFocus()
+
+        mainLayout = QtWidgets.QGridLayout()
+        category_label = QtWidgets.QLabel('Category')
+        nickname_label = QtWidgets.QLabel('Nickname')
+        self.category_comboBox = QtWidgets.QComboBox(categoryNickname_dialog)
+        self.nickname_comboBox = QtWidgets.QComboBox(categoryNickname_dialog)
+        add_btn = QtWidgets.QPushButton('Add')
+        del_btn = QtWidgets.QPushButton('Delete')
+
+        categoryNickname_dialog.setLayout(mainLayout)
+        mainLayout.addWidget(category_label, 0, 0)
+        mainLayout.addWidget(nickname_label, 0, 1)
+        mainLayout.addWidget(self.category_comboBox, 1, 0)
+        mainLayout.addWidget(self.nickname_comboBox, 1, 1)
+        mainLayout.addWidget(add_btn, 2, 0)
+        mainLayout.addWidget(del_btn, 2, 1)
+
+        categories = manager.getCategories()
+        self.category_comboBox.addItems(categories)
+        self.nickname_comboBox.addItems(manager.getCategoryNickName(categories[0]))
+        self.nickname_comboBox.setEditable(1)
+
+        def onAddNickname():
+            category = str(self.category_comboBox.currentText())
+            nickname = str(self.nickname_comboBox.currentText())
+            if nickname:
+                manager.addCategoryNickname(category, nickname)
+                self.nickname_comboBox.clear()
+                self.nickname_comboBox.addItems(manager.getCategoryNickName(category))
+
+        def onRemoveNickname():
+            category = str(self.category_comboBox.currentText())
+            nickname = str(self.nickname_comboBox.currentText())
+            if nickname:
+                manager.delCategoryNickname(category, nickname)
+                self.nickname_comboBox.clear()
+                self.nickname_comboBox.addItems(manager.getCategoryNickName(category))
+
+        add_btn.clicked.connect(onAddNickname)
+        del_btn.clicked.connect(onRemoveNickname)
+
+        categoryNickname_dialog.show()
 
     def projectSettingsUI(self):
         # This method is NOT Software Specific
@@ -2411,6 +2220,7 @@ class MainUI(QtWidgets.QMainWindow):
         makeReference_checkBox.setLayoutDirection(QtCore.Qt.LeftToRight)
         makeReference_checkBox.setCheckable(True)
         makeReference_checkBox.setText("Make Final")
+        makeReference_checkBox.setVisible(False)
         formLayout.setWidget(4, QtWidgets.QFormLayout.FieldRole, makeReference_checkBox)
 
         if BoilerDict["Environment"] == "Houdini" or BoilerDict["Environment"] == "Nuke":
@@ -2562,6 +2372,7 @@ class MainUI(QtWidgets.QMainWindow):
             radioButton.setText(fileFormat)
             formats_horizontalLayout.addWidget(radioButton)
             radioButtonList.append(radioButton)
+            radioButton.setVisible(False)
             if defaultSceneFormat is not None and fileFormat == defaultSceneFormat:
                 sceneFormatIdx = i
 
@@ -2579,6 +2390,7 @@ class MainUI(QtWidgets.QMainWindow):
         makeReference_checkBox.setLayoutDirection(QtCore.Qt.LeftToRight)
         makeReference_checkBox.setInputMethodHints(QtCore.Qt.ImhPreferUppercase)
         makeReference_checkBox.setText("Make Final")
+        makeReference_checkBox.setVisible(False)
         makeReference_checkBox.setCheckable(True)
 
         if BoilerDict["Environment"] == "Houdini" or BoilerDict["Environment"] == "Nuke":
@@ -2640,6 +2452,13 @@ class MainUI(QtWidgets.QMainWindow):
 
         def saveAsVersionCommand(versionUp=1):
             # TODO : ref
+            notes = str(notes_plainTextEdit.toPlainText()).strip()
+            if not notes:
+                noteMsg = 'Please fill the notes and try again'
+                self.queryPop(type="okCancel", textTitle="Empty Notes", textHeader=noteMsg)
+                # self.manager.errorLogger(title="Empty notes", errorMessage=noteMsg)
+                return
+
             checklist = self.manager.preSaveChecklist()
             for msg in checklist:
                 q = self.queryPop(type="yesNo", textTitle="Checklist", textHeader=msg)
@@ -2648,15 +2467,16 @@ class MainUI(QtWidgets.QMainWindow):
                 else:
                     self.manager.errorLogger(title="Disregarded warning", errorMessage=msg)
 
+            '''
             for button in radioButtonList:
                 if button.isChecked():
                     sceneFormat = button.text()
                     break
-
+            '''
             # print "sceneFormat", sceneFormat
             sceneInfo = self.manager.saveVersion(makeReference=makeReference_checkBox.checkState(),
-                                                 versionNotes=notes_plainTextEdit.toPlainText(),
-                                                 sceneFormat=sceneFormat,
+                                                 versionNotes=notes,
+                                                 sceneFormat=None,
                                                  versionUp=versionUp)
 
             if not sceneInfo == -1:
