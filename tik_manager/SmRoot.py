@@ -111,7 +111,6 @@ class RootManager(object):
         self._pathsDict["masterDir"] = os.path.normpath(os.path.join(self._pathsDict["projectDir"], "smDatabase"))
         self._folderCheck(self._pathsDict["masterDir"])
 
-
         self._pathsDict["databaseDir"] = os.path.normpath(os.path.join(self._pathsDict["masterDir"], _softwarePathsDict["databaseDir"]))
         self._folderCheck(self._pathsDict["databaseDir"])
 
@@ -119,6 +118,8 @@ class RootManager(object):
         self._folderCheck(self._pathsDict["scenesDir"])
 
         self._pathsDict["projectSettingsFile"] = os.path.normpath(os.path.join(self._pathsDict["masterDir"], "projectSettings.json"))
+        self._pathsDict["projectDirectoryDatabase"] = os.path.normpath(os.path.join(self._pathsDict["masterDir"], "projectDirectoryDatabase.json"))
+
         # self._pathsDict["subprojectsFile"] = os.path.normpath(os.path.join(self._pathsDict["databaseDir"], "subPdata.json"))
         self._pathsDict["subprojectsFile"] = os.path.normpath(os.path.join(self._pathsDict["masterDir"], "subPdata.json"))
         self._pathsDict["categoriesFile"] = os.path.normpath(os.path.join(self._pathsDict["databaseDir"], _softwarePathsDict["categoriesFile"]))
@@ -140,7 +141,7 @@ class RootManager(object):
 
         self._pathsDict["softwareDatabase"] = os.path.normpath(os.path.join(self._pathsDict["generalSettingsDir"], "softwareDatabase.json"))
         self._pathsDict["sceneManagerDefaults"] = os.path.normpath(os.path.join(self._pathsDict["generalSettingsDir"], "sceneManagerDefaults.json"))
-        self._pathsDict["projectDirectoryDatabase"] = os.path.normpath(os.path.join(self._pathsDict["generalSettingsDir"], "projectDirectoryDatabase.json"))
+        self._pathsDict["generalProjectDirectoryDatabase"] = os.path.normpath(os.path.join(self._pathsDict["generalSettingsDir"], "projectDirectoryDatabase.json"))
 
     def getSoftwarePaths(self):
         """This method must be overridden to return the software currently working on"""
@@ -165,8 +166,9 @@ class RootManager(object):
 
         # defaults dictionary holding "defaultCategories", "defaultPreviewSettings", "defaultUsers"
         self._sceneManagerDefaults = self._loadJson(self._pathsDict["sceneManagerDefaults"])
-        self._projectDirectoryDefaultInfo = {}
-        if os.path.isfile(self._pathsDict["projectDirectoryDatabase"]):
+        self._projectDirectoryDefaultInfo = self._loadProjectDirectoryInfo()
+        if not os.path.isfile(self._pathsDict["projectDirectoryDatabase"]):
+            
             self._projectDirectoryDefaultInfo = self._loadJson(
                 self._pathsDict["projectDirectoryDatabase"])
 
@@ -1951,15 +1953,15 @@ Elapsed Time:{6}
     def checkProjectFolder(self):
         projSetting = self.loadProjectSettings()
         projectType = projSetting['ProjectType']
-        self._projectDirectoryDefaultInfo = self._loadJson(
-            self._pathsDict["projectDirectoryDatabase"])
-
-        defaultProjectDirs = self.getDefaultProjectDirectory()
-        projDirs = self._projectDirectoryDefaultInfo.get(
-            projectType, defaultProjectDirs)
-
         resolvedPath = self.getProjectDir()
-        for projDir in projDirs:
-            outDir = os.path.join(resolvedPath, projDir)
-            if not os.path.isdir(outDir):
-                os.makedirs(outDir)
+        self.createProjectDirectory(resolvedPath, projectType)
+
+    def _loadProjectDirectoryInfo(self):
+        info = {}
+        if not os.path.isfile(self._pathsDict["projectDirectoryDatabase"]):
+            shutil.copy(self._pathsDict["generalProjectDirectoryDatabase"],
+                        self._pathsDict["projectDirectoryDatabase"])
+            
+        info = self._loadJson(self._pathsDict["projectDirectoryDatabase"])
+
+        return info

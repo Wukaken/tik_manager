@@ -979,7 +979,23 @@ class MainUI(QtWidgets.QMainWindow):
         self.createproject_Dialog.show()
 
     def checkProjectFolder(self):
+        passw, ok = QtWidgets.QInputDialog.getText(
+            self, "Password Query",
+            "Enter Admin Password:", QtWidgets.QLineEdit.Password)
+
+        if ok:
+            if self.manager.checkPassword(passw):
+                pass
+            else:
+                self.infoPop(textTitle="Incorrect Password",
+                             textHeader="The Password is invalid")
+                return
+        else:
+            return
+        
         self.manager.checkProjectFolder()
+        self.infoPop(textTitle="Check Project Directory",
+                     textHeader='All Project Folders Have been created!!')
 
     def setProjectUI(self):
 
