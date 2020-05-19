@@ -1963,5 +1963,21 @@ Elapsed Time:{6}
                         self._pathsDict["projectDirectoryDatabase"])
             
         info = self._loadJson(self._pathsDict["projectDirectoryDatabase"])
-
         return info
+
+    def modifyCategoryDetailInfo(self, category, nicknamesStr, pathStr):
+        parts = nicknamesStr.split()
+        nicknames = []
+        for part in parts:
+            name = part.strip()
+            if name:
+                nicknames.append(name)
+
+        if not nicknames:
+            nicknames = [category]
+
+        path = pathStr
+        if not pathStr:
+            path = 'scenes/%s' % category
+
+        return

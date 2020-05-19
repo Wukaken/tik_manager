@@ -517,7 +517,7 @@ class MainUI(QtWidgets.QMainWindow):
         # add_remove_users_fm = QtWidgets.QAction("&Add/Remove Users", self)
 
         add_remove_categories_fm = QtWidgets.QAction("&Add/Remove Categories", self)
-        add_remove_category_nickname_fm = QtWidgets.QAction("&Add/Remove Category nicknames", self)
+        add_remove_category_settings_fm = QtWidgets.QAction("&Add/Remove Category Settings", self)
         pb_settings_fm = QtWidgets.QAction("&Playblast Settings", self)
 
         projectSettings_fm = QtWidgets.QAction("&Project Settings", self)
@@ -552,7 +552,7 @@ class MainUI(QtWidgets.QMainWindow):
         #settings
         # self.fileMenu.addAction(add_remove_users_fm)
         self.fileMenu.addAction(add_remove_categories_fm)
-        self.fileMenu.addAction(add_remove_category_nickname_fm)
+        self.fileMenu.addAction(add_remove_category_settings_fm)
         self.fileMenu.addAction(pb_settings_fm)
         self.fileMenu.addAction(projectSettings_fm)
         self.fileMenu.addAction(changeAdminPass_fm)
@@ -662,7 +662,7 @@ class MainUI(QtWidgets.QMainWindow):
         pb_settings_fm.triggered.connect(self.onPbSettings)
 
         add_remove_categories_fm.triggered.connect(self.addRemoveCategoryUI)
-        add_remove_category_nickname_fm.triggered.connect(self.addRemoveCategoryNicknameUI)
+        add_remove_category_settings_fm.triggered.connect(self.addRemoveCategorySettingsUI)
 
         projectSettings_fm.triggered.connect(self.projectSettingsUI)
 
@@ -1927,8 +1927,7 @@ class MainUI(QtWidgets.QMainWindow):
 
         categories_dialog.show()
 
-
-    def addRemoveCategoryNicknameUI(self):
+    def addRemoveCategorySettingsUI(self):
         # This method IS Software Specific
         manager = self._getManager()
         '''
@@ -1944,55 +1943,60 @@ class MainUI(QtWidgets.QMainWindow):
         else:
             return
         '''
-        categoryNickname_dialog = QtWidgets.QDialog(parent=self)
-        categoryNickname_dialog.setModal(True)
-        categoryNickname_dialog.setObjectName(("category_nickname_Dialog"))
-        categoryNickname_dialog.setMinimumSize(QtCore.QSize(342, 177))
-        categoryNickname_dialog.setMaximumSize(QtCore.QSize(342, 177))
-        categoryNickname_dialog.setWindowTitle(("Add/Remove Category Nickname"))
-        categoryNickname_dialog.setFocus()
+        categorySettings_dialog = QtWidgets.QDialog(parent=self)
+        categorySettings_dialog.setModal(True)
+        categorySettings_dialog.setObjectName(("category_nickname_Dialog"))
+        categorySettings_dialog.setMinimumSize(QtCore.QSize(342, 177))
+        categorySettings_dialog.setMaximumSize(QtCore.QSize(342, 177))
+        categorySettings_dialog.setWindowTitle(("Add/Remove Category Nickname"))
+        categorySettings_dialog.setFocus()
 
         mainLayout = QtWidgets.QGridLayout()
         category_label = QtWidgets.QLabel('Category')
-        nickname_label = QtWidgets.QLabel('Nickname')
-        self.category_comboBox = QtWidgets.QComboBox(categoryNickname_dialog)
-        self.nickname_comboBox = QtWidgets.QComboBox(categoryNickname_dialog)
-        add_btn = QtWidgets.QPushButton('Add')
-        del_btn = QtWidgets.QPushButton('Delete')
+        nickname_label = QtWidgets.QLabel('Nicknames')
+        path_label = QtWidgets.QLabel('StorePath')
+        self.category_comboBox = QtWidgets.QComboBox(categorySettings_dialog)
+        self.nickname_lineEdit = QtWidgets.QLineEdit(categorySettings_dialog)
+        self.path_lineEdit = QtWidgets.QLineEdit(categorySettings_dialog)
+        add_btn = QtWidgets.QPushButton('Modify/Add')
+        close_btn = QtWidgets.QPushButton('Close')
 
-        categoryNickname_dialog.setLayout(mainLayout)
+        categorySettings_dialog.setLayout(mainLayout)
         mainLayout.addWidget(category_label, 0, 0)
-        mainLayout.addWidget(nickname_label, 0, 1)
-        mainLayout.addWidget(self.category_comboBox, 1, 0)
-        mainLayout.addWidget(self.nickname_comboBox, 1, 1)
-        mainLayout.addWidget(add_btn, 2, 0)
-        mainLayout.addWidget(del_btn, 2, 1)
+        mainLayout.addWidget(self.category_comboBox, 0, 1)
+        mainLayout.addWidget(nickname_label, 1, 0)
+        mainLayout.addWidget(self.nickname_lineEdit, 1, 1)
+        mainLayout.addWidget(path_label, 2, 0)
+        mainLayout.addWidget(self.path_lineEdit, 2, 1)
+        mainLayout.addWidget(add_btn, 3, 0)
+        mainLayout.addWidget(close_btn, 3, 1)
 
         categories = manager.getCategories()
         self.category_comboBox.addItems(categories)
-        self.nickname_comboBox.addItems(manager.getCategoryNickName(categories[0]))
-        self.nickname_comboBox.setEditable(1)
 
-        def onAddNickname():
+        def setCategoryInfo():
             category = str(self.category_comboBox.currentText())
-            nickname = str(self.nickname_comboBox.currentText())
-            if nickname:
-                manager.addCategoryNickname(category, nickname)
-                self.nickname_comboBox.clear()
-                self.nickname_comboBox.addItems(manager.getCategoryNickName(category))
+            nicknamesStr = str(self.nickname_lineEdit.currentText())
+            pathStr = str(self.path_lineEdit.currentText())
 
-        def onRemoveNickname():
+            manager.modifyCategoryDetailInfo(category, nicknamesStr, pathStr)
+
+        def setCategoryUiInfo():
             category = str(self.category_comboBox.currentText())
-            nickname = str(self.nickname_comboBox.currentText())
-            if nickname:
-                manager.delCategoryNickname(category, nickname)
-                self.nickname_comboBox.clear()
-                self.nickname_comboBox.addItems(manager.getCategoryNickName(category))
+            info = manager.getCategoryDetailInfo(category)
+            nicknames = info['nicknames']
+            nicknamesStr = ' '.join(nicknames)
+            pathStr = info['path']
 
-        add_btn.clicked.connect(onAddNickname)
-        del_btn.clicked.connect(onRemoveNickname)
+            self.nickname_lineEdit.setText(nicknamesStr)
+            self.path_lineEdit.setText(pathStr)
 
-        categoryNickname_dialog.show()
+        setCategoryUiInfo()
+        self.category_comboBox.currentIndexChanged(setCategoryUiInfo)
+
+        add_btn.clicked.connect(setCategoryInfo)
+        close_btn.clicked.connect(categorySettings_dialog.close)
+        categorySettings_dialog.show()
 
     def projectSettingsUI(self):
         # This method is NOT Software Specific
