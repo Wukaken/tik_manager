@@ -119,18 +119,13 @@ class RootManager(object):
 
         self._pathsDict["projectSettingsFile"] = os.path.normpath(os.path.join(self._pathsDict["masterDir"], "projectSettings.json"))
         self._pathsDict["projectDirectoryDatabase"] = os.path.normpath(os.path.join(self._pathsDict["masterDir"], "projectDirectoryDatabase.json"))
+        self._pathsDict["projectCategoryDetailInfo"] = os.path.normpath(os.path.join(self._pathsDict["databaseDir"], "projectCategoryDetailInfo.json"))
 
         # self._pathsDict["subprojectsFile"] = os.path.normpath(os.path.join(self._pathsDict["databaseDir"], "subPdata.json"))
         self._pathsDict["subprojectsFile"] = os.path.normpath(os.path.join(self._pathsDict["masterDir"], "subPdata.json"))
         self._pathsDict["categoriesFile"] = os.path.normpath(os.path.join(self._pathsDict["databaseDir"], _softwarePathsDict["categoriesFile"]))
 
-        parts = os.path.splitext(_softwarePathsDict["categoriesFile"])
-        categoriesNickNameFileName = _softwarePathsDict.get(
-            "categoriesNickNameFile",
-            "%sNickName%s" % (parts[0], parts[1]))
-        self._pathsDict["categoriesNickNameFile"] = os.path.normpath(os.path.join(self._pathsDict["databaseDir"], categoriesNickNameFileName))
-
-        self._pathsDict["previewsDir"] = os.path.normpath(os.path.join(self._pathsDict["projectDir"], "Playblasts", _softwarePathsDict["niceName"])) # dont change
+        self._pathsDict["previewsDir"] = os.path.normpath(os.path.join(self._pathsDict["projectDir"], "Playblasts", _softwarePathsDict["niceName"]))  # dont change
         self._folderCheck(self._pathsDict["previewsDir"])
 
         self._pathsDict["pbSettingsFile"] = os.path.normpath(os.path.join(self._pathsDict["previewsDir"], _softwarePathsDict["pbSettingsFile"]))
@@ -142,6 +137,7 @@ class RootManager(object):
         self._pathsDict["softwareDatabase"] = os.path.normpath(os.path.join(self._pathsDict["generalSettingsDir"], "softwareDatabase.json"))
         self._pathsDict["sceneManagerDefaults"] = os.path.normpath(os.path.join(self._pathsDict["generalSettingsDir"], "sceneManagerDefaults.json"))
         self._pathsDict["generalProjectDirectoryDatabase"] = os.path.normpath(os.path.join(self._pathsDict["generalSettingsDir"], "projectDirectoryDatabase.json"))
+        self._pathsDict["generalProjectCategoryDetailInfo"] = os.path.normpath(os.path.join(self._pathsDict["generalSettingsDir"], "projectCategoryDetailInfo.json"))
 
     def getSoftwarePaths(self):
         """This method must be overridden to return the software currently working on"""
@@ -177,6 +173,7 @@ class RootManager(object):
         self._usersDict = self._loadUsers()
         self._currentsDict = self._loadUserPrefs()
         self._subProjectsList = self._loadSubprojects()
+        self._categoryDetailInfo = self._loadCategoryDetailInfo()
 
         # unsaved DB
         self._baseScenesInCategory = []
@@ -1976,8 +1973,64 @@ Elapsed Time:{6}
         if not nicknames:
             nicknames = [category]
 
+        oriSep = '/'
+        toSep = '\\'
+        if not os.path.sep == '\\':
+            oriSep = '\\'
+            toSep = '/'
+            
         path = pathStr
         if not pathStr:
-            path = 'scenes/%s' % category
+            path = 'scenes%s%s' % (os.path.sep, category)
+        elif path.startswith(self.projectDir):
+            path = os.path.relpath(pathStr, start=self.projectDir)
 
-        return
+        outDir = os.path.join(self.projectDir, path)
+        if not os.path.isdir(outDir):
+            os.makedirs(outDir)
+
+        path = path.replace(oriSep, toSep)
+        categoryInfo = {category: {'nicknames': nicknames,
+                                   'path': path}}
+        self._categoryDetailInfo.update(categoryInfo)
+        self._dumpJson(self._categoryDetailInfo,
+                       self._pathsDict['projectCategoryDetailInfo'])
+
+        self.addWorkspaceSetting(path)
+
+    def _loadCategoryDetailInfo(self):
+        if not os.path.isfile(self._pathsDict["projectCategoryDetailInfo"]) and \
+           os.path.isfile(self._pathsDict["generalProjectCategoryDetailInfo"]):
+            shutil.copy(self._pathsDict["generalProjectCategoryDetailInfo"],
+                        self._pathsDict["projectCategoryDetailInfo"])
+            
+        info = self._loadJson(self._pathsDict["projectCategoryDetailInfo"])
+        if not info:
+            info = {}
+        return info
+
+    def getCategoryDetailInfo(self, category):
+        curInfo = self._categoryDetailInfo.get(category)
+        if not curInfo:
+            self.modifyCategoryDetailInfo(category, '', '')
+
+        curInfo = self._categoryDetailInfo.get(category)
+        return curInfo
+
+    def addWorkspaceSetting(self, path):
+        wsFile = os.path.join(self.projectDir, "workspace.mel")
+        rId = open(wsFile, 'rb')
+        tem = rId.readlines()
+        rId.close()
+
+        addTest = 1
+        outPath = path.replace('\\', '/')
+        for t in tem:
+            if '"%s"' % outPath in t:
+                addTest = 0
+                break
+
+        if addTest:
+            rId = open(wsFile, 'ab')
+            rId.write('workspace -fr "scene" "%s";\n' % outPath)
+            rId.close()

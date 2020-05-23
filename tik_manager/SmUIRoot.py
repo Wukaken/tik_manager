@@ -662,7 +662,7 @@ class MainUI(QtWidgets.QMainWindow):
         pb_settings_fm.triggered.connect(self.onPbSettings)
 
         add_remove_categories_fm.triggered.connect(self.addRemoveCategoryUI)
-        add_remove_category_settings_fm.triggered.connect(self.addRemoveCategorySettingsUI)
+        add_remove_category_settings_fm.triggered.connect(self.modifyCategorySettingsUI)
 
         projectSettings_fm.triggered.connect(self.projectSettingsUI)
 
@@ -1927,7 +1927,7 @@ class MainUI(QtWidgets.QMainWindow):
 
         categories_dialog.show()
 
-    def addRemoveCategorySettingsUI(self):
+    def modifyCategorySettingsUI(self):
         # This method IS Software Specific
         manager = self._getManager()
         '''
@@ -1973,6 +1973,7 @@ class MainUI(QtWidgets.QMainWindow):
 
         categories = manager.getCategories()
         self.category_comboBox.addItems(categories)
+        self.category_comboBox.setCurrentIndex(self.manager.currentTabIndex)
 
         def setCategoryInfo():
             category = str(self.category_comboBox.currentText())
@@ -1980,6 +1981,7 @@ class MainUI(QtWidgets.QMainWindow):
             pathStr = str(self.path_lineEdit.currentText())
 
             manager.modifyCategoryDetailInfo(category, nicknamesStr, pathStr)
+            categorySettings_dialog.close()
 
         def setCategoryUiInfo():
             category = str(self.category_comboBox.currentText())
@@ -1992,7 +1994,7 @@ class MainUI(QtWidgets.QMainWindow):
             self.path_lineEdit.setText(pathStr)
 
         setCategoryUiInfo()
-        self.category_comboBox.currentIndexChanged(setCategoryUiInfo)
+        self.category_comboBox.currentIndexChanged.connect(setCategoryUiInfo)
 
         add_btn.clicked.connect(setCategoryInfo)
         close_btn.clicked.connect(categorySettings_dialog.close)
