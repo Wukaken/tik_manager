@@ -1977,8 +1977,8 @@ class MainUI(QtWidgets.QMainWindow):
 
         def setCategoryInfo():
             category = str(self.category_comboBox.currentText())
-            nicknamesStr = str(self.nickname_lineEdit.currentText())
-            pathStr = str(self.path_lineEdit.currentText())
+            nicknamesStr = str(self.nickname_lineEdit.text())
+            pathStr = str(self.path_lineEdit.text())
 
             manager.modifyCategoryDetailInfo(category, nicknamesStr, pathStr)
             categorySettings_dialog.close()
@@ -2238,6 +2238,17 @@ class MainUI(QtWidgets.QMainWindow):
         category_comboBox.setCurrentIndex(self.category_tabWidget.currentIndex())
         formLayout.setWidget(2, QtWidgets.QFormLayout.FieldRole, category_comboBox)
 
+        categoryNickname_label = QtWidgets.QLabel(verticalLayoutWidget_2)
+        categoryNickname_label.setFrameShape(QtWidgets.QFrame.StyledPanel)
+        categoryNickname_label.setText(("Nickname    "))
+        formLayout.setWidget(3, QtWidgets.QFormLayout.LabelRole,
+                             categoryNickname_label)
+
+        categoryNickname_comboBox = QtWidgets.QComboBox(verticalLayoutWidget_2)
+        categoryNickname_comboBox.setMinimumSize(QtCore.QSize(150, 20))
+        # category_comboBox.addItems((self.manager._categories))
+        formLayout.setWidget(3, QtWidgets.QFormLayout.FieldRole, categoryNickname_comboBox)     
+
         makeReference_checkBox = QtWidgets.QCheckBox(verticalLayoutWidget_2)
         makeReference_checkBox.setLayoutDirection(QtCore.Qt.LeftToRight)
         makeReference_checkBox.setCheckable(True)
@@ -2311,6 +2322,13 @@ class MainUI(QtWidgets.QMainWindow):
                 self.queryPop(type="okCancel", textTitle="Error Empty File Name", textHeader=msg)
                 return
 
+            notes = str(notes_plainTextEdit.toPlainText()).strip()
+            if not notes:
+                noteMsg = 'Please fill the notes and try again'
+                self.queryPop(type="okCancel", textTitle="Empty Notes", textHeader=noteMsg)
+                # self.manager.errorLogger(title="Empty notes", errorMessage=noteMsg)
+                return
+
             checklist = self.manager.preSaveChecklist()
             for msg in checklist:
                 q = self.queryPop(type="yesNo", textTitle="Checklist", textHeader=msg)
@@ -2320,6 +2338,7 @@ class MainUI(QtWidgets.QMainWindow):
                     self.manager.errorLogger(title="Disregarded warning", errorMessage=msg)
 
             category = category_comboBox.currentText()
+            nickname = categoryNickname_comboBox.currentText()
             subIndex = subProject_comboBox.currentIndex()
             makeReference = makeReference_checkBox.checkState()
             notes = notes_plainTextEdit.toPlainText()
@@ -2329,7 +2348,7 @@ class MainUI(QtWidgets.QMainWindow):
                     break
 
             AssertionError(sceneFormat)
-            state = self.manager.saveBaseScene(category, name, subIndex, makeReference, notes, sceneFormat)
+            state = self.manager.saveBaseScene(category, nickname, name, subIndex, makeReference, notes, sceneFormat)
             if state[0] != -1:
                 self.populateBaseScenes()
                 self.manager.getOpenSceneInfo()
@@ -2338,20 +2357,26 @@ class MainUI(QtWidgets.QMainWindow):
             else:
                 pass
 
+        def modifyCategoryNicknames():
+            category = category_comboBox.currentText()
+            nicknames = self.manager.genCategoryNicknames(category)
+            categoryNickname_comboBox.clear()
+            categoryNickname_comboBox.addItems(nicknames)
+
         # SIGNALS
         # -------
         lineEdit.textChanged.connect(
             lambda: self._checkValidity(lineEdit.text(), buttonBox, lineEdit))
 
+        modifyCategoryNicknames()
         buttonBox.accepted.connect(saveCommand)
-
+        category_comboBox.currentIndexChanged.connect(modifyCategoryNicknames)
 
         # self.sd_buttonBox.accepted.connect(self.save_Dialog.accept)
         buttonBox.rejected.connect(saveBaseScene_Dialog.reject)
         # QtCore.QMetaObject.connectSlotsByName(self.save_Dialog)
 
         saveBaseScene_Dialog.show()
-
 
     def saveAsVersionDialog(self, versionUp=1):
         # This method IS Software Specific

@@ -164,7 +164,6 @@ class RootManager(object):
         self._sceneManagerDefaults = self._loadJson(self._pathsDict["sceneManagerDefaults"])
         self._projectDirectoryDefaultInfo = self._loadProjectDirectoryInfo()
         if not os.path.isfile(self._pathsDict["projectDirectoryDatabase"]):
-            
             self._projectDirectoryDefaultInfo = self._loadJson(
                 self._pathsDict["projectDirectoryDatabase"])
 
@@ -575,12 +574,26 @@ class RootManager(object):
         dbDir = self._pathsDict["databaseDir"]
         if not self._pathsDict['sceneFile'].startswith(self.projectDir):
             return None
-        
-        resPart = os.path.relpath(self._pathsDict["sceneFile"], start=self.projectDir)
-        rResPart = resPart.split(os.path.sep, 1)[1]
-        jsonPart = '%s.json' % os.path.dirname(rResPart)
-        jsonFile = os.path.normpath(os.path.join(dbDir, jsonPart))
 
+        resPart = os.path.relpath(self._pathsDict["sceneFile"], start=self.projectDir)
+        categories = self.getCategories()
+        category = ''
+        resPartTem = resPart.replace('\\', '/')
+        categoryPath = ''
+        for categoryTem in categories:
+            categoryPathTem = self.genCategoryOutputDir(categoryTem).replace('\\', '/')
+            if resPartTem.startswith('%s/' % categoryPathTem):
+                category = categoryTem
+                categoryPath = self.genCategoryOutputDir(categoryTem)
+                break
+
+        if not category:
+            return None
+
+        realResPart = os.path.relpath(resPart, start=categoryPath)
+        rResPart = realResPart.rsplit(os.path.sep, 1)[0]
+        jsonPart = '%s.json' % rResPart
+        jsonFile = os.path.normpath(os.path.join(dbDir, category, jsonPart))
         if os.path.isfile(jsonFile):
             jsonInfo = self._loadJson(jsonFile)
 
@@ -1746,10 +1759,11 @@ Elapsed Time:{6}
         if checkUniqueBaseName:
             self.checkBaseNameUnique(categoryName, baseName, subProjectIndex=0)
 
-        scenesDir = self._pathsDict["scenesDir"]
+        # scenesDir = self._pathsDict["scenesDir"]
+        categoryDir = self.genCategoryOutputDir(categoryName)
         subProject = self.getSubProject(subProjectIndex)
         outFolder = os.path.normpath(os.path.join(
-            scenesDir, categoryName, subProject, baseName))
+            self.projectDir, categoryDir, subProject, baseName))
         self._folderCheck(outFolder)
         return outFolder
 
@@ -1789,13 +1803,14 @@ Elapsed Time:{6}
             baseName, version, subVersion)
         return thumbName
 
-    def getOutputFileInfo(self, categoryName, baseName, version, subVersion,
-                          sceneFormat, checkUniqueBaseName=0, subProjectIndex=0,
-                          makeReference=True, *args, **kwargs):
+    def getOutputFileInfo(self, categoryName, nickname, baseName, version,
+                          subVersion, sceneFormat, checkUniqueBaseName=0,
+                          subProjectIndex=0, makeReference=True,
+                          *args, **kwargs):
         sceneDir = self.getOutputSceneFolder(
             categoryName, baseName, subProjectIndex=subProjectIndex,
             checkUniqueBaseName=checkUniqueBaseName)
-        sceneName = self.getOutputFileName(baseName, categoryName,
+        sceneName = self.getOutputFileName(baseName, nickname,
                                            version, subVersion, sceneFormat)
         sceneFile = os.path.normpath(os.path.join(sceneDir, sceneName))
 
@@ -1851,8 +1866,9 @@ Elapsed Time:{6}
 
         baseName = jsonInfo['Name']
         category = jsonInfo['Category']
+        nickname = jsonInfo['Nickname']
         outName = self.getOutputFileName(
-            baseName, category, version, subVersion, fileFormat)
+            baseName, nickname, version, subVersion, fileFormat)
 
         relPath = jsonInfo["Path"]
         relSceneFile = os.path.join(relPath, outName)
@@ -1876,6 +1892,7 @@ Elapsed Time:{6}
 
         info = {'sceneDir': sceneDir,
                 'sceneFile': sceneFile,
+                'nickname': nickname,
                 'jsonFile': jsonFile,
                 'thumbFile': thumbFile,
                 'referenceFile': referenceFile,
@@ -2034,3 +2051,23 @@ Elapsed Time:{6}
             rId = open(wsFile, 'ab')
             rId.write('workspace -fr "scene" "%s";\n' % outPath)
             rId.close()
+
+    def genCategoryOutputDir(self, category):
+        info = self._categoryDetailInfo.get(category)
+        outDir = ''
+        if not info:
+            outDir = 'scenes%s%s' % (os.path.sep, category)
+        else:
+            outDir = info['path']
+        
+        return outDir
+
+    def genCategoryNicknames(self, category):
+        info = self._categoryDetailInfo.get(category)
+        nicknames = []
+        if not info:
+            nicknames = [category]
+        else:
+            nicknames = info['nicknames']
+        
+        return nicknames

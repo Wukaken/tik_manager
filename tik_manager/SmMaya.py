@@ -153,7 +153,7 @@ class MayaManager(RootManager):
         mel.eval(command)
         self.projectDir = self.getProjectDir()
 
-    def saveBaseScene(self, categoryName, baseName, subProjectIndex=0, makeReference=True, versionNotes="", sceneFormat="mb", *args, **kwargs):
+    def saveBaseScene(self, categoryName, nickname, baseName, subProjectIndex=0, makeReference=True, versionNotes="", sceneFormat="mb", *args, **kwargs):
         """
         Saves the scene with formatted name and creates a json file for the scene
         Args:
@@ -177,8 +177,9 @@ class MayaManager(RootManager):
         completeNote = "[%s] on %s\n%s\n" % (self.currentUser, now, versionNotes)
 
         info = self.getOutputFileInfo(
-            categoryName, baseName, 1, 1, sceneFormat, checkUniqueBaseName=1,
-            subProjectIndex=subProjectIndex, makeReference=makeReference)
+            categoryName, nickname, baseName, 1, 1, sceneFormat,
+            checkUniqueBaseName=1, subProjectIndex=subProjectIndex,
+            makeReference=makeReference)
 
         sceneDir = info['sceneDir']
         sceneFile = info['sceneFile']
@@ -198,6 +199,7 @@ class MayaManager(RootManager):
         jsonInfo["ID"] = "SmMayaV02_sceneFile"
         jsonInfo["MayaVersion"] = cmds.about(q=True, api=True)
         jsonInfo["Name"] = baseName
+        jsonInfo["Nickname"] = nickname
         jsonInfo["Path"] = os.path.relpath(sceneDir, start=projectPath)
         jsonInfo["Category"] = categoryName
         jsonInfo["Creator"] = self.currentUser
@@ -209,8 +211,9 @@ class MayaManager(RootManager):
             
         jsonInfo["ReferencedVersion"] = referenceVersion
         jsonInfo["ReferencedSubVersion"] = referenceSubVersion
-        jsonInfo["Versions"] = [ # PATH => Notes => User Initials => Machine ID => Playblast => Thumbnail
+        jsonInfo["Versions"] = [  # PATH => Notes => User Initials => Machine ID => Playblast => Thumbnail
             {"RelativePath": os.path.relpath(sceneFile, start=projectPath),
+             "Nickname": nickname,
              "Note": completeNote,
              "User": self._usersDict[self.currentUser],
              "Workstation": socket.gethostname(),
@@ -255,6 +258,7 @@ class MayaManager(RootManager):
                                                    makeReference=makeReference)
             sceneFile = info['sceneFile']
             thumbFile = info['thumbFile']
+            nickname = info['nickname']
             referenceFile = info['referenceFile']
             referenceVersion = info['referenceVersion']
             referenceSubVersion = info['referenceSubVersion']
@@ -266,6 +270,7 @@ class MayaManager(RootManager):
             jsonInfo = self._loadJson(jsonFile)
             jsonInfo["Versions"].append(
                 {"RelativePath": os.path.relpath(sceneFile, start=projectPath),
+                 "Nickname": nickname,
                  "Note": completeNote,
                  "User": self._usersDict[self.currentUser],
                  "Workstation": socket.gethostname(),
@@ -896,8 +901,3 @@ class MainUI(baseUI):
         imanager = QtWidgets.QAction("&Image Manager", self)
         self.toolsMenu.addAction(imanager)
         imanager.triggered.connect(ImMaya.MainUI)
-
-
-
-
-
