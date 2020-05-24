@@ -1930,7 +1930,7 @@ class MainUI(QtWidgets.QMainWindow):
     def modifyCategorySettingsUI(self):
         # This method IS Software Specific
         manager = self._getManager()
-        '''
+
         passw, ok = QtWidgets.QInputDialog.getText(self, "Password Query",
                                                    "Enter Admin Password:", QtWidgets.QLineEdit.Password)
 
@@ -1942,7 +1942,7 @@ class MainUI(QtWidgets.QMainWindow):
                 return
         else:
             return
-        '''
+
         categorySettings_dialog = QtWidgets.QDialog(parent=self)
         categorySettings_dialog.setModal(True)
         categorySettings_dialog.setObjectName(("category_nickname_Dialog"))
@@ -2284,7 +2284,7 @@ class MainUI(QtWidgets.QMainWindow):
         spacerItem = QtWidgets.QSpacerItem(80, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
 
         formats_horizontalLayout.addItem(spacerItem)
-        formLayout.setLayout(3, QtWidgets.QFormLayout.FieldRole, formats_horizontalLayout)
+        formLayout.setLayout(5, QtWidgets.QFormLayout.FieldRole, formats_horizontalLayout)
         left_verticalLayout.addLayout(formLayout)
 
         buttonBox = QtWidgets.QDialogButtonBox(verticalLayoutWidget_2)
