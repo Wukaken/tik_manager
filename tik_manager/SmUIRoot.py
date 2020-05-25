@@ -186,7 +186,7 @@ class MainUI(QtWidgets.QMainWindow):
     def buildUI(self):
         self.buildUIElements()
         self.buildLayout()
-        #self.buildConnection()
+        self.buildConnection()
     
     def buildUIElements(self):
         self.buildMainUIElements()
@@ -203,8 +203,8 @@ class MainUI(QtWidgets.QMainWindow):
         self.buildTopLeftLayout()
         self.buildBottomLeftLayout()
         self.buildTopRightLayout()
-        #self.buildBottomRightLayout()
-        #self.buildBottomLayout()
+        self.buildBottomRightLayout()
+        self.buildBottomLayout()
 
     def buildMainUIElements(self):
         self.centralwidget = QtWidgets.QWidget(self)
@@ -296,6 +296,8 @@ class MainUI(QtWidgets.QMainWindow):
         helpMenu.addAction(onlineHelp_mi)
         helpMenu.addAction(checkVersion_mi)
 
+        self.menubar.addMenu("User: %s" % self.manager.currentUser)
+
     def buildBottomUIElements(self):
         self.statusbar = QtWidgets.QStatusBar(self)
         self.statusbar.setObjectName(("statusbar"))
@@ -356,6 +358,7 @@ class MainUI(QtWidgets.QMainWindow):
         self.addSubProject_pushButton.setMinimumSize(QtCore.QSize(40, 30))
         self.addSubProject_pushButton.setMaximumSize(QtCore.QSize(40, 30))
         self.addSubProject_pushButton.setText(("Add"))
+        self.addSubProject_pushButton.setStyleSheet("color: red")
         self.addSubProject_pushButton.setObjectName(("addSubProject_pushButton"))
 
         ''''''''''''''''''''''''''''''''''''
@@ -376,23 +379,29 @@ class MainUI(QtWidgets.QMainWindow):
 
     def buildBottomLeftUIElements(self):
         self.category_tabWidget = QtWidgets.QTabWidget(self.centralwidget)
-        self.category_tabWidget.setMinimumSize(QtCore.QSize(200, 400))
+        self.category_tabWidget.setMaximumSize(QtCore.QSize(1600, 22))
         self.category_tabWidget.setTabPosition(QtWidgets.QTabWidget.North)
         self.category_tabWidget.setElideMode(QtCore.Qt.ElideNone)
         self.category_tabWidget.setUsesScrollButtons(False)
         self.category_tabWidget.setObjectName(("tabWidget"))
 
+        self.scenes_listWidget = QtWidgets.QListWidget(self.centralwidget)
+        self.scenes_listWidget.setObjectName(("listWidget"))
+
     def buildTopRightUIElements(self):
         self.saveBaseScene_pushButton = QtWidgets.QPushButton(self.centralwidget)
         self.saveBaseScene_pushButton.setText(("Save Base Scene"))
+        self.saveBaseScene_pushButton.setStyleSheet("background-color: red; color: white")
         self.saveBaseScene_pushButton.setObjectName(("saveBaseScene_pushButton"))
 
         self.deleteVersion_pushButton = QtWidgets.QPushButton(self.centralwidget)
         self.deleteVersion_pushButton.setText(("Delete"))
+        self.deleteVersion_pushButton.setStyleSheet("color: red")
         self.deleteVersion_pushButton.setObjectName(("deleteVersion_pushButton"))
 
         self.makeReference_pushButton = QtWidgets.QPushButton(self.centralwidget)
         self.makeReference_pushButton.setText(("Make Final"))
+        self.makeReference_pushButton.setStyleSheet("color: red")
         self.makeReference_pushButton.setObjectName(("makeReference_pushButton"))
 
         ''''''''''''''''''''''''''''''''''''
@@ -411,20 +420,24 @@ class MainUI(QtWidgets.QMainWindow):
         self.openScene_pushButton = QtWidgets.QPushButton(self.centralwidget)
         self.openScene_pushButton.setLayoutDirection(QtCore.Qt.LeftToRight)
         self.openScene_pushButton.setText(("Open"))
+        self.openScene_pushButton.setStyleSheet("color: green")
         self.openScene_pushButton.setObjectName(("open_pushButton"))
 
         self.refScene_pushButton = QtWidgets.QPushButton(self.centralwidget)
         self.refScene_pushButton.setLayoutDirection(QtCore.Qt.LeftToRight)
         self.refScene_pushButton.setText(("Reference"))
+        self.refScene_pushButton.setStyleSheet("color: green")
         self.refScene_pushButton.setObjectName(("reference_pushButton"))
 
         ''''''''''''''''''''''''''''''''''''
         self.saveVersion_pushButton = QtWidgets.QPushButton(self.centralwidget)
         self.saveVersion_pushButton.setText(("Save As Version"))
+        self.saveVersion_pushButton.setStyleSheet("color: red")
         self.saveVersion_pushButton.setObjectName(("saveVersion_pushButton"))
 
         self.saveSubVersion_pushButton = QtWidgets.QPushButton(self.centralwidget)
         self.saveSubVersion_pushButton.setText(("Save As Sub Version"))
+        self.saveSubVersion_pushButton.setStyleSheet("color: yellow")
         self.saveSubVersion_pushButton.setObjectName(("saveSubVersion_pushButton"))
 
         ''''''''''''''''''''''''''''''''''''
@@ -470,23 +483,44 @@ class MainUI(QtWidgets.QMainWindow):
 
     def buildMainLayout(self):
         self.setObjectName(self.windowName)
-        self.resize(680, 600)
+        self.resize(880, 600)
         self.setWindowTitle(self.windowName)
 
         self.setCentralWidget(self.centralwidget)
 
-        self.main_horizontalLayout = QtWidgets.QHBoxLayout(self.centralwidget)
-        self.main_horizontalLayout.setObjectName(("main_hboxLayout"))
-        
-        self.centralwidget.setLayout(self.main_horizontalLayout)
+        self.mainLayout = QtWidgets.QGridLayout(self.centralwidget)
+
+        topLine = QtWidgets.QFrame(self.centralwidget)
+        topLine.setFrameShape(QtWidgets.QFrame.HLine)
+        topLine.setFrameShadow(QtWidgets.QFrame.Sunken)
+
+        midLine = QtWidgets.QFrame(self.centralwidget)
+        midLine.setFrameShape(QtWidgets.QFrame.VLine)
+        midLine.setFrameShadow(QtWidgets.QFrame.Sunken)
+
+        bottomLine = QtWidgets.QFrame(self.centralwidget)
+        bottomLine.setFrameShape(QtWidgets.QFrame.HLine)
+        bottomLine.setFrameShadow(QtWidgets.QFrame.Sunken)
+
+        topMidLine = QtWidgets.QFrame(self.centralwidget)
+        topMidLine.setFrameShape(QtWidgets.QFrame.HLine)
+        topMidLine.setFrameShadow(QtWidgets.QFrame.Sunken)
 
         self.left_verticalLayout = QtWidgets.QVBoxLayout(self.centralwidget)
         self.right_verticalLayout = QtWidgets.QGridLayout(self.centralwidget)
-        self.main_horizontalLayout.addLayout(self.left_verticalLayout)
-        self.main_horizontalLayout.addLayout(self.right_verticalLayout)
+
+        self.mainLayout.addWidget(topLine, 0, 0, 1, 3)
+        self.mainLayout.addLayout(self.left_verticalLayout, 1, 0)
+        self.mainLayout.addWidget(midLine, 1, 1)
+        self.mainLayout.addLayout(self.right_verticalLayout, 1, 2)
+        self.mainLayout.addWidget(bottomLine, 2, 0, 1, 3)
+        
+        self.centralwidget.setLayout(self.mainLayout)
 
         self.left_verticalLayout.addLayout(self.topLeftLayout)
+        self.left_verticalLayout.addWidget(topMidLine)
         self.left_verticalLayout.addWidget(self.category_tabWidget)
+        self.left_verticalLayout.addWidget(self.scenes_listWidget)
 
         self.setMenuBar(self.menubar)
         self.setStatusBar(self.statusbar)
@@ -525,14 +559,29 @@ class MainUI(QtWidgets.QMainWindow):
         self.right_verticalLayout.addWidget(self.deleteVersion_pushButton, i, 2)
         self.right_verticalLayout.addWidget(self.makeReference_pushButton, i, 3, 1, 2)
         i += 5
+        line = QtWidgets.QFrame(self.centralwidget)
+        line.setFrameShape(QtWidgets.QFrame.HLine)
+        line.setFrameShadow(QtWidgets.QFrame.Sunken)
+        self.right_verticalLayout.addWidget(line, i, 0, 1, 5)
+        i += 5
         self.right_verticalLayout.addWidget(self.version_label, i, 0)
         self.right_verticalLayout.addWidget(self.version_comboBox, i, 1)
         self.right_verticalLayout.addWidget(self.subVersion_comboBox, i, 2)
         self.right_verticalLayout.addWidget(self.openScene_pushButton, i, 3)
         self.right_verticalLayout.addWidget(self.refScene_pushButton, i, 4)
         i += 5
+        line = QtWidgets.QFrame(self.centralwidget)
+        line.setFrameShape(QtWidgets.QFrame.HLine)
+        line.setFrameShadow(QtWidgets.QFrame.Sunken)
+        self.right_verticalLayout.addWidget(line, i, 0, 1, 5)
+        i += 5
         self.right_verticalLayout.addWidget(self.saveVersion_pushButton, i, 0, 1, 2)
         self.right_verticalLayout.addWidget(self.saveSubVersion_pushButton, i, 2, 1, 3)
+        i += 5
+        line = QtWidgets.QFrame(self.centralwidget)
+        line.setFrameShape(QtWidgets.QFrame.HLine)
+        line.setFrameShadow(QtWidgets.QFrame.Sunken)
+        self.right_verticalLayout.addWidget(line, i, 0, 1, 5)
         i += 5
         self.right_verticalLayout.addWidget(self.showPreview_pushButton, i, 0, 1, 2)
         self.right_verticalLayout.addWidget(self.addNote_pushButton, i, 2, 1, 3)
@@ -542,7 +591,16 @@ class MainUI(QtWidgets.QMainWindow):
         self.right_verticalLayout.addWidget(self.notes_textEdit, i, 0, 5, 5)
         i += 5
         self.right_verticalLayout.addWidget(self.thumbnail_label, i, 0, 5, 5)
-        
+
+    def buildBottomRightLayout(self):
+        return
+
+    def buildBottomLayout(self):
+        return
+
+    def buildConnection(self):
+        return
+
         '''
         
 
