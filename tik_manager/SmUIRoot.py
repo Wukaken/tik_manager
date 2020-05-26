@@ -79,11 +79,11 @@ logger.setLevel(logging.WARNING)
 
 
 # Below is the standard dictionary for Scene Manager Standalone
-BoilerDict = {"Environment":"Standalone",
-              "MainWindow":None,
-              "WindowTitle":"Scene Manager Standalone v%s" %_version.__version__,
-              "Stylesheet":"mayaDark.stylesheet",
-              "SceneFormats":None
+BoilerDict = {"Environment": "Standalone",
+              "MainWindow": None,
+              "WindowTitle": "Scene Manager Standalone v%s" %_version.__version__,
+              "Stylesheet": "mayaDark.stylesheet",
+              "SceneFormats": None
               }
 
 # Get Environment and edit the dictionary according to the Environment
@@ -124,9 +124,6 @@ try:
     BoilerDict["SceneFormats"] = ["nk"]
 except ImportError:
     pass
-
-
-
 
 
 def getMainWindow():
@@ -190,61 +187,65 @@ class MainUI(QtWidgets.QMainWindow):
     
     def buildUIElements(self):
         self.buildMainUIElements()
-        self.buildTopUIElements()
+
+        self.buildMenuBarUIElements()
+        
         self.buildTopLeftUIElements()
         self.buildBottomLeftUIElements()
         self.buildTopRightUIElements()
         self.buildBottomRightUIElements()
-        self.buildBottomUIElements()
+        
+        self.buildStatusBarUIElements()
+
+        self.buildAdditiveUIElements()
 
     def buildLayout(self):
         self.buildMainLayout()
-        self.buildTopLayout()
+
         self.buildTopLeftLayout()
         self.buildBottomLeftLayout()
         self.buildTopRightLayout()
         self.buildBottomRightLayout()
-        self.buildBottomLayout()
 
     def buildMainUIElements(self):
         self.centralwidget = QtWidgets.QWidget(self)
         self.centralwidget.setObjectName("centralwidget")
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
 
-    def buildTopUIElements(self):
+    def buildMenuBarUIElements(self):
         self.menubar = QtWidgets.QMenuBar(self)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 680, 18))
         self.menubar.setObjectName(("menubar"))
 
         self.fileMenu = self.menubar.addMenu("File")
-        createProject_fm = QtWidgets.QAction("&Create Project", self)
-        checkProjectFolder_fm = QtWidgets.QAction("&Check Project Folders", self)
+        self.createProject_fm = QtWidgets.QAction("&Create Project", self)
+        self.checkProjectFolder_fm = QtWidgets.QAction("&Check Project Folders", self)
         self.saveVersion_fm = QtWidgets.QAction("&Save Version", self)
         self.saveBaseScene_fm = QtWidgets.QAction("&Save Base Scene", self)
         self.saveSubVersion_fm = QtWidgets.QAction("&Save Sub Version", self)
 
-        loadReferenceScene_fm = QtWidgets.QAction("&Load/Reference Scene", self)
+        self.loadReferenceScene_fm = QtWidgets.QAction("&Load/Reference Scene", self)
 
-        add_remove_categories_fm = QtWidgets.QAction("&Add/Remove Categories", self)
-        add_remove_category_settings_fm = QtWidgets.QAction("&Add/Remove Category Settings", self)
-        pb_settings_fm = QtWidgets.QAction("&Playblast Settings", self)
+        self.add_remove_categories_fm = QtWidgets.QAction("&Add/Remove Categories", self)
+        self.add_remove_category_settings_fm = QtWidgets.QAction("&Add/Remove Category Settings", self)
+        self.pb_settings_fm = QtWidgets.QAction("&Playblast Settings", self)
 
-        projectSettings_fm = QtWidgets.QAction("&Project Settings", self)
+        self.projectSettings_fm = QtWidgets.QAction("&Project Settings", self)
 
-        changeAdminPass_fm = QtWidgets.QAction("&Change Admin Password", self)
+        self.changeAdminPass_fm = QtWidgets.QAction("&Change Admin Password", self)
 
         self.changeCommonFolder = QtWidgets.QAction("&Change Common Database", self)
         self.changeCommonFolder.setVisible(False)
 
-        deleteFile_fm = QtWidgets.QAction("&Delete Selected Base Scene", self)
-        deleteReference_fm = QtWidgets.QAction("&Delete Reference of Selected Scene", self)
-        projectReport_fm = QtWidgets.QAction("&Project Report", self)
-        projectReport_fm.setEnabled(False)
-        checkReferences_fm = QtWidgets.QAction("&Check References", self)
+        self.deleteFile_fm = QtWidgets.QAction("&Delete Selected Base Scene", self)
+        self.deleteReference_fm = QtWidgets.QAction("&Delete Reference of Selected Scene", self)
+        self.projectReport_fm = QtWidgets.QAction("&Project Report", self)
+        self.projectReport_fm.setEnabled(False)
+        self.checkReferences_fm = QtWidgets.QAction("&Check References", self)
 
         # save
-        self.fileMenu.addAction(createProject_fm)
-        self.fileMenu.addAction(checkProjectFolder_fm)
+        self.fileMenu.addAction(self.createProject_fm)
+        self.fileMenu.addAction(self.checkProjectFolder_fm)
         self.fileMenu.addAction(self.saveVersion_fm)
         self.fileMenu.addAction(self.saveSubVersion_fm)
         self.fileMenu.addAction(self.saveBaseScene_fm)
@@ -252,53 +253,53 @@ class MainUI(QtWidgets.QMainWindow):
         self.fileMenu.addSeparator()
 
         # load
-        self.fileMenu.addAction(loadReferenceScene_fm)
+        self.fileMenu.addAction(self.loadReferenceScene_fm)
 
         self.fileMenu.addSeparator()
 
         # settings
-        self.fileMenu.addAction(add_remove_categories_fm)
-        self.fileMenu.addAction(add_remove_category_settings_fm)
-        self.fileMenu.addAction(pb_settings_fm)
-        self.fileMenu.addAction(projectSettings_fm)
-        self.fileMenu.addAction(changeAdminPass_fm)
+        self.fileMenu.addAction(self.add_remove_categories_fm)
+        self.fileMenu.addAction(self.add_remove_category_settings_fm)
+        self.fileMenu.addAction(self.pb_settings_fm)
+        self.fileMenu.addAction(self.projectSettings_fm)
+        self.fileMenu.addAction(self.changeAdminPass_fm)
         self.fileMenu.addAction(self.changeCommonFolder)
 
         self.fileMenu.addSeparator()
 
         # delete
-        self.fileMenu.addAction(deleteFile_fm)
-        self.fileMenu.addAction(deleteReference_fm)
+        self.fileMenu.addAction(self.deleteFile_fm)
+        self.fileMenu.addAction(self.deleteReference_fm)
 
         self.fileMenu.addSeparator()
 
         # misc
-        self.fileMenu.addAction(projectReport_fm)
-        self.fileMenu.addAction(checkReferences_fm)
+        self.fileMenu.addAction(self.projectReport_fm)
+        self.fileMenu.addAction(self.checkReferences_fm)
 
         ''''''''''''''''''''''''''''''''''''
         self.toolsMenu = self.menubar.addMenu("Tools")
-        imageViewer_mi = QtWidgets.QAction("&Image Viewer", self)
-        projectMaterials_mi = QtWidgets.QAction("&Project Materials", self)
+        self.imageViewer_mi = QtWidgets.QAction("&Image Viewer", self)
+        self.projectMaterials_mi = QtWidgets.QAction("&Project Materials", self)
         self.assetLibrary_mi = QtWidgets.QAction("&Asset Library", self)
         self.createPB = QtWidgets.QAction("&Create Preview", self)
 
-        self.toolsMenu.addAction(imageViewer_mi)
-        self.toolsMenu.addAction(projectMaterials_mi)
+        self.toolsMenu.addAction(self.imageViewer_mi)
+        self.toolsMenu.addAction(self.projectMaterials_mi)
         self.toolsMenu.addAction(self.assetLibrary_mi)
         self.toolsMenu.addAction(self.createPB)
 
         ''''''''''''''''''''''''''''''''''''
         helpMenu = self.menubar.addMenu("Help")
-        onlineHelp_mi = QtWidgets.QAction("&Online Help", self)
-        checkVersion_mi = QtWidgets.QAction("&Check for updates", self)
+        self.onlineHelp_mi = QtWidgets.QAction("&Online Help", self)
+        self.checkVersion_mi = QtWidgets.QAction("&Check for updates", self)
 
-        helpMenu.addAction(onlineHelp_mi)
-        helpMenu.addAction(checkVersion_mi)
+        helpMenu.addAction(self.onlineHelp_mi)
+        helpMenu.addAction(self.checkVersion_mi)
 
         self.menubar.addMenu("User: %s" % self.manager.currentUser)
 
-    def buildBottomUIElements(self):
+    def buildStatusBarUIElements(self):
         self.statusbar = QtWidgets.QStatusBar(self)
         self.statusbar.setObjectName(("statusbar"))
 
@@ -373,6 +374,15 @@ class MainUI(QtWidgets.QMainWindow):
         self.baseScene_lineEdit.setPlaceholderText((""))
         self.baseScene_lineEdit.setObjectName(("baseScene_lineEdit"))
         self.baseScene_lineEdit.setReadOnly(True)
+
+        ''''''''''''''''''''''''''''''''''''
+        self.load_radioButton = QtWidgets.QRadioButton(self.centralwidget)
+        self.load_radioButton.setText(("Load Mode"))
+        self.load_radioButton.setObjectName(("load_radioButton"))
+
+        self.reference_radioButton = QtWidgets.QRadioButton(self.centralwidget)
+        self.reference_radioButton.setText(("Reference Mode"))
+        self.reference_radioButton.setObjectName(("reference_radioButton"))
 
         ''''''''''''''''''''''''''''''''''''
         self.topLeftLayout = QtWidgets.QGridLayout()
@@ -481,6 +491,49 @@ class MainUI(QtWidgets.QMainWindow):
     def buildBottomRightUIElements(self):
         return
 
+    def buildAdditiveUIElements(self):
+        # RIGHT CLICK MENUS
+        self.popMenu_scenes = QtWidgets.QMenu()
+
+        self.scenes_rcItem_0 = QtWidgets.QAction('Import Scene', self)
+        self.popMenu_scenes.addAction(self.scenes_rcItem_0)
+        
+        self.scenes_rcItem_1 = QtWidgets.QAction('Show Scene Folder in Explorer', self)
+        self.popMenu_scenes.addAction(self.scenes_rcItem_1)
+
+        self.scenes_rcItem_2 = QtWidgets.QAction('Show Preview Folder in Explorer', self)
+        self.popMenu_scenes.addAction(self.scenes_rcItem_2)
+
+        self.scenes_rcItem_3 = QtWidgets.QAction('Show Data Folder in Explorer', self)
+        self.popMenu_scenes.addAction(self.scenes_rcItem_3)
+
+        self.scenes_rcItem_6 = QtWidgets.QAction('Show Project Folder in Explorer', self)
+        self.popMenu_scenes.addAction(self.scenes_rcItem_6)
+        self.popMenu_scenes.addSeparator()
+
+        self.scenes_rcItem_4 = QtWidgets.QAction('Scene Info', self)
+        self.popMenu_scenes.addAction(self.scenes_rcItem_4)
+
+        self.popMenu_scenes.addSeparator()
+        self.scenes_rcItem_5 = QtWidgets.QAction('View Rendered Images', self)
+        self.popMenu_scenes.addAction(self.scenes_rcItem_5)
+
+        # Thumbnail Right Click Menu
+        self.popMenu_thumbnail = QtWidgets.QMenu()
+
+        self.rcAction_thumb_0 = QtWidgets.QAction('Replace with current view', self)
+        self.popMenu_thumbnail.addAction(self.rcAction_thumb_0)
+
+        self.rcAction_thumb_1 = QtWidgets.QAction('Replace with external file', self)
+        self.popMenu_thumbnail.addAction(self.rcAction_thumb_1)
+
+        # SHORTCUTS
+        # PyInstaller and Standalone version compatibility
+        if FORCE_QT4:
+            self.shortcutRefresh = Qt.QShortcut(QtWidgets.QKeySequence("F5"), self, self.refresh)
+        else:
+            self.shortcutRefresh = QtWidgets.QShortcut(QtGui.QKeySequence("F5"), self, self.refresh)
+
     def buildMainLayout(self):
         self.setObjectName(self.windowName)
         self.resize(880, 600)
@@ -524,31 +577,29 @@ class MainUI(QtWidgets.QMainWindow):
 
         self.setMenuBar(self.menubar)
         self.setStatusBar(self.statusbar)
-
-    def buildTopLayout(self):
-        return
+        self.statusBar().showMessage("Status | Idle")
 
     def buildTopLeftLayout(self):
         i = 0
         self.topLeftLayout.addWidget(self.project_label, i, 0)
-        self.topLeftLayout.addWidget(self.project_lineEdit, i, 1)
-        self.topLeftLayout.addWidget(self.setProject_pushButton, i, 2)
+        self.topLeftLayout.addWidget(self.project_lineEdit, i, 1, 1, 3)
+        self.topLeftLayout.addWidget(self.setProject_pushButton, i, 4)
         i += 5
         self.topLeftLayout.addWidget(self.projects_label, i, 0)
-        self.topLeftLayout.addWidget(self.projects_comboBox, i, 1)
+        self.topLeftLayout.addWidget(self.projects_comboBox, i, 1, 1, 3)
         i += 5
         self.topLeftLayout.addWidget(self.projectDate_label, i, 0)
-        self.topLeftLayout.addWidget(self.projectCreateDate_label, i, 1)
-        i += 5
-        self.topLeftLayout.addWidget(self.projectDate_label, i, 0)
-        self.topLeftLayout.addWidget(self.projectCreateDate_label, i, 1)
+        self.topLeftLayout.addWidget(self.projectCreateDate_label, i, 1, 1, 3)
         i += 5
         self.topLeftLayout.addWidget(self.subProject_label, i, 0)
-        self.topLeftLayout.addWidget(self.subProject_comboBox, i, 1)
-        self.topLeftLayout.addWidget(self.addSubProject_pushButton, i, 2)
+        self.topLeftLayout.addWidget(self.subProject_comboBox, i, 1, 1, 3)
+        self.topLeftLayout.addWidget(self.addSubProject_pushButton, i, 4)
         i += 5
         self.topLeftLayout.addWidget(self.baseScene_label, i, 0)
-        self.topLeftLayout.addWidget(self.baseScene_lineEdit, i, 1)
+        self.topLeftLayout.addWidget(self.baseScene_lineEdit, i, 1, 1, 3)
+        i += 5
+        self.topLeftLayout.addWidget(self.load_radioButton, i, 1)
+        self.topLeftLayout.addWidget(self.reference_radioButton, i, 2)
 
     def buildBottomLeftLayout(self):
         return
@@ -595,391 +646,32 @@ class MainUI(QtWidgets.QMainWindow):
     def buildBottomRightLayout(self):
         return
 
-    def buildBottomLayout(self):
-        return
-
     def buildConnection(self):
-        return
+        self.createProject_fm.triggered.connect(self.createProjectUI)
+        self.checkProjectFolder_fm.triggered.connect(self.checkProjectFolder)
 
-        '''
-        
+        self.pb_settings_fm.triggered.connect(self.onPbSettings)
 
+        self.add_remove_categories_fm.triggered.connect(self.addRemoveCategoryUI)
+        self.add_remove_category_settings_fm.triggered.connect(self.modifyCategorySettingsUI)
 
+        self.projectSettings_fm.triggered.connect(self.projectSettingsUI)
 
-        
+        self.changeAdminPass_fm.triggered.connect(self.changePasswordUI)
 
-        self.
+        self.deleteFile_fm.triggered.connect(self.onDeleteBaseScene)
 
-        
+        self.deleteReference_fm.triggered.connect(self.onDeleteReference)
 
-        self.main_horizontalLayout = QtWidgets.QHBoxLayout()
-        self.main_horizontalLayout.setContentsMargins(-1, -1, 0, -1)
-        self.main_horizontalLayout.setSpacing(6)
-        self.main_horizontalLayout.setObjectName(("horizontalLayout"))
-        self.main_horizontalLayout.setStretch(0, 1)
+        self.checkReferences_fm.triggered.connect(lambda: self.populateBaseScenes(deepCheck=True))
 
-
-
-
-
-
-        
-
-
-
-
-        spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-
-
-        self.loadScene_pushButton = QtWidgets.QPushButton(self.centralwidget)
-        self.loadScene_pushButton.setMinimumSize(QtCore.QSize(150, 45))
-        self.loadScene_pushButton.setMaximumSize(QtCore.QSize(150, 45))
-        self.loadScene_pushButton.setLayoutDirection(QtCore.Qt.LeftToRight)
-        self.loadScene_pushButton.setText(("Load Scene"))
-        self.loadScene_pushButton.setObjectName(("loadScene_pushButton"))
-
-        #
-        self.main_gridLayout.addLayout(self.main_horizontalLayout, 4, 0, 1, 1)
-        #
-        self.r2_gridLayout = QtWidgets.QGridLayout()
-        self.r2_gridLayout.setObjectName(("r2_gridLayout"))
-        self.r2_gridLayout.setColumnStretch(1, 1)
-
-        self.load_radioButton = QtWidgets.QRadioButton(self.centralwidget)
-        self.load_radioButton.setText(("Load Mode"))
-        self.load_radioButton.setObjectName(("load_radioButton"))
-        self.r2_gridLayout.addWidget(self.load_radioButton, 0, 0, 1, 1)
-
-        self.reference_radioButton = QtWidgets.QRadioButton(self.centralwidget)
-        self.reference_radioButton.setText(("Reference Mode"))
-        self.reference_radioButton.setObjectName(("reference_radioButton"))
-        self.r2_gridLayout.addWidget(self.reference_radioButton, 0, 1, 1, 1)
-
-        self.subProject_label = QtWidgets.QLabel(self.centralwidget)
-        self.subProject_label.setText(("Sub-Project:"))
-        self.subProject_label.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter)
-        self.subProject_label.setObjectName(("subProject_label"))
-        self.r2_gridLayout.addWidget(self.subProject_label, 0, 2, 1, 1)
-
-        self.subProject_comboBox = QtWidgets.QComboBox(self.centralwidget)
-        self.subProject_comboBox.setMinimumSize(QtCore.QSize(150, 30))
-        self.subProject_comboBox.setMaximumSize(QtCore.QSize(16777215, 30))
-        self.subProject_comboBox.setObjectName(("subProject_comboBox"))
-        self.r2_gridLayout.addWidget(self.subProject_comboBox, 0, 3, 1, 1)
-
-        self.addSubProject_pushButton = QtWidgets.QPushButton(self.centralwidget)
-        self.addSubProject_pushButton.setMinimumSize(QtCore.QSize(30, 30))
-        self.addSubProject_pushButton.setMaximumSize(QtCore.QSize(30, 30))
-        self.addSubProject_pushButton.setText(("+"))
-        self.addSubProject_pushButton.setObjectName(("addSubProject_pushButton"))
-        self.r2_gridLayout.addWidget(self.addSubProject_pushButton, 0, 4, 1, 1)
-
-        self.user_label = QtWidgets.QLabel(self.centralwidget)
-        self.user_label.setText(("User:"))
-        self.user_label.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter)
-        self.user_label.setObjectName(("user_label"))
-        self.r2_gridLayout.addWidget(self.user_label, 0, 5, 1, 1)
-
-        self.user_comboBox = QtWidgets.QComboBox(self.centralwidget)
-        self.user_comboBox.setMinimumSize(QtCore.QSize(130, 30))
-        self.user_comboBox.setMaximumSize(QtCore.QSize(16777215, 30))
-        self.user_comboBox.setObjectName(("user_comboBox"))
-        self.r2_gridLayout.addWidget(self.user_comboBox, 0, 6, 1, 1)
-
-        self.main_gridLayout.addLayout(self.r2_gridLayout, 1, 0, 1, 1)
-        self.r1_gridLayout = QtWidgets.QGridLayout()
-        self.r1_gridLayout.setObjectName(("r1_gridLayout"))
-
-        self.baseScene_label = QtWidgets.QLabel(self.centralwidget)
-        self.baseScene_label.setLayoutDirection(QtCore.Qt.LeftToRight)
-        self.baseScene_label.setText(("Base Scene:"))
-        self.baseScene_label.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter)
-        self.baseScene_label.setObjectName(("baseScene_label"))
-        self.r1_gridLayout.addWidget(self.baseScene_label, 0, 0, 1, 1)
-
-        self.baseScene_lineEdit = QtWidgets.QLineEdit(self.centralwidget)
-        self.baseScene_lineEdit.setText((""))
-        self.baseScene_lineEdit.setPlaceholderText((""))
-        self.baseScene_lineEdit.setObjectName(("baseScene_lineEdit"))
-        self.baseScene_lineEdit.setReadOnly(True)
-        self.r1_gridLayout.addWidget(self.baseScene_lineEdit, 0, 1, 1, 1)
-
-        self.project_label = QtWidgets.QLabel(self.centralwidget)
-        self.project_label.setText(("ProjectPath:"))
-        self.project_label.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter)
-        self.project_label.setObjectName(("project_label"))
-        self.r1_gridLayout.addWidget(self.project_label, 1, 0, 1, 1)
-
-        self.project_lineEdit = QtWidgets.QLineEdit(self.centralwidget)
-        self.project_lineEdit.setText((""))
-        self.project_lineEdit.setPlaceholderText((""))
-        self.project_lineEdit.setObjectName(("project_lineEdit"))
-        self.project_lineEdit.setFocusPolicy(QtCore.Qt.NoFocus)
-        # self.project_lineEdit.setReadOnly(True)
-        self.r1_gridLayout.addWidget(self.project_lineEdit, 1, 1, 1, 1)
-
-        self.setProject_pushButton = QtWidgets.QPushButton(self.centralwidget)
-        self.setProject_pushButton.setText(("SET"))
-        self.setProject_pushButton.setObjectName(("setProject_pushButton"))
-        self.r1_gridLayout.addWidget(self.setProject_pushButton, 1, 2, 1, 1)
-
-        self.projects_label = QtWidgets.QLabel(self.centralwidget)
-        self.projects_label.setText(("Project:"))
-        self.projects_label.setAlignment(QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter)
-        self.projects_label.setObjectName(("projects_label"))
-        self.r1_gridLayout.addWidget(self.projects_label, 2, 0, 1, 1)
-
-        self.projects_comboBox = QtWidgets.QComboBox(self.centralwidget)
-        self.projects_comboBox.setObjectName(("projects_comboBox"))
-        self.r1_gridLayout.addWidget(self.projects_comboBox, 2, 1, 1, 1)
-
-        self.main_gridLayout.addLayout(self.r1_gridLayout, 0, 0, 1, 1)
-
-        self.category_tabWidget = QtWidgets.QTabWidget(self.centralwidget)
-        self.category_tabWidget.setMaximumSize(QtCore.QSize(16777215, 20))
-        self.category_tabWidget.setTabPosition(QtWidgets.QTabWidget.North)
-        self.category_tabWidget.setElideMode(QtCore.Qt.ElideNone)
-        self.category_tabWidget.setUsesScrollButtons(False)
-        self.category_tabWidget.setObjectName(("tabWidget"))
-
-        self.main_gridLayout.addWidget(self.category_tabWidget, 2, 0, 1, 1)
-
-        self.splitter = QtWidgets.QSplitter(self.centralwidget)
-        self.splitter.setOrientation(QtCore.Qt.Horizontal)
-        self.splitter.setObjectName(("splitter"))
-
-        self.scenes_listWidget = QtWidgets.QListWidget(self.splitter)
-        self.scenes_listWidget.setObjectName(("listWidget"))
-
-        self.frame = QtWidgets.QFrame(self.splitter)
-        self.frame.setFrameShape(QtWidgets.QFrame.StyledPanel)
-        self.frame.setFrameShadow(QtWidgets.QFrame.Raised)
-        self.frame.setObjectName(("frame"))
-
-        self.gridLayout_6 = QtWidgets.QGridLayout(self.frame)
-        self.gridLayout_6.setContentsMargins(-1, -1, 0, 0)
-        self.gridLayout_6.setObjectName(("gridLayout_6"))
-
-        self.verticalLayout = QtWidgets.QVBoxLayout()
-        self.verticalLayout.setObjectName(("verticalLayout"))
-
-        self.notes_label = QtWidgets.QLabel(self.frame)
-        self.notes_label.setLayoutDirection(QtCore.Qt.LeftToRight)
-        self.notes_label.setText(("Version Notes:"))
-        self.notes_label.setAlignment(QtCore.Qt.AlignLeading | QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
-        self.notes_label.setObjectName(("version_label_2"))
-        self.verticalLayout.addWidget(self.notes_label)
-
-        self.notes_textEdit = QtWidgets.QTextEdit(self.frame)
-        self.notes_textEdit.setObjectName(("textEdit"))
-        self.notes_textEdit.setReadOnly(True)
-        self.verticalLayout.addWidget(self.notes_textEdit)
-
-        # PyInstaller and Standalone version compatibility
-        if FORCE_QT4:
-            self.tPixmap = QtWidgets.QPixmap("")
-        else:
-            self.tPixmap = QtGui.QPixmap("")
-        # self.tPixmap = QtGui.QPixmap("")
-        self.thumbnail_label = ImageWidget(self.frame)
-        self.thumbnail_label.setPixmap(self.tPixmap)
-
-        self.thumbnail_label.setMinimumSize(QtCore.QSize(221, 124))
-        self.thumbnail_label.setFrameShape(QtWidgets.QFrame.Box)
-        self.thumbnail_label.setScaledContents(True)
-        self.thumbnail_label.setAlignment(QtCore.Qt.AlignCenter)
-        self.thumbnail_label.setObjectName(("label"))
-        self.verticalLayout.addWidget(self.thumbnail_label)
-
-        self.gridLayout_6.addLayout(self.verticalLayout, 3, 0, 1, 1)
-
-        self.gridLayout_7 = QtWidgets.QGridLayout()
-        self.gridLayout_7.setContentsMargins(-1, -1, 10, 10)
-        self.gridLayout_7.setObjectName(("gridLayout_7"))
-
-        self.showPreview_pushButton = QtWidgets.QPushButton(self.frame)
-        self.showPreview_pushButton.setMinimumSize(QtCore.QSize(100, 30))
-        self.showPreview_pushButton.setMaximumSize(QtCore.QSize(150, 30))
-        self.showPreview_pushButton.setText(("Show Preview"))
-        self.showPreview_pushButton.setObjectName(("setProject_pushButton_5"))
-        self.gridLayout_7.addWidget(self.showPreview_pushButton, 0, 3, 1, 1)
-
-        self.horizontalLayout_4 = QtWidgets.QHBoxLayout()
-        self.horizontalLayout_4.setSpacing(1)
-        self.horizontalLayout_4.setObjectName(("horizontalLayout_4"))
-
-        self.horizontalLayout_5 = QtWidgets.QHBoxLayout()
-        self.horizontalLayout_5.setSpacing(1)
-        self.horizontalLayout_5.setObjectName(("horizontalLayout_5"))
-
-        self.version_label = QtWidgets.QLabel(self.frame)
-        self.version_label.setMinimumSize(QtCore.QSize(60, 30))
-        self.version_label.setMaximumSize(QtCore.QSize(60, 30))
-        self.version_label.setFrameShape(QtWidgets.QFrame.Box)
-        self.version_label.setText(("Version:"))
-        self.version_label.setAlignment(QtCore.Qt.AlignCenter)
-        self.version_label.setObjectName(("version_label"))
-        self.horizontalLayout_4.addWidget(self.version_label)
-
-        self.subVersion_label = QtWidgets.QLabel(self.frame)
-        self.subVersion_label.setMinimumSize(QtCore.QSize(60, 30))
-        self.subVersion_label.setMaximumSize(QtCore.QSize(60, 30))
-        self.subVersion_label.setFrameShape(QtWidgets.QFrame.Box)
-        self.subVersion_label.setText(("SubVer:"))
-        self.subVersion_label.setAlignment(QtCore.Qt.AlignCenter)
-        self.subVersion_label.setObjectName(("subVersion_label"))
-        self.horizontalLayout_5.addWidget(self.subVersion_label)
-
-
-
-        self.gridLayout_7.addLayout(self.horizontalLayout_4, 0, 0, 1, 1)
-        self.gridLayout_7.addLayout(self.horizontalLayout_5, 1, 0, 1, 1)
-
-        self.makeReference_pushButton = QtWidgets.QPushButton(self.frame)
-        self.makeReference_pushButton.setMinimumSize(QtCore.QSize(100, 30))
-        self.makeReference_pushButton.setMaximumSize(QtCore.QSize(300, 30))
-        self.makeReference_pushButton.setText(("Make Final"))
-        self.makeReference_pushButton.setObjectName(("makeReference_pushButton"))
-        self.gridLayout_7.addWidget(self.makeReference_pushButton, 2, 0, 1, 1)
-
-        self.addNote_pushButton = QtWidgets.QPushButton(self.frame)
-        self.addNote_pushButton.setMinimumSize(QtCore.QSize(100, 30))
-        self.addNote_pushButton.setMaximumSize(QtCore.QSize(150, 30))
-        self.addNote_pushButton.setToolTip((""))
-        self.addNote_pushButton.setStatusTip((""))
-        self.addNote_pushButton.setWhatsThis((""))
-        self.addNote_pushButton.setAccessibleName((""))
-        self.addNote_pushButton.setAccessibleDescription((""))
-        self.addNote_pushButton.setText(("Add Note"))
-        self.addNote_pushButton.setObjectName(("addNote_pushButton"))
-        self.gridLayout_7.addWidget(self.addNote_pushButton, 2, 3, 1, 1)
-
-        self.gridLayout_6.addLayout(self.gridLayout_7, 0, 0, 1, 1)
-
-        self.main_gridLayout.addWidget(self.splitter, 3, 0, 1, 1)
-
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-        sizePolicy.setHorizontalStretch(1)
-        sizePolicy.setVerticalStretch(1)
-        self.splitter.setSizePolicy(sizePolicy)
-
-        self.splitter.setStretchFactor(0, 1)
-
-        # MENU BAR / STATUS BAR
-        # ---------------------
-
-        self.menubar = QtWidgets.QMenuBar(self)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 680, 18))
-        self.menubar.setObjectName(("menubar"))
-
-        self.setMenuBar(self.menubar)
-        self.statusbar = QtWidgets.QStatusBar(self)
-        self.statusbar.setObjectName(("statusbar"))
-        self.setStatusBar(self.statusbar)
-
-
-
-        # RIGHT CLICK MENUS
-        # -----------------
-
-        # List Widget Right Click Menu
-        self.scenes_listWidget.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-        self.scenes_listWidget.customContextMenuRequested.connect(self.onContextMenu_scenes)
-        self.popMenu_scenes = QtWidgets.QMenu()
-
-        self.scenes_rcItem_0 = QtWidgets.QAction('Import Scene', self)
-        self.popMenu_scenes.addAction(self.scenes_rcItem_0)
-        self.scenes_rcItem_0.triggered.connect(lambda: self.rcAction_scenes("importScene"))
-
-        self.scenes_rcItem_1 = QtWidgets.QAction('Show Scene Folder in Explorer', self)
-        self.popMenu_scenes.addAction(self.scenes_rcItem_1)
-        self.scenes_rcItem_1.triggered.connect(lambda: self.rcAction_scenes("showInExplorerMaya"))
-
-        self.scenes_rcItem_2 = QtWidgets.QAction('Show Preview Folder in Explorer', self)
-        self.popMenu_scenes.addAction(self.scenes_rcItem_2)
-        self.scenes_rcItem_2.triggered.connect(lambda: self.rcAction_scenes("showInExplorerPB"))
-
-        self.scenes_rcItem_3 = QtWidgets.QAction('Show Data Folder in Explorer', self)
-        self.popMenu_scenes.addAction(self.scenes_rcItem_3)
-        self.scenes_rcItem_3.triggered.connect(lambda: self.rcAction_scenes("showInExplorerData"))
-
-        self.scenes_rcItem_6 = QtWidgets.QAction('Show Project Folder in Explorer', self)
-        self.popMenu_scenes.addAction(self.scenes_rcItem_6)
-        self.scenes_rcItem_6.triggered.connect(lambda: self.rcAction_scenes("showInExplorerProject"))
-
-        self.popMenu_scenes.addSeparator()
-        self.scenes_rcItem_4 = QtWidgets.QAction('Scene Info', self)
-        self.popMenu_scenes.addAction(self.scenes_rcItem_4)
-        self.scenes_rcItem_4.triggered.connect(lambda: self.rcAction_scenes("showSceneInfo"))
-
-        self.popMenu_scenes.addSeparator()
-        self.scenes_rcItem_5 = QtWidgets.QAction('View Rendered Images', self)
-        self.popMenu_scenes.addAction(self.scenes_rcItem_5)
-        self.scenes_rcItem_5.triggered.connect(lambda: self.rcAction_scenes("viewRender"))
-
-
-
-        # Thumbnail Right Click Menu
-        self.thumbnail_label.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-        self.thumbnail_label.customContextMenuRequested.connect(self.onContextMenu_thumbnail)
-        self.popMenu_thumbnail = QtWidgets.QMenu()
-
-        rcAction_thumb_0 = QtWidgets.QAction('Replace with current view', self)
-        self.popMenu_thumbnail.addAction(rcAction_thumb_0)
-        rcAction_thumb_0.triggered.connect(lambda: self.rcAction_thumb("currentView"))
-
-
-        rcAction_thumb_1 = QtWidgets.QAction('Replace with external file', self)
-        self.popMenu_thumbnail.addAction(rcAction_thumb_1)
-        rcAction_thumb_1.triggered.connect(lambda: self.rcAction_thumb("file"))
-
-
-        # SHORTCUTS
-        # ---------
-
-        # PyInstaller and Standalone version compatibility
-        if FORCE_QT4:
-            shortcutRefresh = Qt.QShortcut(QtWidgets.QKeySequence("F5"), self, self.refresh)
-        else:
-            shortcutRefresh = QtWidgets.QShortcut(QtGui.QKeySequence("F5"), self, self.refresh)
-
-        # SIGNAL CONNECTIONS
-        # ------------------
-
-        createProject_fm.triggered.connect(self.createProjectUI)
-        checkProjectFolder_fm.triggered.connect(self.checkProjectFolder)
-
-        # add_remove_users_fm.triggered.connect(self.addRemoveUserUI)
-        pb_settings_fm.triggered.connect(self.onPbSettings)
-
-        add_remove_categories_fm.triggered.connect(self.addRemoveCategoryUI)
-        add_remove_category_settings_fm.triggered.connect(self.modifyCategorySettingsUI)
-
-        projectSettings_fm.triggered.connect(self.projectSettingsUI)
-
-        changeAdminPass_fm.triggered.connect(self.changePasswordUI)
-
-
-
-
-        deleteFile_fm.triggered.connect(self.onDeleteBaseScene)
-
-        deleteReference_fm.triggered.connect(self.onDeleteReference)
-
-
-        checkReferences_fm.triggered.connect(lambda: self.populateBaseScenes(deepCheck=True))
-
-        imageViewer_mi.triggered.connect(self.onIviewer)
-        projectMaterials_mi.triggered.connect(self.onPMaterials)
+        self.imageViewer_mi.triggered.connect(self.onIviewer)
+        self.projectMaterials_mi.triggered.connect(self.onPMaterials)
         self.assetLibrary_mi.triggered.connect(self.onAssetLibrary)
         self.createPB.triggered.connect(self.onCreatePreview)
 
-        onlineHelp_mi.triggered.connect(lambda: webbrowser.open_new("http://www.ardakutlu.com/tik-manager-documentation/"))
-        checkVersion_mi.triggered.connect(self.onCheckNewVersion)
-
-        self.statusBar().showMessage("Status | Idle")
-
-        # self.project_lineEdit.
+        self.onlineHelp_mi.triggered.connect(lambda: webbrowser.open_new("http://www.ardakutlu.com/tik-manager-documentation/"))
+        self.checkVersion_mi.triggered.connect(self.onCheckNewVersion)
 
         self.load_radioButton.clicked.connect(self.onModeChange)
         self.reference_radioButton.clicked.connect(self.onModeChange)
@@ -994,8 +686,6 @@ class MainUI(QtWidgets.QMainWindow):
         self.makeReference_pushButton.clicked.connect(self.onMakeReference)
 
         self.subProject_comboBox.activated.connect(self.onSubProjectChange)
-
-        self.user_comboBox.activated.connect(self.onUserChange)
 
         self.showPreview_pushButton.clicked.connect(self.onShowPreview)
 
@@ -1014,11 +704,12 @@ class MainUI(QtWidgets.QMainWindow):
         self.saveSubVersion_fm.triggered.connect(partial(self.saveAsVersionDialog, 0))
 
         self.scenes_listWidget.doubleClicked.connect(self.onLoadScene)
-        self.loadScene_pushButton.clicked.connect(self.onLoadScene)
+        self.openScene_pushButton.clicked.connect(self.onOpenScene)
+        self.refScene_pushButton.clicked.connect(self.onReferenceScene)
 
         self.addNote_pushButton.clicked.connect(self.addNoteDialog)
-        '''
 
+        self.deleteVersion_pushButton.clicked.connect(self.onDeleteVersion)
 
     def createSubProjectUI(self):
 
@@ -2926,10 +2617,9 @@ class MainUI(QtWidgets.QMainWindow):
     def initMainUI(self, newborn=False):
         """Initialization Method for MainUI. Needs to be overriden for Standalone Version"""
 
-        #self.load_radioButton.setChecked(self.manager.currentMode)
-        #self.reference_radioButton.setChecked(not self.manager.currentMode)
+        self.load_radioButton.setChecked(self.manager.currentMode)
+        self.reference_radioButton.setChecked(not self.manager.currentMode)
         self.category_tabWidget.setCurrentIndex(self.manager.currentTabIndex)
-
 
         if not newborn:
             self.manager.init_paths()
@@ -2950,11 +2640,7 @@ class MainUI(QtWidgets.QMainWindow):
         self._initSubProjects()
 
         # init base scenes
-        '''
         self.populateBaseScenes()
-
-
-        self._initUsers()
 
         # disable the version related stuff
         self.version_comboBox.clear()
@@ -2963,8 +2649,6 @@ class MainUI(QtWidgets.QMainWindow):
         self.subVersion_comboBox.setStyleSheet("background-color: rgb(80,80,80); color: white")
         # self._vEnableDisable()
         self.onModeChange()
-        '''
-        # print "ASDFASDFASDFASDF"
 
     def refresh(self):
         # currentUserIndex = self.user_comboBox.currentIndex()
@@ -3093,7 +2777,6 @@ class MainUI(QtWidgets.QMainWindow):
         # This method is NOT Software Specific
         self.initMainUI()
 
-
     def onSubProjectChange(self):
         # This method IS Software Specific
         manager = self._getManager()
@@ -3118,10 +2801,8 @@ class MainUI(QtWidgets.QMainWindow):
         self._vEnableDisable()
 
         if self.load_radioButton.isChecked():
-            self.loadScene_pushButton.setText("Load Scene")
             self.scenes_listWidget.setStyleSheet("border-style: solid; border-width: 2px; border-color: grey;")
         else:
-            self.loadScene_pushButton.setText("Reference Scene")
             self.scenes_listWidget.setStyleSheet("border-style: solid; border-width: 2px; border-color: cyan;")
 
         self.manager.currentMode = self.load_radioButton.isChecked()
@@ -3132,7 +2813,7 @@ class MainUI(QtWidgets.QMainWindow):
         manager = self._getManager()
         self.version_comboBox.blockSignals(True)
         self.subVersion_comboBox.blockSignals(True)
-        #clear version_combobox
+        # clear version_combobox
         self.version_comboBox.clear()
         self.subVersion_comboBox.clear()
 
@@ -3250,6 +2931,26 @@ class MainUI(QtWidgets.QMainWindow):
                 self.scenes_listWidget.addItem(listItem)
         self.scenes_listWidget.blockSignals(False)
 
+    def onOpenScene(self):
+        oriLoad = self.load_radioButton.isChecked()
+        oriRef = self.reference_radioButton.isChecked()
+        
+        self.load_radioButton.setChecked(1)
+        self.reference_radioButton.setChecked(0)
+        self.onLoadScene()
+        self.load_radioButton.setChecked(oriLoad)
+        self.reference_radioButton.setChecked(oriRef)
+
+    def onReferenceScene(self):
+        oriLoad = self.load_radioButton.isChecked()
+        oriRef = self.reference_radioButton.isChecked()
+        
+        self.load_radioButton.setChecked(0)
+        self.reference_radioButton.setChecked(1)
+        self.onLoadScene()
+        self.load_radioButton.setChecked(oriLoad)
+        self.reference_radioButton.setChecked(oriRef)
+    
     def onLoadScene(self):
         # This method IS Software Specific. BUT overriding it is better, so it is not selecting manager
 
@@ -3276,9 +2977,7 @@ class MainUI(QtWidgets.QMainWindow):
                     self.manager.loadBaseScene(force=True)
                 if q == "cancel":
                     pass
-
-
-            else: # if current scene saved and secure
+            else:  # if current scene saved and secure
                 self.manager.loadBaseScene(force=True)
                 self.manager.getOpenSceneInfo()
                 self._initOpenScene()
@@ -3353,7 +3052,6 @@ class MainUI(QtWidgets.QMainWindow):
             self.populateBaseScenes()
             self.statusBar().showMessage("Status | Scene Deleted => %s" % name)
 
-
     def onDeleteReference(self):
         # This method IS Software Specific.
 
@@ -3377,6 +3075,25 @@ class MainUI(QtWidgets.QMainWindow):
             manager.deleteReference(manager.currentDatabasePath)
             self.populateBaseScenes()
             self.statusBar().showMessage("Status | Reference of %s is deleted" % name)
+
+    def onDeleteVersion(self):
+        passw, ok = QtWidgets.QInputDialog.getText(self, "DELETING Version File of %s\n\nAre you sure?", "Enter Admin Password:", QtWidgets.QLineEdit.Password)
+        if ok:
+            if self.manager.checkPassword(passw):
+                pass
+            else:
+                self.infoPop(textTitle="Incorrect Password", textHeader="The Password is invalid")
+                return
+        else:
+            return
+
+        manager = self._getManager()
+        name = manager.currentBaseSceneName
+        row = self.scenes_listWidget.currentRow()
+        if not row == -1:
+            manager.deleteVersion(manager.currentDatabasePath)
+            self.populateBaseScenes()
+            self.statusBar().showMessage("Status | Name: %s, Version %s, SubVersion %s has been deleted" % (name, manager.currentVersionIndex, manager.currentSubVersionIndex)
 
     def onIviewer(self):
         # This method is NOT Software Specific.
@@ -3474,7 +3191,6 @@ class MainUI(QtWidgets.QMainWindow):
             self.makeReference_pushButton.setEnabled(True)
             self.addNote_pushButton.setEnabled(True)
             self.version_label.setEnabled(True)
-            self.subVersion_label.setEnabled(True)
         else:
             self.version_comboBox.setEnabled(False)
             self.subVersion_comboBox.setEnabled(False)
@@ -3482,7 +3198,6 @@ class MainUI(QtWidgets.QMainWindow):
             self.makeReference_pushButton.setEnabled(False)
             self.addNote_pushButton.setEnabled(False)
             self.version_label.setEnabled(False)
-            self.subVersion_label.setEnabled(False)
 
         if manager.getPreviews():
             self.showPreview_pushButton.setEnabled(True)

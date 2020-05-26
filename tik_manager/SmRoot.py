@@ -347,7 +347,7 @@ class RootManager(object):
         self._currentSceneInfo = self._loadSceneInfo()
 
         # assert (self._currentSceneInfo == -2)
-        if self._currentSceneInfo == -2: # corrupted db file
+        if self._currentSceneInfo == -2:  # corrupted db file
             # self._currentSceneInfo == {}
             self._currentBaseSceneName = ""
             self.currentVersionIndex = -1
@@ -360,14 +360,12 @@ class RootManager(object):
 
         self._currentVersionDetailInfo = self.getVersionDetailInfo()
 
-        if self._currentSceneInfo["ReferencedVersion"]:
-            self.currentVersionIndex = self._currentSceneInfo["ReferencedVersion"]
-            self.currentSubVersionIndex = self._currentSceneInfo.get("ReferencedSubVersion", 1)
+        if self._currentSceneInfo["ReferencedVersions"]:
+            self.currentVersionIndex = self._currentSceneInfo["ReferencedVersions"][-1]
+            self.currentSubVersionIndex = self._currentSceneInfo["ReferencedSubVersions"][-1]
         else:
-            self.currentVersionIndex = len(self._currentVersionDetailInfo)
-            vIds = self._currentVersionDetailInfo.keys()
-            vIds.sort()
-            self.currentSubVersionIndex = len(self._currentVersionDetailInfo[vIds[-1]])
+            self.currentVersionIndex = self.getSortedVersionIndex()[-1]
+            self.currentSubVersionIndex = self.getSortedSubVersionIndex(self.currentVersionIndex)[-1]
 
         self.cursorInfo()
         # self._currentPreviewIndex = 0
@@ -438,10 +436,19 @@ class RootManager(object):
         #     logger.warning("Cursor is already at %s" % indexData)
         #     return
         self._currentVersionIndex = indexData
-        subVersionInfo = self._currentVersionDetailInfo[self._currentVersionIndex]
-        subVerIds = sorted(subVersionInfo, key=lambda x: subVersionInfo[x])
+        subVerIds = self.getSortedSubVersionIndex(self._currentVersionIndex)
         self.currentSubVersionIndex = subVerIds[-1]
         self.cursorInfo()
+
+    def getSortedVersionIndex(self):
+        vIds = self._currentVersionDetailInfo.keys()
+        vIds.sort()
+        return vIds
+
+    def getSortedSubVersionIndex(self, verIdx):
+        subVersionInfo = self._currentVersionDetailInfo[verIdx]
+        subVerIds = sorted(subVersionInfo, key=lambda x: subVersionInfo[x])
+        return subVerIds
 
     @property
     def currentSubVersionIndex(self):
@@ -1122,7 +1129,6 @@ Elapsed Time:{6}
             Path: {1}
                         """.format(previewName, previewFile))
 
-
     def deleteBasescene(self, databaseFile):
         """
         Deletes the given Base Scene and ALL its versions. Removes it from the database completely
@@ -1132,26 +1138,31 @@ Elapsed Time:{6}
         """
         logger.debug("Func: deleteBasescene")
 
-        #ADMIN ACCESS
+        # ADMIN ACCESS
         jsonInfo = self._loadJson(databaseFile)
         if jsonInfo == -2:
             return -2
         # delete all version files
+
+        keys = ["RelativePath", "Thumb"]
         for version in jsonInfo["Versions"]:
-            try:
-                os.remove(os.path.join(self.projectDir, version["RelativePath"]))
-            except:
-                msg = "Cannot delete scene version:%s" % (version["RelativePath"])
-                logger.warning(msg)
-                raise Exception([203, msg])
-                # pass
+            for key in keys:
+                full = os.path.join(self.projectDir, version[key])
+                if os.path.isfile(full):
+                    try:
+                        os.remove(full)
+                    except:
+                        msg = "Cannot delete scene version:%s" % (version[key])
+                        logger.warning(msg)
+                        raise Exception([203, msg])
 
         # delete reference file
-        if jsonInfo["ReferenceFile"]:
-            try:
-                os.remove(os.path.join(self.projectDir, jsonInfo["ReferenceFile"]))
-            except:
-                msg = "Cannot delete reference file %s" % (jsonInfo["ReferenceFile"])
+        if jsonInfo["ReferenceFiles"]:
+            for refFile in jsonInfo['ReferenceFiles']:
+                try:
+                    os.remove(os.path.join(self.projectDir, refFile))
+                except:
+                    msg = "Cannot delete reference file %s" % refFile
                 logger.warning(msg)
                 raise Exception([203, msg])
                 # pass
@@ -1168,7 +1179,7 @@ Elapsed Time:{6}
             # pass
         # delete json database file
         try:
-            os.remove(os.path.join(self.projectDir, databaseFile))
+            os.remove(databaseFile)
         except:
             msg = "Cannot delete scene path %s" % (databaseFile)
             # logger.warning(msg)
@@ -1179,7 +1190,7 @@ Elapsed Time:{6}
         logger.debug(msg)
         self.errorLogger(title="Deleted Base Scene", errorMessage=msg)
 
-    def deleteReference(self, databaseFile):
+    def deleteVersion(self, databaseFile):
         """
         Deletes the Reference file of the given Base Scene (If exists).
         Basically this is opposite of what "makeReference"  method does.
@@ -1188,21 +1199,86 @@ Elapsed Time:{6}
         """
         logger.debug("Func: deleteReference")
 
-        #ADMIN ACCESS
+        # ADMIN ACCESS
+        jsonInfo = self._loadJson(databaseFile)
+        if jsonInfo == -2:
+            return -2
+
+        if jsonInfo["Versions"]:
+            verId = self.currentVersionIndex
+            subVerId = self.currentSubVersionIndex
+            versions = jsonInfo['Versions']
+
+            rmIds = []
+            for i, curVersion in enumerate(versions):
+                relPath = curVersion['RelativePath']
+                verInfo = self.getFileVersionInfo(relPath)
+                if verInfo['currentVersion'] == verId and \
+                   verInfo['currentSubVersion'] == subVerId:
+                    rmIds.insert(0, i)
+
+            if len(rmIds) == len(versions):
+                self.deleteBasescene(databaseFile)
+            else:
+                refVersions = jsonInfo['ReferencedVersions']
+                if verId in refVersions:
+                    idx = refVersions.index(verId)
+                    refSubId = jsonInfo['ReferencedSubVersions'][idx]
+                    if refSubId == subVerId:
+                        self.deleteReference(databaseFile)
+                        jsonInfo = self._loadJson(databaseFile)
+                        
+                rmInfo = {}
+                for rmId in rmIds:
+                    rmInfo = jsonInfo['Versions'].pop(rmId)
+
+                keys = ["RelativePath", "Thumb"]
+                for key in keys:
+                    full = os.path.join(self.projectDir, rmInfo[key])
+                    if os.path.isfile(full):
+                        try:
+                            os.remove(full)
+                        except:
+                            msg = "Cannot delete scene file:%s" % (rmInfo[key])
+                            logger.warning(msg)
+                            raise Exception([203, msg])
+
+                self._dumpJson(jsonInfo, databaseFile)
+                self.errorLogger(title="Can not Deleted Reference File", errorMessage="Version: %s not Exists" % verId)
+
+    def deleteRefernece(self, databaseFile):
+        """
+        Deletes the Reference file of the given Base Scene (If exists).
+        Basically this is opposite of what "makeReference"  method does.
+        :param databaseFile: (String) Absolute path of the database file
+        :return: None
+        """
+        logger.debug("Func: deleteReference")
+
+        # ADMIN ACCESS
         jsonInfo = self._loadJson(databaseFile)
         if jsonInfo == -2:
             return -2
 
         if jsonInfo["ReferenceFile"]:
-            try:
-                referenceFile = jsonInfo["ReferenceFile"]
-                os.remove(os.path.join(self.projectDir, jsonInfo["ReferenceFile"]))
-                jsonInfo["ReferenceFile"] = None
-                jsonInfo["ReferencedVersion"] = None
-                self._dumpJson(jsonInfo, databaseFile)
-                self.errorLogger(title="Deleted Reference File", errorMessage="%s deleted" %referenceFile)
-            except:
-                msg = "Cannot delete reference file %s" % (jsonInfo["ReferenceFile"])
+            verId = self.currentVersionIndex
+            refVersions = jsonInfo['ReferencedVersions']
+            if verId not in refVersions:
+                self.errorLogger(title="Can not Deleted Reference File", errorMessage="Version: %s not Exists" % verId)
+            else:
+                try:
+                    idx = refVersions.index(verId)
+                    referenceFiles = jsonInfo["ReferenceFiles"]
+                    os.remove(os.path.join(self.projectDir, referenceFiles[idx]))
+
+                    jsonInfo["ReferenceFiles"].pop(idx)
+                    jsonInfo["ReferencedVersions"].pop(idx)
+                    jsonInfo["ReferencedSubVersions"].pop(idx)
+                    self._dumpJson(jsonInfo, databaseFile)
+                    self.errorLogger(title="Deleted Reference File",
+                                     errorMessage="%s deleted" % referenceFiles[idx])
+                except:
+                    msg = "Cannot delete reference file %s" % (jsonInfo["ReferenceFile"])
                 logger.warning(msg)
                 raise Exception([203, msg])
                 pass
@@ -1223,16 +1299,31 @@ Elapsed Time:{6}
         absVersionFile = os.path.join(self.projectDir, self._currentSceneInfo["Versions"][idx]["RelativePath"])
         name = os.path.split(absVersionFile)[1]
         filename, extension = os.path.splitext(name)
-        referenceName = "{0}_{1}_forReference".format(self._currentSceneInfo["Name"], self._currentSceneInfo["Category"])
+        referenceName = "{0}_{1}_v%03d".format(
+            self._currentSceneInfo["Name"], self._currentSceneInfo["Nickname"],
+            self._currentVersionIndex)
         relReferenceFile = os.path.join(self._currentSceneInfo["Path"], "{0}{1}".format(referenceName, extension))
         absReferenceFile = os.path.join(self.projectDir, relReferenceFile)
-        shutil.copyfile(absVersionFile, absReferenceFile)
-        self._currentSceneInfo["ReferenceFile"] = relReferenceFile
-        # SET the referenced version as the 'VISUAL INDEX NUMBER' starting from 1
-        self._currentSceneInfo["ReferencedVersion"] = self._currentVersionIndex
-        self._currentSceneInfo["ReferencedSubVersion"] = self._currentSubVersionIndex
+        
+        verIdx = -1
+        subVerIdx = -1
+        if self.currentVersionIndex in self._currentSceneInfo['ReferencedVersions']:
+            verIdx = self._currentSceneInfo['ReferencedVersions'].index(self.currentVersionIndex)
+            subVerIdx = self._currentSceneInfo['ReferencedSubVersions'][verIdx]
+            
+        if verIdx == -1 or subVerIdx == -1:
+            shutil.copyfile(absVersionFile, absReferenceFile)
+            if verIdx == -1:
+                self._currentSceneInfo["ReferenceFiles"].append(relReferenceFile)
+                # SET the referenced version as the 'VISUAL INDEX NUMBER' starting from 1
+                self._currentSceneInfo["ReferencedVersions"].append(self._currentVersionIndex)
+                self._currentSceneInfo["ReferencedSubVersions"].append(self._currentSubVersionIndex)
+            else:
+                self._currentSceneInfo["ReferenceFiles"][idx] = relReferenceFile
+                self._currentSceneInfo["ReferencedVersions"][idx] = self._currentVersionIndex
+                self._currentSceneInfo["ReferencedSubVersions"][idx] = self._currentSubVersionIndex
 
-        self._dumpJson(self._currentSceneInfo, self._baseScenesInCategory[self.currentBaseSceneName])
+            self._dumpJson(self._currentSceneInfo, self._baseScenesInCategory[self.currentBaseSceneName])
 
     def saveCallback(self):
         """Callback function to update reference files when files saved regularly"""
