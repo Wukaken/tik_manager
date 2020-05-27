@@ -205,12 +205,12 @@ class MayaManager(RootManager):
         jsonInfo["Creator"] = self.currentUser
         jsonInfo["CreatorHost"] = (socket.gethostname())
         if referenceFile:
-            jsonInfo["ReferenceFile"] = os.path.relpath(referenceFile, start=projectPath)
+            jsonInfo["ReferenceFiles"] = [os.path.relpath(referenceFile, start=projectPath)]
         else:
-            jsonInfo["ReferenceFile"] = None
+            jsonInfo["ReferenceFiles"] = []
             
-        jsonInfo["ReferencedVersion"] = referenceVersion
-        jsonInfo["ReferencedSubVersion"] = referenceSubVersion
+        jsonInfo["ReferencedVersions"] = [referenceVersion]
+        jsonInfo["ReferencedSubVersions"] = [referenceSubVersion]
         jsonInfo["Versions"] = [  # PATH => Notes => User Initials => Machine ID => Playblast => Thumbnail
             {"RelativePath": os.path.relpath(sceneFile, start=projectPath),
              "Nickname": nickname,
@@ -280,10 +280,21 @@ class MayaManager(RootManager):
 
             if referenceFile is not None:
                 shutil.copyfile(sceneFile, referenceFile)
-                jsonInfo["ReferenceFile"] = os.path.relpath(
-                    referenceFile, start=projectPath)
-                jsonInfo["ReferencedVersion"] = referenceVersion
-                jsonInfo["ReferencedSubVersion"] = referenceSubVersion
+                refVers = jsonInfo["ReferencedVersion"]
+                if referenceVersion in refVers:
+                    refIdx = refVers.index(referenceVersion)
+                    jsonInfo["ReferenceFiles"][refIdx] = os.path.relpath(
+                        referenceFile, start=projectPath)
+                    jsonInfo["ReferencedVersions"][refIdx] = referenceVersion
+                    jsonInfo["ReferencedSubVersions"][refIdx] = referenceSubVersion
+                else:
+                    refVers.append(referenceVersion)
+                    refVers.sort()
+                    refIdx = refVers.index(referenceVersion)
+                    jsonInfo["ReferencedVersions"] = refVers
+                    jsonInfo["ReferenceFiles"].insert(refIdx, os.path.relpath(
+                        referenceFile, start=projectPath))
+                    jsonInfo["ReferencedSubVersions"].insert(refIdx, referenceSubVersion)
 
             self._dumpJson(jsonInfo, jsonFile)
         else:
@@ -520,8 +531,13 @@ class MayaManager(RootManager):
         """Creates reference from the scene at cursor position"""
         logger.debug("Func: referenceBaseScene")
         projectPath = self.projectDir
-        relReferenceFile = self._currentSceneInfo["ReferenceFile"]
-
+        relReferenceFiles = self._currentSceneInfo["ReferenceFiles"]
+        relReferenceVersions = self._currentSceneInfo["ReferencedVersions"]
+        relReferenceFile = ''
+        if self._currentVersionIndex in relReferenceVersions:
+            idx = relReferenceVersions.index(self._currentVersionIndex)
+            relReferenceFile = relReferenceFiles[idx]
+        
         if relReferenceFile:
             referenceFile = os.path.join(projectPath, relReferenceFile)
             refFileBasename = os.path.split(relReferenceFile)[1]
@@ -537,7 +553,7 @@ class MayaManager(RootManager):
                 pass
 
         else:
-            cmds.warning("There is no reference set for this scene. Nothing changed")
+            cmds.warning("There is no reference set for this scene in version: %s. Nothing changed" % self._currentVersionIndex)
 
     def doCreateThumbnail(self, thumbnailFile):
         logger.debug("Func: doCreateThumbnail")

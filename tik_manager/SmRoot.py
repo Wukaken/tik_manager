@@ -335,31 +335,23 @@ class RootManager(object):
             self.currentSubVersionIndex = -1
             return
         if sceneName not in self._baseScenesInCategory.keys():
-
             self.currentVersionIndex = -1
             self.currentSubVersionIndex = -1
-            # msg = "There is no scene called %s in current category" %sceneName
-
-            # self._exception(101, msg)
             return
 
         self._currentBaseSceneName = sceneName
         self._currentSceneInfo = self._loadSceneInfo()
 
-        # assert (self._currentSceneInfo == -2)
         if self._currentSceneInfo == -2:  # corrupted db file
-            # self._currentSceneInfo == {}
             self._currentBaseSceneName = ""
             self.currentVersionIndex = -1
             self.currentSubVersionIndex = -1
             self._currentVersionDetailInfo = {}
             msg = "Database file %s is corrupted"
-            # raise Exception ([200, "Database file %s is corrupted\nDo you want to fix it manually?" %sceneName, self._baseScenesInCategory[sceneName]] )
             self._exception(200, msg)
             return
 
         self._currentVersionDetailInfo = self.getVersionDetailInfo()
-
         if self._currentSceneInfo["ReferencedVersions"]:
             self.currentVersionIndex = self._currentSceneInfo["ReferencedVersions"][-1]
             self.currentSubVersionIndex = self._currentSceneInfo["ReferencedSubVersions"][-1]
@@ -426,7 +418,7 @@ class RootManager(object):
             return
 
         versions = self._currentVersionDetailInfo.keys()
-        if not 1 <= indexData <= len(versions):
+        if indexData not in versions:
             msg = "out of version range! %s" % indexData
             # logger.error(msg)
             # raise Exception([101, msg])
@@ -469,10 +461,8 @@ class RootManager(object):
             return
         
         subVersions = self._currentVersionDetailInfo[self.currentVersionIndex]
-        if not 1 <= indexData <= len(subVersions):
+        if indexData not in subVersions:
             msg = "out of subversion range! %s" % indexData
-            # logger.error(msg)
-            # raise Exception([101, msg])
             self._exception(101, msg)
             return
 
@@ -1197,7 +1187,7 @@ Elapsed Time:{6}
         :param databaseFile: (String) Absolute path of the database file
         :return: None
         """
-        logger.debug("Func: deleteReference")
+        logger.debug("Func: deleteVersion")
 
         # ADMIN ACCESS
         jsonInfo = self._loadJson(databaseFile)
@@ -1246,7 +1236,7 @@ Elapsed Time:{6}
                 self._dumpJson(jsonInfo, databaseFile)
                 self.errorLogger(title="Can not Deleted Reference File", errorMessage="Version: %s not Exists" % verId)
 
-    def deleteRefernece(self, databaseFile):
+    def deleteReference(self, databaseFile):
         """
         Deletes the Reference file of the given Base Scene (If exists).
         Basically this is opposite of what "makeReference"  method does.
@@ -1260,7 +1250,7 @@ Elapsed Time:{6}
         if jsonInfo == -2:
             return -2
 
-        if jsonInfo["ReferenceFile"]:
+        if jsonInfo["ReferenceFiles"]:
             verId = self.currentVersionIndex
             refVersions = jsonInfo['ReferencedVersions']
             if verId not in refVersions:
@@ -1278,10 +1268,9 @@ Elapsed Time:{6}
                     self.errorLogger(title="Deleted Reference File",
                                      errorMessage="%s deleted" % referenceFiles[idx])
                 except:
-                    msg = "Cannot delete reference file %s" % (jsonInfo["ReferenceFile"])
-                logger.warning(msg)
-                raise Exception([203, msg])
-                pass
+                    msg = "Cannot delete reference file %s" % (jsonInfo["ReferenceFiles"][idx])
+                    logger.warning(msg)
+                    raise Exception([203, msg])
 
     def makeReference(self):
         """Creates a Reference copy from the base scene version at cursor position"""
@@ -1299,7 +1288,7 @@ Elapsed Time:{6}
         absVersionFile = os.path.join(self.projectDir, self._currentSceneInfo["Versions"][idx]["RelativePath"])
         name = os.path.split(absVersionFile)[1]
         filename, extension = os.path.splitext(name)
-        referenceName = "{0}_{1}_v%03d".format(
+        referenceName = self.getReferenceFileName(
             self._currentSceneInfo["Name"], self._currentSceneInfo["Nickname"],
             self._currentVersionIndex)
         relReferenceFile = os.path.join(self._currentSceneInfo["Path"], "{0}{1}".format(referenceName, extension))
@@ -1311,23 +1300,26 @@ Elapsed Time:{6}
             verIdx = self._currentSceneInfo['ReferencedVersions'].index(self.currentVersionIndex)
             subVerIdx = self._currentSceneInfo['ReferencedSubVersions'][verIdx]
             
-        if verIdx == -1 or subVerIdx == -1:
+        if verIdx == -1 or not subVerIdx == self.currentSubVersionIndex:
             shutil.copyfile(absVersionFile, absReferenceFile)
             if verIdx == -1:
-                self._currentSceneInfo["ReferenceFiles"].append(relReferenceFile)
-                # SET the referenced version as the 'VISUAL INDEX NUMBER' starting from 1
                 self._currentSceneInfo["ReferencedVersions"].append(self._currentVersionIndex)
-                self._currentSceneInfo["ReferencedSubVersions"].append(self._currentSubVersionIndex)
+                refVers = self._currentSceneInfo["ReferencedVersions"]
+                refVers.sort()
+                curIdx = refVers.index(self._currentVersionIndex)
+                self._currentSceneInfo["ReferenceFiles"].insert(curIdx, relReferenceFile)
+                self._currentSceneInfo["ReferencedSubVersions"].insert(curIdx, self._currentSubVersionIndex)
             else:
-                self._currentSceneInfo["ReferenceFiles"][idx] = relReferenceFile
-                self._currentSceneInfo["ReferencedVersions"][idx] = self._currentVersionIndex
-                self._currentSceneInfo["ReferencedSubVersions"][idx] = self._currentSubVersionIndex
+                self._currentSceneInfo["ReferenceFiles"][verIdx] = relReferenceFile
+                self._currentSceneInfo["ReferencedVersions"][verIdx] = self._currentVersionIndex
+                self._currentSceneInfo["ReferencedSubVersions"][verIdx] = self._currentSubVersionIndex
 
             self._dumpJson(self._currentSceneInfo, self._baseScenesInCategory[self.currentBaseSceneName])
 
     def saveCallback(self):
         """Callback function to update reference files when files saved regularly"""
-
+        return
+        '''
         ## TODO // TEST IT
         self._pathsDict["sceneFile"] = self.getSceneFile()
         try:
@@ -1338,8 +1330,8 @@ Elapsed Time:{6}
             return
         if openSceneInfo["jsonFile"]:
             jsonInfo = self._loadJson(openSceneInfo["jsonFile"])
-            if jsonInfo["ReferenceFile"]:
-                absRefFile = os.path.join(self._pathsDict["projectDir"], jsonInfo["ReferenceFile"])
+            if jsonInfo["ReferenceFiles"]:
+                absRefFile = os.path.join(self._pathsDict["projectDir"], jsonInfo["ReferenceFiles"])
                 # TODO : ref => Dict
                 absBaseSceneVersion = os.path.join(self._pathsDict["projectDir"], jsonInfo["Versions"][int(jsonInfo["ReferencedVersion"]) - 1]["RelativePath"])
                 # if the refererenced scene file is the saved file (saved or saved as)
@@ -1350,6 +1342,7 @@ Elapsed Time:{6}
                         print "Scene Manager Update:\nReference File Updated"
                     except:
                         pass
+        '''
 
     def checkReference(self, databaseFile, deepCheck=False):
         """
@@ -1369,29 +1362,51 @@ Elapsed Time:{6}
         if sceneInfo == -2:
             return -2 # Corrupted database file
 
-        if sceneInfo["ReferenceFile"]:
-            relVersionFile = sceneInfo["Versions"][sceneInfo["ReferencedVersion"] - 1]["RelativePath"]
-            absVersionFile = os.path.join(self.projectDir, relVersionFile)
-            relRefFile = sceneInfo["ReferenceFile"]
-            absRefFile = os.path.join(self.projectDir, relRefFile)
+        exitCode = 0
+        logList = []
+        if sceneInfo["ReferenceFiles"]:
+            refVers = sceneInfo["ReferencedVersions"]
+            refSubVers = sceneInfo["ReferencedSubVersions"]
+            refFiles = sceneInfo["ReferenceFiles"]
 
-            if not os.path.isfile(absRefFile):
-                logger.info("CODE RED: Reference File does not exist")
-                return -1 # code red
-            else:
-                if deepCheck:
-                    if filecmp.cmp(absVersionFile, absRefFile):
-                        logger.info("CODE GREEN: Everything is OK")
-                        return 1 # code Green
-                    else:
-                        logger.info("CODE RED: Checksum mismatch with reference file")
-                        return -1 # code red
+            versionData = sceneInfo['Versions']
+            versionDetailInfo = self.getVersionDetailInfo(versionData=versionData)
+            for i in range(len(refVers)):
+                ver = refVers[i]
+                subVer = refSubVers[i]
+                verIdx = versionDetailInfo[ver][subVer]
+                relVersionFile = sceneInfo['Versions'][verIdx]['RelativePath']
+                absVersionFile = os.path.join(self.projectDir, relVersionFile)
+                relRefFile = refFiles[i]
+                absRefFile = os.path.join(self.projectDir, relRefFile)
+
+                msg = ''
+                if not os.path.isfile(absRefFile):
+                    msg = "CODE RED: Reference File: %s does not exist" % absRefFile
+                    exitCode = -1
                 else:
-                    logger.info("CODE GREEN: Everything is OK")
-                    return 1 # code Green
+                    if deepCheck:
+                        if filecmp.cmp(absVersionFile, absRefFile):
+                            msg = "CODE GREEN: Reference File: %s is OK" % absRefFile
+                            exitCode = 1
+                        else:
+                            msg = "CODE RED: Checksum mismatch with Reference File: %s" % absRefFile
+                            if not exitCode == 1:
+                                exitCode = -1
+                    else:
+                        msg = "CODE GREEN: Reference File: %s is OK" % absRefFile
+                        if not exitCode == -1:
+                            exitCode = 1
+                    
+                logList.append(msg)
         else:
-            logger.info("CODE YELLOW: File does not have a reference copy")
-            return 0 # code yellow
+            msg = "CODE YELLOW: File does not have a reference copy"
+            logList.append(msg)
+            exitCode = 0
+
+        outMsg = '\n'.join(logList)
+        logger.info(outMsg)
+        return exitCode
 
     def errorLogger(self, title="", errorMessage=""):
         """
@@ -1885,8 +1900,8 @@ Elapsed Time:{6}
     def getOutputJsonName(self, baseName):
         return '%s.json' % baseName
 
-    def getReferenceFileName(self, baseName, categoryName, fileFormat):
-        referenceName = "{0}_{1}_forReference".format(baseName, categoryName)
+    def getReferenceFileName(self, baseName, nickname, version):
+        referenceName = "%s_%s_v%03d" % (baseName, nickname, version)
         return referenceName
 
     def getThumbnailName(self, baseName, version, subVersion):
@@ -1918,13 +1933,14 @@ Elapsed Time:{6}
         referenceSubVersion = None
         if makeReference:
             referenceName = self.getReferenceFileName(
-                baseName, categoryName, sceneFormat)
+                baseName, categoryName, version)
             referenceFile = os.path.normpath(os.path.join(sceneDir, referenceName))
             referenceVersion = version
             referenceSubVersion = subVersion
 
         info = {'sceneDir': sceneDir,
                 'sceneFile': sceneFile,
+                'nickname': nickname,
                 'jsonFile': jsonFile,
                 'thumbFile': thumbFile,
                 'referenceFile': referenceFile,
@@ -1991,8 +2007,9 @@ Elapsed Time:{6}
                 'referenceSubVersion': referenceSubVersion}
         return info
 
-    def getVersionDetailInfo(self):
-        versionData = self.getVersions()
+    def getVersionDetailInfo(self, versionData=None):
+        if versionData is None:
+            versionData = self.getVersions()
 
         verIdInfo = {}
         for i, curVersionData in enumerate(versionData):
@@ -2111,10 +2128,11 @@ Elapsed Time:{6}
            os.path.isfile(self._pathsDict["generalProjectCategoryDetailInfo"]):
             shutil.copy(self._pathsDict["generalProjectCategoryDetailInfo"],
                         self._pathsDict["projectCategoryDetailInfo"])
-            
-        info = self._loadJson(self._pathsDict["projectCategoryDetailInfo"])
-        if not info:
-            info = {}
+
+        info = {}
+        if os.path.isfile(self._pathsDict["projectCategoryDetailInfo"]):
+            info = self._loadJson(self._pathsDict["projectCategoryDetailInfo"])
+
         return info
 
     def getCategoryDetailInfo(self, category):

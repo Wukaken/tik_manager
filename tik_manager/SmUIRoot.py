@@ -340,8 +340,7 @@ class MainUI(QtWidgets.QMainWindow):
 
         self.projectCreateDate_label = QtWidgets.QLabel(self.centralwidget)
         self.projectCreateDate_label.setText('')
-        self.projectCreateDate_label.setAlignment(
-            QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter)
+        self.projectCreateDate_label.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
         self.projectCreateDate_label.setObjectName(("projectCreateDate_label"))
 
         ''''''''''''''''''''''''''''''''''''
@@ -2634,6 +2633,7 @@ class MainUI(QtWidgets.QMainWindow):
         # init project
         self.project_lineEdit.setText(self.manager.projectDir)
         self.renewProjectComboBox()
+        self.renewProjectCreateDate()
 
         # init subproject
 
@@ -2649,6 +2649,11 @@ class MainUI(QtWidgets.QMainWindow):
         self.subVersion_comboBox.setStyleSheet("background-color: rgb(80,80,80); color: white")
         # self._vEnableDisable()
         self.onModeChange()
+
+    def renewProjectCreateDate(self):
+        projSetting = self.manager.loadProjectSettings()
+        createDate = projSetting['ProjectDate']
+        self.projectCreateDate_label.setText(createDate)
 
     def refresh(self):
         # currentUserIndex = self.user_comboBox.currentIndex()
@@ -2824,60 +2829,55 @@ class MainUI(QtWidgets.QMainWindow):
             manager.currentBaseSceneName = str(self.scenes_listWidget.currentItem().text())
 
         self._vEnableDisable()
-        #get versions and add it to the combobox
-        verIdInfo = manager.getVersionDetailInfo()
+        if not row == -1:
+            if self.load_radioButton.isChecked():
+                verIdInfo = manager.getVersionDetailInfo()
+                if verIdInfo:
+                    verIds = manager.getSortedVersionIndex()
+                    for verId in verIds:
+                        self.version_comboBox.addItem("v%03d" % verId)
 
-        if verIdInfo:
-            verIds = verIdInfo.keys()
-            verIds.sort()
-            for verId in verIds:
-                self.version_comboBox.addItem("v%03d" % verId)
+                    self.version_comboBox.setCurrentIndex(len(verIds) - 1)
+                    self.onVersionChange()
+            else:
+                verIds = manager._currentSceneInfo['ReferencedVersions']
+                for verId in verIds:
+                    self.version_comboBox.addItem("v%03d" % verId)
 
-            self.version_comboBox.setCurrentIndex(len(verIds) - 1)
-            lastVerInfo = verIdInfo[verIds[-1]]
-            subVerIds = sorted(
-                lastVerInfo, key=lambda x: lastVerInfo[x])
+                self.version_comboBox.setCurrentIndex(len(verIds) - 1)
+                self.subVersion_comboBox.clear()
+                self.onSubVersionChange()
 
-            for subVerId in subVerIds:
-                self.subVersion_comboBox.addItem("%03d" % subVerId)
-
-            self.subVersion_comboBox.setCurrentIndex(len(subVerIds) - 1)
-
-        self.onVersionChange()
         self.version_comboBox.blockSignals(False)
         self.subVersion_comboBox.blockSignals(False)
 
     def onVersionChange(self):
         # This method IS Software Specific
         manager = self._getManager()
-
-        if self.version_comboBox.currentIndex() is not -1:
-            manager.currentVersionIndex = self.version_comboBox.currentIndex() + 1
-
-            subVerIdInfo = manager._currentVersionDetailInfo[manager.currentVersionIndex]
-            subVerIds = sorted(subVerIdInfo, key=lambda x: subVerIdInfo[x])
-
-            self.subVersion_comboBox.clear()
+        self.subVersion_comboBox.clear()
+        if self.version_comboBox.currentIndex() is not -1 and \
+           self.load_radioButton.isChecked():
+            manager.currentVersionIndex = int(self.version_comboBox.currentText()[1:])
+            subVerIds = manager.getSortedSubVersionIndex(manager.currentVersionIndex)
             for subVerId in subVerIds:
-                self.subVersion_comboBox.addItem('%03d' % subVerId)
+                self.subVersion_comboBox.addItem("%03d" % subVerId)
 
             self.subVersion_comboBox.setCurrentIndex(len(subVerIds) - 1)
-            self.onSubVersionChange()
+
+        self.onSubVersionChange()
 
     def onSubVersionChange(self):
         manager = self._getManager()
 
         if not self.subVersion_comboBox.currentIndex() == -1:
             manager.currentSubVersionIndex = int(self.subVersion_comboBox.currentText())
+        elif self.reference_radioButton.isChecked():
+            refVers = manager._currentSceneInfo["ReferencedVersions"]
+            verIdx = refVers.index(manager.currentVersionIndex)
+            manager.currentSubVersionIndex = manager._currentSceneInfo["ReferencedSubVersions"][verIdx]
 
-        # self.version_comboBox.blockSignals(True)
-
-        # clear Notes and verison combobox
         self.notes_textEdit.clear()
-
-        # update notes
         self.notes_textEdit.setPlainText(manager.getNotes())
-
 
         # update thumb
         if FORCE_QT4:
@@ -2887,9 +2887,9 @@ class MainUI(QtWidgets.QMainWindow):
         # self.tPixmap = QtGui.QPixmap(self.manager.getThumbnail())
         self.thumbnail_label.setPixmap(self.tPixmap)
 
-        if not manager.currentVersionIndex > len(manager._currentVersionDetailInfo) and \
+        if manager.currentVersionIndex in manager._currentVersionDetailInfo and \
            not manager.currentVersionIndex == -1 and \
-           not manager.currentSubVersionIndex > len(manager._currentVersionDetailInfo[manager._currentVersionIndex]) and \
+           manager.currentSubVersionIndex in manager._currentVersionDetailInfo[manager._currentVersionIndex] and \
            not manager.currentSubVersionIndex == -1:
             self.version_comboBox.setStyleSheet("background-color: rgb(80,80,80); color: yellow")
         else:
@@ -2897,8 +2897,6 @@ class MainUI(QtWidgets.QMainWindow):
 
         # self.version_comboBox.blockSignals(False)
         self._vEnableDisable()
-
-
 
     def populateBaseScenes(self, deepCheck=False):
         # This method IS Software Specific
@@ -2908,6 +2906,8 @@ class MainUI(QtWidgets.QMainWindow):
 
         self.scenes_listWidget.blockSignals(True)
         self.scenes_listWidget.clear()
+        self.version_comboBox.clear()
+        self.subVersion_comboBox.clear()
         # logger.debug("populateBaseScenes")
         baseScenesDict = manager.getBaseScenesInCategory()
         if self.reference_radioButton.isChecked():
@@ -3093,7 +3093,7 @@ class MainUI(QtWidgets.QMainWindow):
         if not row == -1:
             manager.deleteVersion(manager.currentDatabasePath)
             self.populateBaseScenes()
-            self.statusBar().showMessage("Status | Name: %s, Version %s, SubVersion %s has been deleted" % (name, manager.currentVersionIndex, manager.currentSubVersionIndex)
+            self.statusBar().showMessage("Status | Name: %s, Version %s, SubVersion %s has been deleted" % (name, manager.currentVersionIndex, manager.currentSubVersionIndex))
 
     def onIviewer(self):
         # This method is NOT Software Specific.
@@ -3182,22 +3182,20 @@ class MainUI(QtWidgets.QMainWindow):
     def _vEnableDisable(self):
         manager = self._getManager()
         if self.load_radioButton.isChecked() and manager.currentBaseSceneName:
-            self.version_comboBox.setEnabled(True)
             self.subVersion_comboBox.setEnabled(True)
             # if manager.getPreviews() is not []:
             #     self.showPreview_pushButton.setEnabled(True)
             # else:
             #     self.showPreview_pushButton.setEnabled(False)
+            self.deleteVersion_pushButton.setEnabled(True)
             self.makeReference_pushButton.setEnabled(True)
             self.addNote_pushButton.setEnabled(True)
-            self.version_label.setEnabled(True)
         else:
-            self.version_comboBox.setEnabled(False)
             self.subVersion_comboBox.setEnabled(False)
             self.showPreview_pushButton.setEnabled(False)
+            self.deleteVersion_pushButton.setEnabled(False)
             self.makeReference_pushButton.setEnabled(False)
             self.addNote_pushButton.setEnabled(False)
-            self.version_label.setEnabled(False)
 
         if manager.getPreviews():
             self.showPreview_pushButton.setEnabled(True)
