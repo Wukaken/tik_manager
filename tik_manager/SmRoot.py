@@ -1259,14 +1259,15 @@ Elapsed Time:{6}
                 try:
                     idx = refVersions.index(verId)
                     referenceFiles = jsonInfo["ReferenceFiles"]
-                    os.remove(os.path.join(self.projectDir, referenceFiles[idx]))
+                    referenceFile = referenceFiles[idx]
+                    os.remove(os.path.join(self.projectDir, referenceFile))
 
                     jsonInfo["ReferenceFiles"].pop(idx)
                     jsonInfo["ReferencedVersions"].pop(idx)
                     jsonInfo["ReferencedSubVersions"].pop(idx)
                     self._dumpJson(jsonInfo, databaseFile)
                     self.errorLogger(title="Deleted Reference File",
-                                     errorMessage="%s deleted" % referenceFiles[idx])
+                                     errorMessage="%s deleted" % referenceFile)
                 except:
                     msg = "Cannot delete reference file %s" % (jsonInfo["ReferenceFiles"][idx])
                     logger.warning(msg)

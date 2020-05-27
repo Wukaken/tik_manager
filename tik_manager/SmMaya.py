@@ -206,11 +206,13 @@ class MayaManager(RootManager):
         jsonInfo["CreatorHost"] = (socket.gethostname())
         if referenceFile:
             jsonInfo["ReferenceFiles"] = [os.path.relpath(referenceFile, start=projectPath)]
+            jsonInfo["ReferencedVersions"] = [referenceVersion]
+            jsonInfo["ReferencedSubVersions"] = [referenceSubVersion]
         else:
             jsonInfo["ReferenceFiles"] = []
-            
-        jsonInfo["ReferencedVersions"] = [referenceVersion]
-        jsonInfo["ReferencedSubVersions"] = [referenceSubVersion]
+            jsonInfo["ReferencedVersions"] = []
+            jsonInfo["ReferencedSubVersions"] = []
+
         jsonInfo["Versions"] = [  # PATH => Notes => User Initials => Machine ID => Playblast => Thumbnail
             {"RelativePath": os.path.relpath(sceneFile, start=projectPath),
              "Nickname": nickname,

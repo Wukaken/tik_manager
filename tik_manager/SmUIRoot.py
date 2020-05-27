@@ -2517,11 +2517,10 @@ class MainUI(QtWidgets.QMainWindow):
                     version, subVersion))
 
             self.manager.currentBaseSceneName = sceneInfo["Name"]
-            verIds = self.manager._currentVersionDetailInfo.keys()
-            verIds.sort()
-            subVerIds = self.manager._currentVersionDetailInfo[verIds[-1]]
-            self.manager.currentVersionIndex = len(verIds)
-            self.manager.currentSubVersionIndex = len(subVerIds)
+            verIds = self.manager.getSortedVersionIndex()
+            subVerIds = self.manager.getSortedSubVersionIndex(verIds[-1])
+            self.manager.currentVersionIndex = verIds[-1]
+            self.manager.currentSubVersionIndex = subVerIds[-1]
 
             currentRow = self.scenes_listWidget.currentRow()
             self.populateBaseScenes()
@@ -2534,8 +2533,6 @@ class MainUI(QtWidgets.QMainWindow):
         # -------
         sv_buttonBox.accepted.connect(partial(saveAsVersionCommand, versionUp))
         sv_buttonBox.rejected.connect(saveV_Dialog.reject)
-
-
 
         sceneInfo = self.manager.getOpenSceneInfo()
         if sceneInfo:
