@@ -1028,7 +1028,7 @@ Elapsed Time:{6}
         curCategories = self._loadCategories()
 
         index = curCategories.index(categoryName)
-        newindex= index+dir
+        newindex= index + dir
         if not (0 <= newindex <= len(curCategories)):
             return
 
@@ -1040,7 +1040,6 @@ Elapsed Time:{6}
         self._dumpJson(curCategories, self._pathsDict["categoriesFile"])
         self._categories = curCategories
         return
-
 
     def removeCategory(self, categoryName):
         """Removes the category from database"""
@@ -1054,6 +1053,7 @@ Elapsed Time:{6}
             return
 
         if categoryName in curCategories:
+            self.currentTabIndex = 0
             # Check if category about to be removed is empty
             for subP in self._subProjectsList:
                 baseScenes = self.scanBaseScenes(categoryAs=categoryName, subProjectAs=subP)
@@ -1067,6 +1067,15 @@ Elapsed Time:{6}
 
             # remove the empty category
             curCategories.remove(categoryName)
+            categoryDetailInfo = self._loadCategoryDetailInfo()
+            categoryOutDir = categoryDetailInfo.get(categoryName, {}).get('path')
+            if categoryOutDir is not None:
+                self.removeWorkspaceSetting(categoryOutDir)
+                if categoryName in categoryDetailInfo:
+                    categoryDetailInfo.pop(categoryName)
+                    self._dumpJson(categoryDetailInfo, self._pathsDict['projectCategoryDetailInfo'])
+                    self._categoryDetailInfo = self._loadCategoryDetailInfo()
+            
             self._dumpJson(curCategories, self._pathsDict["categoriesFile"])
             self._categories = curCategories
             return
@@ -1085,8 +1094,6 @@ Elapsed Time:{6}
         #     return
         # except ValueError:
         #     logger.warning("Specified Category does not exist")
-
-
 
     def playPreview(self, camera):
         """Runs the playblast at cursor position"""
@@ -2160,6 +2167,27 @@ Elapsed Time:{6}
         if addTest:
             rId = open(wsFile, 'ab')
             rId.write('workspace -fr "scene" "%s";\n' % outPath)
+            rId.close()
+
+    def removeWorkspaceSetting(self, path):
+        wsFile = os.path.join(self.projectDir, "workspace.mel")
+        rId = open(wsFile, 'rb')
+        tem = rId.readlines()
+        rId.close()
+
+        outPath = path.replace('\\', '/')
+        rmIds = []
+        for i, t in enumerate(tem):
+            if '"%s"' % outPath in t:
+                rmIds.insert(0, i)
+
+        if rmIds:
+            rId = open(wsFile, 'wb')
+            for rmId in rmIds:
+                tem.pop(rmId)
+
+            for t in tem:
+                rId.write(t)
             rId.close()
 
     def genCategoryOutputDir(self, category):

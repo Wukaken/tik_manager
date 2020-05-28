@@ -547,7 +547,7 @@ class MayaManager(RootManager):
             cmds.file(os.path.normpath(referenceFile), reference=True, gl=True, mergeNamespacesOnClash=False,
                       namespace=namespace)
             try:
-                ranges = self._currentSceneInfo["Versions"][self._currentSceneInfo["ReferencedVersion"]-1]["Ranges"]
+                ranges = self._currentSceneInfo["Versions"][self._currentSceneInfo]["ReferencedVersion"][-1]["Ranges"]
                 q = self._question("Do You want to set the Time ranges same with the reference?")
                 if q:
                     self._setTimelineRanges(ranges)
@@ -614,13 +614,20 @@ class MayaManager(RootManager):
         :return: None
         """
         logger.debug("Func: replaceThumbnail")
+        thumbName = self.getThumbnailName(
+            self._currentSceneInfo['Name'], self._currentVersionIndex,
+            self._currentSubVersionIndex)
+        jsonDir = os.path.dirname(self.currentDatabasePath)
+        thumbFile = os.path.normpath(os.path.join(jsonDir, thumbName))
         if not filePath:
-            filePath = self.createThumbnail(useCursorPosition=True)
+            self.doCreateThumbnail(thumbFile)
+        else:
+            shutil.copy(filePath, thumbFile)
 
         idx = self.getRealVersionIndex()
         projectPath = self.projectDir
         self._currentSceneInfo["Versions"][idx]["Thumb"] = os.path.relpath(
-            filePath, start=projectPath)
+            thumbFile, start=projectPath)
 
         self._dumpJson(self._currentSceneInfo, self.currentDatabasePath)
 

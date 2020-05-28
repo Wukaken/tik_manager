@@ -219,7 +219,7 @@ class MainUI(QtWidgets.QMainWindow):
 
         self.fileMenu = self.menubar.addMenu("File")
         self.createProject_fm = QtWidgets.QAction("&Create Project", self)
-        self.checkProjectFolder_fm = QtWidgets.QAction("&Check Project Folders", self)
+        self.checkProjectFolder_fm = QtWidgets.QAction("&Recreate Project Folders", self)
         self.saveVersion_fm = QtWidgets.QAction("&Save Version", self)
         self.saveBaseScene_fm = QtWidgets.QAction("&Save Base Scene", self)
         self.saveSubVersion_fm = QtWidgets.QAction("&Save Sub Version", self)
@@ -227,7 +227,7 @@ class MainUI(QtWidgets.QMainWindow):
         self.loadReferenceScene_fm = QtWidgets.QAction("&Load/Reference Scene", self)
 
         self.add_remove_categories_fm = QtWidgets.QAction("&Add/Remove Categories", self)
-        self.add_remove_category_settings_fm = QtWidgets.QAction("&Add/Remove Category Settings", self)
+        self.add_remove_category_settings_fm = QtWidgets.QAction("&Categories Settings", self)
         self.pb_settings_fm = QtWidgets.QAction("&Playblast Settings", self)
 
         self.projectSettings_fm = QtWidgets.QAction("&Project Settings", self)
@@ -290,14 +290,17 @@ class MainUI(QtWidgets.QMainWindow):
         self.toolsMenu.addAction(self.createPB)
 
         ''''''''''''''''''''''''''''''''''''
-        helpMenu = self.menubar.addMenu("Help")
+        helpMenu = self.menubar.addMenu("About")
         self.onlineHelp_mi = QtWidgets.QAction("&Online Help", self)
         self.checkVersion_mi = QtWidgets.QAction("&Check for updates", self)
 
         helpMenu.addAction(self.onlineHelp_mi)
         helpMenu.addAction(self.checkVersion_mi)
 
-        self.menubar.addMenu("User: %s" % self.manager.currentUser)
+        rightMenuBar = QtWidgets.QMenuBar(self)
+        rightMenuBar.addMenu(self.manager.currentUser)
+        rightMenuBar.setStyleSheet("color: #00FF00")
+        self.menubar.setCornerWidget(rightMenuBar)
 
     def buildStatusBarUIElements(self):
         self.statusbar = QtWidgets.QStatusBar(self)
@@ -388,29 +391,49 @@ class MainUI(QtWidgets.QMainWindow):
 
     def buildBottomLeftUIElements(self):
         self.category_tabWidget = QtWidgets.QTabWidget(self.centralwidget)
-        self.category_tabWidget.setMaximumSize(QtCore.QSize(1600, 22))
+        self.category_tabWidget.setMaximumSize(QtCore.QSize(1300, 600))
         self.category_tabWidget.setTabPosition(QtWidgets.QTabWidget.North)
         self.category_tabWidget.setElideMode(QtCore.Qt.ElideNone)
         self.category_tabWidget.setUsesScrollButtons(False)
         self.category_tabWidget.setObjectName(("tabWidget"))
+        self.category_tabWidget.setUsesScrollButtons(1)
+        self.category_tabWidget.tabBar().setStyleSheet(
+            '''
+            QTabBar::tab::selected {
+            background: #ffa500;
+            color: #000000;
+            }''')
 
+        self.category_layout = QtWidgets.QVBoxLayout()
+        self.category_layout.setContentsMargins(0, 0, 0, 0)
+        
         self.scenes_listWidget = QtWidgets.QListWidget(self.centralwidget)
         self.scenes_listWidget.setObjectName(("listWidget"))
 
     def buildTopRightUIElements(self):
+        self.trA_horizontalLayout = QtWidgets.QHBoxLayout()
+        self.trB_horizontalLayout = QtWidgets.QHBoxLayout()
+        self.trC_horizontalLayout = QtWidgets.QHBoxLayout()
+        self.trD_horizontalLayout = QtWidgets.QHBoxLayout()
+
         self.saveBaseScene_pushButton = QtWidgets.QPushButton(self.centralwidget)
         self.saveBaseScene_pushButton.setText(("Save Base Scene"))
-        self.saveBaseScene_pushButton.setStyleSheet("background-color: red; color: white")
+        self.saveBaseScene_pushButton.setStyleSheet(
+            '''
+            QPushButton{
+            background: #660000; 
+            font-size: 14px;}
+            ''')
         self.saveBaseScene_pushButton.setObjectName(("saveBaseScene_pushButton"))
 
         self.deleteVersion_pushButton = QtWidgets.QPushButton(self.centralwidget)
         self.deleteVersion_pushButton.setText(("Delete"))
-        self.deleteVersion_pushButton.setStyleSheet("color: red")
+        self.deleteVersion_pushButton.setStyleSheet("color: #FF0000")
         self.deleteVersion_pushButton.setObjectName(("deleteVersion_pushButton"))
 
         self.makeReference_pushButton = QtWidgets.QPushButton(self.centralwidget)
         self.makeReference_pushButton.setText(("Make Final"))
-        self.makeReference_pushButton.setStyleSheet("color: red")
+        self.makeReference_pushButton.setStyleSheet("color: #FF0000")
         self.makeReference_pushButton.setObjectName(("makeReference_pushButton"))
 
         ''''''''''''''''''''''''''''''''''''
@@ -429,13 +452,13 @@ class MainUI(QtWidgets.QMainWindow):
         self.openScene_pushButton = QtWidgets.QPushButton(self.centralwidget)
         self.openScene_pushButton.setLayoutDirection(QtCore.Qt.LeftToRight)
         self.openScene_pushButton.setText(("Open"))
-        self.openScene_pushButton.setStyleSheet("color: green")
+        self.openScene_pushButton.setStyleSheet("color: #00FF00")
         self.openScene_pushButton.setObjectName(("open_pushButton"))
 
         self.refScene_pushButton = QtWidgets.QPushButton(self.centralwidget)
         self.refScene_pushButton.setLayoutDirection(QtCore.Qt.LeftToRight)
-        self.refScene_pushButton.setText(("Reference"))
-        self.refScene_pushButton.setStyleSheet("color: green")
+        self.refScene_pushButton.setText(("REF"))
+        self.refScene_pushButton.setStyleSheet("color: #00FF00")
         self.refScene_pushButton.setObjectName(("reference_pushButton"))
 
         ''''''''''''''''''''''''''''''''''''
@@ -535,7 +558,7 @@ class MainUI(QtWidgets.QMainWindow):
 
     def buildMainLayout(self):
         self.setObjectName(self.windowName)
-        self.resize(880, 600)
+        self.resize(680, 600)
         self.setWindowTitle(self.windowName)
 
         self.setCentralWidget(self.centralwidget)
@@ -572,7 +595,6 @@ class MainUI(QtWidgets.QMainWindow):
         self.left_verticalLayout.addLayout(self.topLeftLayout)
         self.left_verticalLayout.addWidget(topMidLine)
         self.left_verticalLayout.addWidget(self.category_tabWidget)
-        self.left_verticalLayout.addWidget(self.scenes_listWidget)
 
         self.setMenuBar(self.menubar)
         self.setStatusBar(self.statusbar)
@@ -600,41 +622,52 @@ class MainUI(QtWidgets.QMainWindow):
         self.topLeftLayout.addWidget(self.load_radioButton, i, 1)
         self.topLeftLayout.addWidget(self.reference_radioButton, i, 2)
 
+        self.category_layout.addWidget(self.scenes_listWidget)
+
     def buildBottomLeftLayout(self):
         return
 
     def buildTopRightLayout(self):
         i = 0
-        self.right_verticalLayout.addWidget(self.saveBaseScene_pushButton, i, 0, 1, 2)
-        self.right_verticalLayout.addWidget(self.deleteVersion_pushButton, i, 2)
-        self.right_verticalLayout.addWidget(self.makeReference_pushButton, i, 3, 1, 2)
+        self.right_verticalLayout.addLayout(self.trA_horizontalLayout, i, 0, 1, 5)
+        self.trA_horizontalLayout.addWidget(self.saveBaseScene_pushButton)
+        self.trA_horizontalLayout.addWidget(self.makeReference_pushButton)
+        self.trA_horizontalLayout.addWidget(self.refScene_pushButton)
         i += 5
         line = QtWidgets.QFrame(self.centralwidget)
         line.setFrameShape(QtWidgets.QFrame.HLine)
         line.setFrameShadow(QtWidgets.QFrame.Sunken)
         self.right_verticalLayout.addWidget(line, i, 0, 1, 5)
         i += 5
-        self.right_verticalLayout.addWidget(self.version_label, i, 0)
-        self.right_verticalLayout.addWidget(self.version_comboBox, i, 1)
-        self.right_verticalLayout.addWidget(self.subVersion_comboBox, i, 2)
-        self.right_verticalLayout.addWidget(self.openScene_pushButton, i, 3)
-        self.right_verticalLayout.addWidget(self.refScene_pushButton, i, 4)
+        self.right_verticalLayout.addLayout(self.trB_horizontalLayout, i, 0, 1, 5)
+        self.trB_horizontalLayout.addWidget(self.version_label)
+        self.trB_horizontalLayout.addWidget(self.version_comboBox)
+        self.trB_horizontalLayout.addWidget(self.subVersion_comboBox)
+        self.trB_horizontalLayout.addWidget(self.openScene_pushButton)
+        self.trB_horizontalLayout.addWidget(self.deleteVersion_pushButton)
         i += 5
         line = QtWidgets.QFrame(self.centralwidget)
         line.setFrameShape(QtWidgets.QFrame.HLine)
         line.setFrameShadow(QtWidgets.QFrame.Sunken)
         self.right_verticalLayout.addWidget(line, i, 0, 1, 5)
         i += 5
-        self.right_verticalLayout.addWidget(self.saveVersion_pushButton, i, 0, 1, 2)
-        self.right_verticalLayout.addWidget(self.saveSubVersion_pushButton, i, 2, 1, 3)
+        self.right_verticalLayout.addLayout(self.trC_horizontalLayout, i, 0, 1, 5)
+        self.trC_horizontalLayout.addWidget(self.saveVersion_pushButton)
+        self.trC_horizontalLayout.addWidget(self.saveSubVersion_pushButton)
         i += 5
         line = QtWidgets.QFrame(self.centralwidget)
         line.setFrameShape(QtWidgets.QFrame.HLine)
         line.setFrameShadow(QtWidgets.QFrame.Sunken)
         self.right_verticalLayout.addWidget(line, i, 0, 1, 5)
         i += 5
-        self.right_verticalLayout.addWidget(self.showPreview_pushButton, i, 0, 1, 2)
-        self.right_verticalLayout.addWidget(self.addNote_pushButton, i, 2, 1, 3)
+        self.right_verticalLayout.addLayout(self.trD_horizontalLayout, i, 0, 1, 5)
+        self.trD_horizontalLayout.addWidget(self.showPreview_pushButton)
+        self.trD_horizontalLayout.addWidget(self.addNote_pushButton)
+        i += 5
+        line = QtWidgets.QFrame(self.centralwidget)
+        line.setFrameShape(QtWidgets.QFrame.HLine)
+        line.setFrameShadow(QtWidgets.QFrame.Sunken)
+        self.right_verticalLayout.addWidget(line, i, 0, 1, 5)
         i += 5
         self.right_verticalLayout.addWidget(self.notes_label, i, 0)
         i += 5
@@ -710,8 +743,25 @@ class MainUI(QtWidgets.QMainWindow):
 
         self.deleteVersion_pushButton.clicked.connect(self.onDeleteVersion)
 
-    def createSubProjectUI(self):
+        '''Right Click Menu'''
+        self.scenes_listWidget.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.scenes_listWidget.customContextMenuRequested.connect(self.onContextMenu_scenes)
 
+        self.scenes_rcItem_0.triggered.connect(lambda: self.rcAction_scenes("importScene"))
+        self.scenes_rcItem_1.triggered.connect(lambda: self.rcAction_scenes("showInExplorerMaya"))
+        self.scenes_rcItem_2.triggered.connect(lambda: self.rcAction_scenes("showInExplorerPB"))
+        self.scenes_rcItem_3.triggered.connect(lambda: self.rcAction_scenes("showInExplorerData"))
+        self.scenes_rcItem_6.triggered.connect(lambda: self.rcAction_scenes("showInExplorerProject"))
+        self.scenes_rcItem_4.triggered.connect(lambda: self.rcAction_scenes("showSceneInfo"))
+        self.scenes_rcItem_5.triggered.connect(lambda: self.rcAction_scenes("viewRender"))
+
+        self.thumbnail_label.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.thumbnail_label.customContextMenuRequested.connect(self.onContextMenu_thumbnail)
+
+        self.rcAction_thumb_0.triggered.connect(lambda: self.rcAction_thumb("currentView"))
+        self.rcAction_thumb_1.triggered.connect(lambda: self.rcAction_thumb("file"))
+
+    def createSubProjectUI(self):
         # This method is NOT Software Specific
         newSub, ok = QtWidgets.QInputDialog.getText(self, "Create New Sub-Project", "Enter an unique Sub-Project name:")
         if ok:
@@ -1809,8 +1859,7 @@ class MainUI(QtWidgets.QMainWindow):
         manager = self._getManager()
 
         passw, ok = QtWidgets.QInputDialog.getText(self, "Password Query",
-                                               "Enter Admin Password:", QtWidgets.QLineEdit.Password)
-
+                                                   "Enter Admin Password:", QtWidgets.QLineEdit.Password)
         if ok:
             if manager.checkPassword(passw):
                 pass
@@ -1819,13 +1868,6 @@ class MainUI(QtWidgets.QMainWindow):
                 return
         else:
             return
-
-
-        # if BoilerDict["Environment"]=="Standalone":
-        #     manager=self._getManager()
-        # else:
-        #     manager = self.manager
-
 
         categories_dialog = QtWidgets.QDialog(parent=self)
         categories_dialog.setModal(True)
@@ -1878,10 +1920,8 @@ class MainUI(QtWidgets.QMainWindow):
         deletecategory_pushButton.setText(("Delete"))
         deletecategory_pushButton.setObjectName(("deletecategory_pushButton"))
 
-
         def onAddCategory():
             manager.addCategory(str(self.categoryName_lineEdit.text()))
-
 
             preTab = QtWidgets.QWidget()
             preTab.setObjectName(self.categoryName_lineEdit.text())
@@ -1896,7 +1936,7 @@ class MainUI(QtWidgets.QMainWindow):
             self.selectcategory_comboBox.addItems(manager.getCategories())
 
             self._initCategories()
-
+            self.populateBaseScenes()
 
         addnewcategory_pushButton.clicked.connect(onAddCategory)
         deletecategory_pushButton.clicked.connect(onRemoveCategory)
@@ -1904,7 +1944,6 @@ class MainUI(QtWidgets.QMainWindow):
         self.categoryName_lineEdit.textChanged.connect(
             lambda: self._checkValidity(self.categoryName_lineEdit.text(), addnewcategory_pushButton,
                                         self.categoryName_lineEdit))
-
 
         categories_dialog.show()
 
@@ -2303,7 +2342,7 @@ class MainUI(QtWidgets.QMainWindow):
                 self.queryPop(type="okCancel", textTitle="Error Empty File Name", textHeader=msg)
                 return
 
-            notes = str(notes_plainTextEdit.toPlainText()).strip()
+            notes = notes_plainTextEdit.toPlainText().strip()
             if not notes:
                 noteMsg = 'Please fill the notes and try again'
                 self.queryPop(type="okCancel", textTitle="Empty Notes", textHeader=noteMsg)
@@ -2480,7 +2519,7 @@ class MainUI(QtWidgets.QMainWindow):
 
         def saveAsVersionCommand(versionUp=1):
             # TODO : ref
-            notes = str(notes_plainTextEdit.toPlainText()).strip()
+            notes = notes_plainTextEdit.toPlainText().strip()
             if not notes:
                 noteMsg = 'Please fill the notes and try again'
                 self.queryPop(type="okCancel", textTitle="Empty Notes", textHeader=noteMsg)
@@ -2513,7 +2552,7 @@ class MainUI(QtWidgets.QMainWindow):
                 verInfo = self.manager.getFileVersionInfo(relPath)
                 version = verInfo['currentVersion']
                 subVersion = verInfo['currentSubVersion']
-                self.statusBar().showMessage("Status | Saved Version => %s, SubVersion => %s" % (
+                self.statusBar().showMessage("Status | Saved Version => %03d, SubVersion => %03d" % (
                     version, subVersion))
 
             self.manager.currentBaseSceneName = sceneInfo["Name"]
@@ -2649,7 +2688,7 @@ class MainUI(QtWidgets.QMainWindow):
 
     def renewProjectCreateDate(self):
         projSetting = self.manager.loadProjectSettings()
-        createDate = projSetting['ProjectDate']
+        createDate = projSetting.get('ProjectDate', '')
         self.projectCreateDate_label.setText(createDate)
 
     def refresh(self):
@@ -2900,7 +2939,9 @@ class MainUI(QtWidgets.QMainWindow):
         manager = self._getManager()
         if not manager:
             return
-
+        
+        self.category_tabWidget.widget(manager.currentTabIndex).setLayout(
+            self.category_layout)
         self.scenes_listWidget.blockSignals(True)
         self.scenes_listWidget.clear()
         self.version_comboBox.clear()
@@ -2995,7 +3036,7 @@ class MainUI(QtWidgets.QMainWindow):
         version = self.manager.currentVersionIndex
         subVersion = self.manager.currentSubVersionIndex
         self.statusBar().showMessage(
-            "Status | Version {0}, SubVersion {1} is the new reference of {2}".format(
+            "Status | Version %03d, SubVersion %03d is the new reference of %s" % (
                 version, subVersion, manager.currentBaseSceneName))
 
         currentRow = self.scenes_listWidget.currentRow()
@@ -3090,7 +3131,7 @@ class MainUI(QtWidgets.QMainWindow):
         if not row == -1:
             manager.deleteVersion(manager.currentDatabasePath)
             self.populateBaseScenes()
-            self.statusBar().showMessage("Status | Name: %s, Version %s, SubVersion %s has been deleted" % (name, manager.currentVersionIndex, manager.currentSubVersionIndex))
+            self.statusBar().showMessage("Status | Name: %s, Version %03d, SubVersion %03d has been deleted" % (name, manager.currentVersionIndex, manager.currentSubVersionIndex))
 
     def onIviewer(self):
         # This method is NOT Software Specific.
@@ -3166,7 +3207,6 @@ class MainUI(QtWidgets.QMainWindow):
         else:
             self.baseScene_lineEdit.setText("Current Scene is not a Base Scene")
             self.baseScene_lineEdit.setStyleSheet("background-color: rgb(40,40,40); color: yellow")
-
 
     def _checkValidity(self, text, button, lineEdit, allowSpaces=False):
         if self.manager.nameCheck(text, allowSpaces=allowSpaces):
