@@ -16,7 +16,7 @@ smShelf.setTools([])
 tools =[]
 
 smScript = """
-from tik_manager import SmHoudini
+from pd_manager import SmHoudini
 SmHoudini.MainUI().show()
 """
 smIcon = os.path.join(iconsLocation, "manager_ICON.png")
@@ -28,7 +28,7 @@ tools.append(smTool)
 
 ## add saveVersion button
 avScript = """
-from tik_manager import SmHoudini
+from pd_manager import SmHoudini
 SmHoudini.MainUI().saveAsVersionDialog()
 """
 avIcon = os.path.join(iconsLocation, "saveVersion_ICON.png")
@@ -41,8 +41,8 @@ tools.append(avTool)
 
 ## add imageViewer button
 ivScript = """
-from tik_manager import ImageViewer
-tik_imageViewer = ImageViewer.MainUI().show()
+from pd_manager import ImageViewer
+pd_imageViewer = ImageViewer.MainUI().show()
 """
 ivIcon = os.path.join(iconsLocation, "imageViewer_ICON.png")
 
@@ -52,7 +52,7 @@ tools.append(ivTool)
 
 ## add projectMaterials button
 pmScript = """
-from tik_manager import projectMaterials
+from pd_manager import projectMaterials
 projectMaterials.MainUI().show()
 """
 pmIcon = os.path.join(iconsLocation, "projectMaterials_ICON.png")
@@ -63,7 +63,7 @@ tools.append(pmTool)
 
 ## add assetLibrary button
 alScript = """
-from tik_manager import projectMaterials
+from pd_manager import projectMaterials
 projectMaterials.MainUI().show()
 """
 alIcon = os.path.join(iconsLocation, "assetLibrary_ICON.png")

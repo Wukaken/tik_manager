@@ -55,7 +55,7 @@ import pprint
 import ImageViewer
 reload(ImageViewer)
 
-# from tik_manager.CSS import darkorange
+# from pd_manager.CSS import darkorange
 # reload(darkorange)
 import logging
 

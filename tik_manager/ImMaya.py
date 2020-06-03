@@ -674,7 +674,7 @@ class ImageManager(RootManager):
             mel.eval('SubmitJobToDeadline()')
             return None, None
         else:
-            msg = "SubmitMayaToDeadlineCustom.mel is not exist under the tik_manager directory"
+            msg = "SubmitMayaToDeadlineCustom.mel is not exist under the pd_manager directory"
             # pm.warning(msg)
             cmds.warning(msg)
             return -1, msg

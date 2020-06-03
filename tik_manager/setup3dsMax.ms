@@ -4,7 +4,7 @@ tooltip: "Scene Manager"
 ButtonText: "SM"
 icon: #("SceneManager",1)
 (
-	python.Execute "from tik_manager import Sm3dsMax"
+	python.Execute "from pd_manager import Sm3dsMax"
 	python.Execute "Sm3dsMax.MainUI().show()"
 )
 
@@ -14,7 +14,7 @@ tooltip: "Scene Manager - Save Version"
 ButtonText: "SM_SaveV"
 icon: #("SceneManager",2)
 (
-	python.Execute "from tik_manager import Sm3dsMax"
+	python.Execute "from pd_manager import Sm3dsMax"
 	python.Execute "Sm3dsMax.MainUI().saveAsVersionDialog()"
 )
 
@@ -24,9 +24,9 @@ tooltip: "Scene Manager - Image Viewer"
 ButtonText: "ImageViewer"
 icon: #("SceneManager",4)
 (
-    python.Execute "from tik_manager import Sm3dsMax"
-    python.Execute "tik_imageViewer = Sm3dsMax.MainUI()"
-    python.Execute "tik_imageViewer.onIviewer()"
+    python.Execute "from pd_manager import Sm3dsMax"
+    python.Execute "pd_imageViewer = Sm3dsMax.MainUI()"
+    python.Execute "pd_imageViewer.onIviewer()"
 )
 
 macroScript makePreview
@@ -35,7 +35,7 @@ tooltip: "Scene Manager - Make Preview"
 ButtonText: "Make Preview"
 icon: #("SceneManager",5)
 (
-	python.Execute "from tik_manager import Sm3dsMax"
+	python.Execute "from pd_manager import Sm3dsMax"
 	python.Execute "reload(Sm3dsMax)"
 	python.Execute "Sm3dsMax.MaxManager().createPreview()"
 )
@@ -46,7 +46,7 @@ tooltip: "Scene Manager - Project Materials"
 ButtonText: "Project Materials"
 icon: #("SceneManager",6)
 (
-	python.Execute "from tik_manager import Sm3dsMax"
-	python.Execute "tik_projectMaterials = Sm3dsMax.MainUI()"
-	python.Execute "tik_projectMaterials.onPMaterials()"
+	python.Execute "from pd_manager import Sm3dsMax"
+	python.Execute "pd_projectMaterials = Sm3dsMax.MainUI()"
+	python.Execute "pd_projectMaterials.onPMaterials()"
 )

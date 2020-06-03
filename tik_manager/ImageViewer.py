@@ -61,7 +61,7 @@ from shutil import copyfile
 
 import logging
 
-# from tik_manager.CSS import darkorange
+# from pd_manager.CSS import darkorange
 
 __author__ = "Arda Kutlu"
 __copyright__ = "Copyright 2018, Image Viewer"

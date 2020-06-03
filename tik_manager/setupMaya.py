@@ -25,9 +25,9 @@ else:
 ## add Manager button:
 
 cmd = """
-from tik_manager import SmMaya
-tik_sceneManager = SmMaya.MainUI(callback="tik_sceneManager")
-tik_sceneManager.show()
+from pd_manager import SmMaya
+pd_sceneManager = SmMaya.MainUI(callback="pd_sceneManager")
+pd_sceneManager.show()
 """
 icon = os.path.join(iconsLocation, "manager_ICON.png")
 if not os.path.isfile(icon):
@@ -37,7 +37,7 @@ addButton("SceneManager", command=cmd, icon=icon )
 
 ## add saveVersion button
 cmd = """
-from tik_manager import SmMaya
+from pd_manager import SmMaya
 SmMaya.MainUI().saveAsVersionDialog()
 """
 icon = os.path.join(iconsLocation, "saveVersion_ICON.png")
@@ -48,8 +48,8 @@ addButton("saveVersion", command=cmd, icon=icon )
 
 ## add imageManager button
 cmd = """
-from tik_manager import ImMaya
-tik_imageManager = ImMaya.MainUI(callback="tik_imageManager")
+from pd_manager import ImMaya
+pd_imageManager = ImMaya.MainUI(callback="pd_imageManager")
 """
 icon = os.path.join(iconsLocation, "imageManager_ICON.png")
 if not os.path.isfile(icon):
@@ -59,8 +59,8 @@ addButton("imageManager", command=cmd, icon=icon )
 
 ## add imageViewer button
 cmd = """
-from tik_manager import ImageViewer
-tik_imageViewer = ImageViewer.MainUI().show()
+from pd_manager import ImageViewer
+pd_imageViewer = ImageViewer.MainUI().show()
 """
 icon = os.path.join(iconsLocation, "imageViewer_ICON.png")
 if not os.path.isfile(icon):
@@ -70,7 +70,7 @@ addButton("imageViewer", command=cmd, icon=icon )
 
 ## add projectMaterials button
 cmd="""
-from tik_manager import projectMaterials
+from pd_manager import projectMaterials
 projectMaterials.MainUI().show()
 """
 icon = os.path.join(iconsLocation, "projectMaterials_ICON.png")
@@ -81,7 +81,7 @@ addButton("projectMaterials", command=cmd, icon=icon)
 
 ## add assetLibrary button
 cmd="""
-from tik_manager import assetLibrary
+from pd_manager import assetLibrary
 assetLibrary.MainUI().show()
 """
 icon = os.path.join(iconsLocation, "assetLibrary_ICON.png")
@@ -109,7 +109,7 @@ addButton("assetLibrary", command=cmd, icon=icon )
 #     sys.path.append(targetFolder)
 #
 # def smUpdate(*args):
-#     from tik_manager import SmMaya
+#     from pd_manager import SmMaya
 #     m = SmMaya.MayaManager()
 #     m.saveCallback()
 #

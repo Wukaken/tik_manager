@@ -271,10 +271,10 @@ def nukeSetup(prompt=True):
         "# start Scene Manager\n",
         "toolbar = nuke.menu('Nodes')\n",
         "smMenu = toolbar.addMenu('SceneManager', icon='manager_ICON.png')\n",
-        "smMenu.addCommand('Scene Manager', 'from tik_manager import SmNuke\\nSmNuke.MainUI().show()', icon='manager_ICON.png')\n",
-        "smMenu.addCommand('Save Version', 'from tik_manager import SmNuke\\nSmNuke.MainUI().saveAsVersionDialog()', icon='saveVersion_ICON.png')\n",
-        "smMenu.addCommand('Image Viewer', 'from tik_manager import SmNuke\\ntik_imageViewer = SmNuke.MainUI()\\ntik_imageViewer.onIviewer()', icon='imageViewer_ICON.png')\n",
-        "smMenu.addCommand('Project Materials', 'from tik_manager import SmNuke\\ntik_projectMaterials = SmNuke.MainUI()\\ntik_projectMaterials.onPMaterials()', icon='projectMaterials_ICON.png')\n",
+        "smMenu.addCommand('Scene Manager', 'from pd_manager import SmNuke\\nSmNuke.MainUI().show()', icon='manager_ICON.png')\n",
+        "smMenu.addCommand('Save Version', 'from pd_manager import SmNuke\\nSmNuke.MainUI().saveAsVersionDialog()', icon='saveVersion_ICON.png')\n",
+        "smMenu.addCommand('Image Viewer', 'from pd_manager import SmNuke\\npd_imageViewer = SmNuke.MainUI()\\npd_imageViewer.onIviewer()', icon='imageViewer_ICON.png')\n",
+        "smMenu.addCommand('Project Materials', 'from pd_manager import SmNuke\\npd_projectMaterials = SmNuke.MainUI()\\npd_projectMaterials.onPMaterials()', icon='projectMaterials_ICON.png')\n",
         "# end Scene Manager\n"
     ]
     inject(menuFile, menuContent, between=("# start Scene Manager\n", "# end Scene Manager\n"))
@@ -360,7 +360,7 @@ def mayaSetup(prompt=True):
         "\n",
         "def smUpdate(*args):\n",
         "    try:\n",
-        "        from tik_manager import SmMaya\n",
+        "        from pd_manager import SmMaya\n",
         "        m = SmMaya.MayaManager()\n",
         "        m.saveCallback()\n",
         "    except:\n",
@@ -411,7 +411,7 @@ def mayaSetup(prompt=True):
         -style "iconOnly" 
         -marginWidth 1
         -marginHeight 1
-        -command "\\nfrom tik_manager import SmMaya\\nreload(SmMaya)\\ntik_sceneManager = SmMaya.MainUI(callback=\\"tik_sceneManager\\")\\ntik_sceneManager.show()\\n" 
+        -command "\\nfrom pd_manager import SmMaya\\nreload(SmMaya)\\npd_sceneManager = SmMaya.MainUI(callback=\\"pd_sceneManager\\")\\npd_sceneManager.show()\\n" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1
@@ -437,7 +437,7 @@ def mayaSetup(prompt=True):
         -style "iconOnly" 
         -marginWidth 1
         -marginHeight 1
-        -command "\\nfrom tik_manager import SmMaya\\nSmMaya.MainUI().saveAsVersionDialog()\\n" 
+        -command "\\nfrom pd_manager import SmMaya\\nSmMaya.MainUI().saveAsVersionDialog()\\n" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1
@@ -463,7 +463,7 @@ def mayaSetup(prompt=True):
         -style "iconOnly" 
         -marginWidth 1
         -marginHeight 1
-        -command "\\nfrom tik_manager import ImMaya\\ntik_imageManager = ImMaya.MainUI(callback=\\"tik_imageManager\\")\\n" 
+        -command "\\nfrom pd_manager import ImMaya\\npd_imageManager = ImMaya.MainUI(callback=\\"pd_imageManager\\")\\n" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1
@@ -489,7 +489,7 @@ def mayaSetup(prompt=True):
         -style "iconOnly" 
         -marginWidth 1
         -marginHeight 1
-        -command "\\nfrom tik_manager import ImageViewer\\ntik_imageViewer = ImageViewer.MainUI().show()\\n" 
+        -command "\\nfrom pd_manager import ImageViewer\\npd_imageViewer = ImageViewer.MainUI().show()\\n" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1
@@ -515,7 +515,7 @@ def mayaSetup(prompt=True):
         -style "iconOnly" 
         -marginWidth 1
         -marginHeight 1
-        -command "\\nfrom tik_manager import SmMaya\\ntik_imageViewer = SmMaya.MayaManager().createPreview()\\n" 
+        -command "\\nfrom pd_manager import SmMaya\\npd_imageViewer = SmMaya.MayaManager().createPreview()\\n" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1
@@ -541,7 +541,7 @@ def mayaSetup(prompt=True):
         -style "iconOnly" 
         -marginWidth 1
         -marginHeight 1
-        -command "\\nfrom tik_manager import projectMaterials\\nprojectMaterials.MainUI().show()\\n" 
+        -command "\\nfrom pd_manager import projectMaterials\\nprojectMaterials.MainUI().show()\\n" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1
@@ -567,7 +567,7 @@ def mayaSetup(prompt=True):
         -style "iconOnly" 
         -marginWidth 1
         -marginHeight 1
-        -command "\\nfrom tik_manager import assetLibrary\\nassetLibrary.MainUI().show()\\n" 
+        -command "\\nfrom pd_manager import assetLibrary\\nassetLibrary.MainUI().show()\\n" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1
@@ -676,28 +676,28 @@ def houdiniSetup(prompt=True):
   </toolshelf>
 
   <tool name="sceneManager" label="Manager" icon="%s">
-    <script scriptType="python"><![CDATA[from tik_manager import SmHoudini
+    <script scriptType="python"><![CDATA[from pd_manager import SmHoudini
 reload(SmHoudini)
 SmHoudini.MainUI().show()]]></script>
   </tool>
 
   <tool name="saveVersion" label="Version" icon="%s">
-    <script scriptType="python"><![CDATA[from tik_manager import SmHoudini
+    <script scriptType="python"><![CDATA[from pd_manager import SmHoudini
 SmHoudini.MainUI().saveAsVersionDialog()]]></script>
   </tool>
 
   <tool name="imageViewer" label="Images" icon="%s">
-    <script scriptType="python"><![CDATA[from tik_manager import ImageViewer
-tik_imageViewer = ImageViewer.MainUI().show()]]></script>
+    <script scriptType="python"><![CDATA[from pd_manager import ImageViewer
+pd_imageViewer = ImageViewer.MainUI().show()]]></script>
   </tool>
   
   <tool name="takePreview" label="Preview" icon="%s">
-    <script scriptType="python"><![CDATA[from tik_manager import SmHoudini
+    <script scriptType="python"><![CDATA[from pd_manager import SmHoudini
 SmHoudini.HoudiniManager().createPreview()]]></script>
   </tool>
   
   <tool name="projectMaterials" label="Project Materials" icon="%s">
-    <script scriptType="python"><![CDATA[from tik_manager import projectMaterials
+    <script scriptType="python"><![CDATA[from pd_manager import projectMaterials
 projectMaterials.MainUI().show()]]></script>
   </tool>
 </shelfDocument>
@@ -828,7 +828,7 @@ python.Execute "import sys"
 python.Execute "import os"
 python.Execute "import MaxPlus"
 python.Execute "sys.path.append(os.path.normpath('{0}'))"
-python.Execute "def smUpdate(*args):\\n    try:\\n        from tik_manager import Sm3dsMax\\n        m = Sm3dsMax.MaxManager()\\n        m.saveCallback()\\n    except:\\n        pass"
+python.Execute "def smUpdate(*args):\\n    try:\\n        from pd_manager import Sm3dsMax\\n        m = Sm3dsMax.MaxManager()\\n        m.saveCallback()\\n    except:\\n        pass"
 python.Execute "MaxPlus.NotificationManager.Register(14, smUpdate)"
 """.format(upNetworkDir.replace("\\", "//"))
 
@@ -843,7 +843,7 @@ tooltip: "Scene Manager"
 ButtonText: "SM"
 icon: #("SceneManager",1)
 (
-	python.Execute "from tik_manager import Sm3dsMax"
+	python.Execute "from pd_manager import Sm3dsMax"
 	python.Execute "Sm3dsMax.MainUI().show()"
 )
 """
@@ -854,7 +854,7 @@ tooltip: "Scene Manager - Save Version"
 ButtonText: "SM_SaveV"
 icon: #("SceneManager",2)
 (
-	python.Execute "from tik_manager import Sm3dsMax"
+	python.Execute "from pd_manager import Sm3dsMax"
 	python.Execute "Sm3dsMax.MainUI().saveAsVersionDialog()"
 )"""
         imageViewer = """
@@ -864,9 +864,9 @@ tooltip: "Scene Manager - Image Viewer"
 ButtonText: "ImageViewer"
 icon: #("SceneManager",4)
 (
-    python.Execute "from tik_manager import Sm3dsMax"
-    python.Execute "tik_imageViewer = Sm3dsMax.MainUI()"
-    python.Execute "tik_imageViewer.onIviewer()"
+    python.Execute "from pd_manager import Sm3dsMax"
+    python.Execute "pd_imageViewer = Sm3dsMax.MainUI()"
+    python.Execute "pd_imageViewer.onIviewer()"
 )"""
         makePreview = """
 macroScript makePreview
@@ -875,7 +875,7 @@ tooltip: "Scene Manager - Make Preview"
 ButtonText: "Make Preview"
 icon: #("SceneManager",5)
 (
-	python.Execute "from tik_manager import Sm3dsMax"
+	python.Execute "from pd_manager import Sm3dsMax"
 	python.Execute "reload(Sm3dsMax)"
 	python.Execute "Sm3dsMax.MaxManager().createPreview()"
 )"""
@@ -886,9 +886,9 @@ tooltip: "Scene Manager - Project Materials"
 ButtonText: "Project Materials"
 icon: #("SceneManager",6)
 (
-	python.Execute "from tik_manager import Sm3dsMax"
-	python.Execute "tik_projectMaterials = Sm3dsMax.MainUI()"
-	python.Execute "tik_projectMaterials.onPMaterials()"
+	python.Execute "from pd_manager import Sm3dsMax"
+	python.Execute "pd_projectMaterials = Sm3dsMax.MainUI()"
+	python.Execute "pd_projectMaterials.onPMaterials()"
 )"""
         _dumpContent(os.path.join(macrosDir, "SceneManager-manager.mcr"), manager)
         _dumpContent(os.path.join(macrosDir, "SceneManager-saveVersion.mcr"), saveVersion)
