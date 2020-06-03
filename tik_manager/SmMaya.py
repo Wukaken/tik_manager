@@ -536,6 +536,7 @@ class MayaManager(RootManager):
         relReferenceFiles = self._currentSceneInfo["ReferenceFiles"]
         relReferenceVersions = self._currentSceneInfo["ReferencedVersions"]
         relReferenceFile = ''
+        idx = 0
         if self._currentVersionIndex in relReferenceVersions:
             idx = relReferenceVersions.index(self._currentVersionIndex)
             relReferenceFile = relReferenceFiles[idx]
@@ -547,7 +548,7 @@ class MayaManager(RootManager):
             cmds.file(os.path.normpath(referenceFile), reference=True, gl=True, mergeNamespacesOnClash=False,
                       namespace=namespace)
             try:
-                ranges = self._currentSceneInfo["Versions"][self._currentSceneInfo]["ReferencedVersion"][-1]["Ranges"]
+                ranges = self._currentSceneInfo["Versions"][idx]["Ranges"]
                 q = self._question("Do You want to set the Time ranges same with the reference?")
                 if q:
                     self._setTimelineRanges(ranges)

@@ -290,16 +290,11 @@ class MainUI(QtWidgets.QMainWindow):
         self.toolsMenu.addAction(self.createPB)
 
         ''''''''''''''''''''''''''''''''''''
-        helpMenu = self.menubar.addMenu("About")
-        self.onlineHelp_mi = QtWidgets.QAction("&Online Help", self)
-        self.checkVersion_mi = QtWidgets.QAction("&Check for updates", self)
-
-        helpMenu.addAction(self.onlineHelp_mi)
-        helpMenu.addAction(self.checkVersion_mi)
+        self.helpMenu = self.menubar.addMenu("About")
 
         rightMenuBar = QtWidgets.QMenuBar(self)
-        rightMenuBar.addMenu(self.manager.currentUser)
-        rightMenuBar.setStyleSheet("color: #00FF00")
+        rightMenuBar.addMenu('User: %s' % self.manager.currentUser)
+        rightMenuBar.setStyleSheet("color: #00FF00; font-weight: bold")
         self.menubar.setCornerWidget(rightMenuBar)
 
     def buildStatusBarUIElements(self):
@@ -322,6 +317,7 @@ class MainUI(QtWidgets.QMainWindow):
 
         self.setProject_pushButton = QtWidgets.QPushButton(self.centralwidget)
         self.setProject_pushButton.setText(("SET"))
+        self.setProject_pushButton.setStyleSheet("font-weight: bold")
         self.setProject_pushButton.setObjectName(("setProject_pushButton"))
 
         ''''''''''''''''''''''''''''''''''''
@@ -341,10 +337,11 @@ class MainUI(QtWidgets.QMainWindow):
             QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter)
         self.projectDate_label.setObjectName(("projectsDate_label"))
 
-        self.projectCreateDate_label = QtWidgets.QLabel(self.centralwidget)
-        self.projectCreateDate_label.setText('')
-        self.projectCreateDate_label.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
-        self.projectCreateDate_label.setObjectName(("projectCreateDate_label"))
+        self.projectCreateDate_lineEdit = QtWidgets.QLineEdit(self.centralwidget)
+        self.projectCreateDate_lineEdit.setText('')
+        self.projectCreateDate_lineEdit.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
+        self.projectCreateDate_lineEdit.setObjectName(("projectCreateDate_lineEdit"))
+        self.projectCreateDate_lineEdit.setReadOnly(True)
 
         ''''''''''''''''''''''''''''''''''''
         self.subProject_label = QtWidgets.QLabel(self.centralwidget)
@@ -361,7 +358,7 @@ class MainUI(QtWidgets.QMainWindow):
         self.addSubProject_pushButton.setMinimumSize(QtCore.QSize(40, 30))
         self.addSubProject_pushButton.setMaximumSize(QtCore.QSize(40, 30))
         self.addSubProject_pushButton.setText(("Add"))
-        self.addSubProject_pushButton.setStyleSheet("color: red")
+        self.addSubProject_pushButton.setStyleSheet("color: #FF0000; font-weight: bold")
         self.addSubProject_pushButton.setObjectName(("addSubProject_pushButton"))
 
         ''''''''''''''''''''''''''''''''''''
@@ -396,7 +393,7 @@ class MainUI(QtWidgets.QMainWindow):
         self.category_tabWidget.setElideMode(QtCore.Qt.ElideNone)
         self.category_tabWidget.setUsesScrollButtons(False)
         self.category_tabWidget.setObjectName(("tabWidget"))
-        self.category_tabWidget.setUsesScrollButtons(1)
+        # self.category_tabWidget.setUsesScrollButtons(1)
         self.category_tabWidget.tabBar().setStyleSheet(
             '''
             QTabBar::tab::selected {
@@ -404,6 +401,7 @@ class MainUI(QtWidgets.QMainWindow):
             color: #000000;
             }''')
 
+        self.category_layout = None
         self.category_layout = QtWidgets.QVBoxLayout()
         self.category_layout.setContentsMargins(0, 0, 0, 0)
         
@@ -421,19 +419,20 @@ class MainUI(QtWidgets.QMainWindow):
         self.saveBaseScene_pushButton.setStyleSheet(
             '''
             QPushButton{
-            background: #660000; 
+            background: #660000;
+            font-weight: bold;
             font-size: 14px;}
             ''')
         self.saveBaseScene_pushButton.setObjectName(("saveBaseScene_pushButton"))
 
         self.deleteVersion_pushButton = QtWidgets.QPushButton(self.centralwidget)
         self.deleteVersion_pushButton.setText(("Delete"))
-        self.deleteVersion_pushButton.setStyleSheet("color: #FF0000")
+        self.deleteVersion_pushButton.setStyleSheet("color: #FF0000; font-weight: bold")
         self.deleteVersion_pushButton.setObjectName(("deleteVersion_pushButton"))
 
         self.makeReference_pushButton = QtWidgets.QPushButton(self.centralwidget)
         self.makeReference_pushButton.setText(("Make Final"))
-        self.makeReference_pushButton.setStyleSheet("color: #FF0000")
+        self.makeReference_pushButton.setStyleSheet("color: #FF0000; font-weight: bold")
         self.makeReference_pushButton.setObjectName(("makeReference_pushButton"))
 
         ''''''''''''''''''''''''''''''''''''
@@ -452,29 +451,30 @@ class MainUI(QtWidgets.QMainWindow):
         self.openScene_pushButton = QtWidgets.QPushButton(self.centralwidget)
         self.openScene_pushButton.setLayoutDirection(QtCore.Qt.LeftToRight)
         self.openScene_pushButton.setText(("Open"))
-        self.openScene_pushButton.setStyleSheet("color: #00FF00")
+        self.openScene_pushButton.setStyleSheet("color: #00FF00; font-weight: bold")
         self.openScene_pushButton.setObjectName(("open_pushButton"))
 
         self.refScene_pushButton = QtWidgets.QPushButton(self.centralwidget)
         self.refScene_pushButton.setLayoutDirection(QtCore.Qt.LeftToRight)
         self.refScene_pushButton.setText(("REF"))
-        self.refScene_pushButton.setStyleSheet("color: #00FF00")
+        self.refScene_pushButton.setStyleSheet("color: #00FF00; font-weight: bold")
         self.refScene_pushButton.setObjectName(("reference_pushButton"))
 
         ''''''''''''''''''''''''''''''''''''
         self.saveVersion_pushButton = QtWidgets.QPushButton(self.centralwidget)
         self.saveVersion_pushButton.setText(("Save As Version"))
-        self.saveVersion_pushButton.setStyleSheet("color: red")
+        self.saveVersion_pushButton.setStyleSheet("color: #FF0000; font-weight: bold")
         self.saveVersion_pushButton.setObjectName(("saveVersion_pushButton"))
 
         self.saveSubVersion_pushButton = QtWidgets.QPushButton(self.centralwidget)
         self.saveSubVersion_pushButton.setText(("Save As Sub Version"))
-        self.saveSubVersion_pushButton.setStyleSheet("color: yellow")
+        self.saveSubVersion_pushButton.setStyleSheet("color: yellow; font-weight: bold")
         self.saveSubVersion_pushButton.setObjectName(("saveSubVersion_pushButton"))
 
         ''''''''''''''''''''''''''''''''''''
         self.showPreview_pushButton = QtWidgets.QPushButton(self.centralwidget)
         self.showPreview_pushButton.setText(("Show Preview"))
+        self.showPreview_pushButton.setStyleSheet("font-weight: bold")
         self.showPreview_pushButton.setObjectName(("shotPreview_pushButton"))
 
         self.addNote_pushButton = QtWidgets.QPushButton(self.centralwidget)
@@ -484,6 +484,7 @@ class MainUI(QtWidgets.QMainWindow):
         self.addNote_pushButton.setAccessibleName((""))
         self.addNote_pushButton.setAccessibleDescription((""))
         self.addNote_pushButton.setText(("Add Note"))
+        self.addNote_pushButton.setStyleSheet("font-weight: bold")
         self.addNote_pushButton.setObjectName(("addNote_pushButton"))
 
         self.notes_label = QtWidgets.QLabel(self.centralwidget)
@@ -610,7 +611,7 @@ class MainUI(QtWidgets.QMainWindow):
         self.topLeftLayout.addWidget(self.projects_comboBox, i, 1, 1, 3)
         i += 5
         self.topLeftLayout.addWidget(self.projectDate_label, i, 0)
-        self.topLeftLayout.addWidget(self.projectCreateDate_label, i, 1, 1, 3)
+        self.topLeftLayout.addWidget(self.projectCreateDate_lineEdit, i, 1, 1, 3)
         i += 5
         self.topLeftLayout.addWidget(self.subProject_label, i, 0)
         self.topLeftLayout.addWidget(self.subProject_comboBox, i, 1, 1, 3)
@@ -702,8 +703,7 @@ class MainUI(QtWidgets.QMainWindow):
         self.assetLibrary_mi.triggered.connect(self.onAssetLibrary)
         self.createPB.triggered.connect(self.onCreatePreview)
 
-        self.onlineHelp_mi.triggered.connect(lambda: webbrowser.open_new("http://www.ardakutlu.com/tik-manager-documentation/"))
-        self.checkVersion_mi.triggered.connect(self.onCheckNewVersion)
+        self.helpMenu.aboutToShow.connect(lambda: webbrowser.open_new("http://www.ardakutlu.com/tik-manager-documentation/"))
 
         self.load_radioButton.clicked.connect(self.onModeChange)
         self.reference_radioButton.clicked.connect(self.onModeChange)
@@ -967,7 +967,7 @@ class MainUI(QtWidgets.QMainWindow):
             swVersion = self.manager.getSoftwareVersion()
             swVerKey = '%sVersion' % BoilerDict['Environment']
 
-            projectDate = datetime.datetime.now().strftime("%y%m%d")
+            projectDate = datetime.datetime.now().strftime("%Y/%m/%d")
 
             projectSettingsDB = {"Resolution": [resolutionX_spinBox.value(), resolutionY_spinBox.value()],
                                  "FPS": int(fps_comboBox.currentText()),
@@ -2654,7 +2654,8 @@ class MainUI(QtWidgets.QMainWindow):
 
         self.load_radioButton.setChecked(self.manager.currentMode)
         self.reference_radioButton.setChecked(not self.manager.currentMode)
-        self.category_tabWidget.setCurrentIndex(self.manager.currentTabIndex)
+        oriIndex = self.manager.currentTabIndex
+        self.category_tabWidget.setCurrentIndex(1)
 
         if not newborn:
             self.manager.init_paths()
@@ -2677,6 +2678,7 @@ class MainUI(QtWidgets.QMainWindow):
 
         # init base scenes
         self.populateBaseScenes()
+        self.category_tabWidget.setCurrentIndex(oriIndex)
 
         # disable the version related stuff
         self.version_comboBox.clear()
@@ -2689,7 +2691,7 @@ class MainUI(QtWidgets.QMainWindow):
     def renewProjectCreateDate(self):
         projSetting = self.manager.loadProjectSettings()
         createDate = projSetting.get('ProjectDate', '')
-        self.projectCreateDate_label.setText(createDate)
+        self.projectCreateDate_lineEdit.setText(createDate)
 
     def refresh(self):
         # currentUserIndex = self.user_comboBox.currentIndex()
@@ -2939,7 +2941,7 @@ class MainUI(QtWidgets.QMainWindow):
         manager = self._getManager()
         if not manager:
             return
-        
+
         self.category_tabWidget.widget(manager.currentTabIndex).setLayout(
             self.category_layout)
         self.scenes_listWidget.blockSignals(True)
