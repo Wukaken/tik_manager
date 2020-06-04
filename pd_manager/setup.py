@@ -1,13 +1,14 @@
 import sys
 import os
 import shutil
-import psutil
+# import psutil
 import _version
 
 def checkRuninngInstances(sw):
     running = True
     aborted=False
-
+    return 1
+    '''
     while not aborted and running:
         # closed = not (sw in (p.name() for p in psutil.process_iter()))
         matchList = [p for p in psutil.process_iter() if p.name().startswith(sw)]
@@ -31,6 +32,7 @@ def checkRuninngInstances(sw):
         else:
             return 1
         # return -1
+    '''
 
 def _loadContent(filePath):
     f = open(filePath, "r")
@@ -303,7 +305,8 @@ def mayaSetup(prompt=True):
                 "SubmitMayaToDeadlineCustom.mel",
                 "adminPass.psw",
                 "projectMaterials.py",
-                "softwareDatabase.json"
+                "softwareDatabase.json",
+                "projectDirectoryDatabase.json",
                 ]
     for file in fileList:
         if not os.path.isfile(os.path.join(networkDir, file)):

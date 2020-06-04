@@ -293,7 +293,7 @@ class MainUI(QtWidgets.QMainWindow):
         self.helpMenu = self.menubar.addMenu("About")
 
         rightMenuBar = QtWidgets.QMenuBar(self)
-        rightMenuBar.addMenu('User: %s' % self.manager.currentUser)
+        rightMenuBar.addMenu('User: %s  ' % self.manager.currentUser)
         rightMenuBar.setStyleSheet("color: #00FF00; font-weight: bold")
         self.menubar.setCornerWidget(rightMenuBar)
 
@@ -444,10 +444,11 @@ class MainUI(QtWidgets.QMainWindow):
 
         self.version_comboBox = QtWidgets.QComboBox(self.centralwidget)
         self.version_comboBox.setObjectName(("version_comboBox"))
-
+        self.version_comboBox.setFixedSize(60, 24)
         self.subVersion_comboBox = QtWidgets.QComboBox(self.centralwidget)
         self.subVersion_comboBox.setObjectName(("subVersion_comboBox"))
-
+        self.subVersion_comboBox.setFixedSize(60, 24)
+        
         self.openScene_pushButton = QtWidgets.QPushButton(self.centralwidget)
         self.openScene_pushButton.setLayoutDirection(QtCore.Qt.LeftToRight)
         self.openScene_pushButton.setText(("Open"))
@@ -703,7 +704,7 @@ class MainUI(QtWidgets.QMainWindow):
         self.assetLibrary_mi.triggered.connect(self.onAssetLibrary)
         self.createPB.triggered.connect(self.onCreatePreview)
 
-        self.helpMenu.aboutToShow.connect(lambda: webbrowser.open_new("http://www.ardakutlu.com/tik-manager-documentation/"))
+        self.helpMenu.aboutToShow.connect(self.showManagerInfo)
 
         self.load_radioButton.clicked.connect(self.onModeChange)
         self.reference_radioButton.clicked.connect(self.onModeChange)
@@ -735,7 +736,7 @@ class MainUI(QtWidgets.QMainWindow):
         self.saveSubVersion_pushButton.clicked.connect(partial(self.saveAsVersionDialog, 0))
         self.saveSubVersion_fm.triggered.connect(partial(self.saveAsVersionDialog, 0))
 
-        self.scenes_listWidget.doubleClicked.connect(self.onLoadScene)
+        self.scenes_listWidget.doubleClicked.connect(lambda: self.onLoadScene(0))
         self.openScene_pushButton.clicked.connect(self.onOpenScene)
         self.refScene_pushButton.clicked.connect(self.onReferenceScene)
 
@@ -784,6 +785,20 @@ class MainUI(QtWidgets.QMainWindow):
         self.manager.setProject(newProjPath)
         self.onProjectChange()
         self.projects_comboBox.blockSignals(False)
+
+    def showManagerInfo(self):
+        dataFile = os.path.join(os.path.dirname(__file__), 'pd_managerInfomation.txt')
+        data = ''
+        if os.path.isfile(dataFile):
+            rid = open(dataFile, 'rb')
+            lines = rid.readlines()
+            data = ''.join(lines)
+            print '1'
+        else:
+            data = 'Re-developed by Project-D Animation Studio\n'
+            data += '                              --2020/06/04'
+
+        self.infoPop(textTitle="About Pd Manager", textHeader="Pd Manager Information", textInfo=data)
 
     def renewProjectComboBox(self):
         self.projects_comboBox.blockSignals(True)
@@ -2893,14 +2908,14 @@ class MainUI(QtWidgets.QMainWindow):
         # This method IS Software Specific
         manager = self._getManager()
         self.subVersion_comboBox.clear()
-        if self.version_comboBox.currentIndex() is not -1 and \
-           self.load_radioButton.isChecked():
+        if not self.version_comboBox.currentIndex() == -1:
             manager.currentVersionIndex = int(self.version_comboBox.currentText()[1:])
-            subVerIds = manager.getSortedSubVersionIndex(manager.currentVersionIndex)
-            for subVerId in subVerIds:
-                self.subVersion_comboBox.addItem("%03d" % subVerId)
+            if self.load_radioButton.isChecked():
+                subVerIds = manager.getSortedSubVersionIndex(manager.currentVersionIndex)
+                for subVerId in subVerIds:
+                    self.subVersion_comboBox.addItem("%03d" % subVerId)
 
-            self.subVersion_comboBox.setCurrentIndex(len(subVerIds) - 1)
+                self.subVersion_comboBox.setCurrentIndex(len(subVerIds) - 1)
 
         self.onSubVersionChange()
 
@@ -2972,27 +2987,14 @@ class MainUI(QtWidgets.QMainWindow):
         self.scenes_listWidget.blockSignals(False)
 
     def onOpenScene(self):
-        oriLoad = self.load_radioButton.isChecked()
-        oriRef = self.reference_radioButton.isChecked()
-        
-        self.load_radioButton.setChecked(1)
-        self.reference_radioButton.setChecked(0)
-        self.onLoadScene()
-        self.load_radioButton.setChecked(oriLoad)
-        self.reference_radioButton.setChecked(oriRef)
+        self.onLoadScene(operType=1)
 
     def onReferenceScene(self):
-        oriLoad = self.load_radioButton.isChecked()
-        oriRef = self.reference_radioButton.isChecked()
-        
-        self.load_radioButton.setChecked(0)
-        self.reference_radioButton.setChecked(1)
-        self.onLoadScene()
-        self.load_radioButton.setChecked(oriLoad)
-        self.reference_radioButton.setChecked(oriRef)
+        self.onLoadScene(operType=2)
     
-    def onLoadScene(self):
+    def onLoadScene(self, operType=0):
         # This method IS Software Specific. BUT overriding it is better, so it is not selecting manager
+        # operType == 0: defined by ui, 1 open, 2 reference
 
         row = self.scenes_listWidget.currentRow()
         if row == -1:
@@ -3006,7 +3008,14 @@ class MainUI(QtWidgets.QMainWindow):
             else:
                 self.manager.errorLogger(title="Disregarded warning", errorMessage=msg)
 
-        if self.load_radioButton.isChecked():
+        rOperType = operType
+        if operType == 0:
+            if self.load_radioButton.isChecked():
+                rOperType = 1
+            else:
+                rOperType = 2
+
+        if rOperType == 1:
             if self.manager.isSceneModified():
                 q = self.queryPop(type="yesNoCancel", textTitle="Save Changes", textInfo="Save Changes to",
                                   textHeader=("Scene Modified"))
@@ -3016,15 +3025,15 @@ class MainUI(QtWidgets.QMainWindow):
                 if q == "no":
                     self.manager.loadBaseScene(force=True)
                 if q == "cancel":
-                    pass
+                    return
             else:  # if current scene saved and secure
                 self.manager.loadBaseScene(force=True)
-                self.manager.getOpenSceneInfo()
-                self._initOpenScene()
+
+            self.manager.getOpenSceneInfo()
+            self._initOpenScene()
 
             self.statusBar().showMessage("Status | Scene Loaded => %s" % self.manager.currentBaseSceneName)
-
-        if self.reference_radioButton.isChecked():
+        elif rOperType == 2:
             self.manager.referenceBaseScene()
             # self.populateScenes()
             self.statusBar().showMessage("Status | Scene Referenced => %s" % self.manager.currentBaseSceneName)
@@ -3210,6 +3219,8 @@ class MainUI(QtWidgets.QMainWindow):
             self.baseScene_lineEdit.setText("Current Scene is not a Base Scene")
             self.baseScene_lineEdit.setStyleSheet("background-color: rgb(40,40,40); color: yellow")
 
+        self._vEnableDisable()
+
     def _checkValidity(self, text, button, lineEdit, allowSpaces=False):
         if self.manager.nameCheck(text, allowSpaces=allowSpaces):
             lineEdit.setStyleSheet("background-color: rgb(40,40,40); color: white")
@@ -3229,12 +3240,45 @@ class MainUI(QtWidgets.QMainWindow):
             self.deleteVersion_pushButton.setEnabled(True)
             self.makeReference_pushButton.setEnabled(True)
             self.addNote_pushButton.setEnabled(True)
+            
         else:
             self.subVersion_comboBox.setEnabled(False)
             self.showPreview_pushButton.setEnabled(False)
             self.deleteVersion_pushButton.setEnabled(False)
             self.makeReference_pushButton.setEnabled(False)
             self.addNote_pushButton.setEnabled(False)
+
+        row = self.scenes_listWidget.currentRow()
+        if not row == -1:
+            self.openScene_pushButton.setEnabled(True)
+            self.openScene_pushButton.setStyleSheet("color: #00FF00; font-weight: bold")
+            self.refScene_pushButton.setEnabled(True)
+            self.refScene_pushButton.setStyleSheet("color: #00FF00; font-weight: bold")
+            self.deleteVersion_pushButton.setEnabled(True)
+            self.deleteVersion_pushButton.setStyleSheet("color: #FF0000; font-weight: bold")
+            self.makeReference_pushButton.setEnabled(True)
+            self.makeReference_pushButton.setStyleSheet("color: #FF0000; font-weight: bold")
+        else:
+            self.openScene_pushButton.setEnabled(False)
+            self.openScene_pushButton.setStyleSheet("color: #444444; font-weight: bold")
+            self.refScene_pushButton.setEnabled(False)
+            self.refScene_pushButton.setStyleSheet("color: #444444; font-weight: bold")
+            self.deleteVersion_pushButton.setEnabled(False)
+            self.deleteVersion_pushButton.setStyleSheet("color: #444444; font-weight: bold")
+            self.makeReference_pushButton.setEnabled(False)
+            self.makeReference_pushButton.setStyleSheet("color: #444444; font-weight: bold")
+
+        sceneInfo = self.manager.getOpenSceneInfo()
+        if sceneInfo:
+            self.saveVersion_pushButton.setEnabled(True)
+            self.saveVersion_pushButton.setStyleSheet("color: #FF0000; font-weight: bold")
+            self.saveSubVersion_pushButton.setEnabled(True)
+            self.saveSubVersion_pushButton.setStyleSheet("color: yellow; font-weight: bold")
+        else:
+            self.saveVersion_pushButton.setEnabled(False)
+            self.saveVersion_pushButton.setStyleSheet("color: #444444; font-weight: bold")
+            self.saveSubVersion_pushButton.setEnabled(False)
+            self.saveSubVersion_pushButton.setStyleSheet("color: #444444; font-weight: bold")
 
         if manager.getPreviews():
             self.showPreview_pushButton.setEnabled(True)
@@ -3281,9 +3325,6 @@ class MainUI(QtWidgets.QMainWindow):
             webbrowser.open_new(downloadPath)
         elif ret == QtWidgets.QMessageBox.Help:
             webbrowser.open_new(whatsNewPath)
-
-
-
 
     def infoPop(self, textTitle="info", textHeader="", textInfo="", type="I"):
         self.msg = QtWidgets.QMessageBox(parent=self)
