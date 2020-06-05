@@ -180,6 +180,8 @@ class MayaManager(RootManager):
             categoryName, nickname, baseName, 1, 1, sceneFormat,
             checkUniqueBaseName=1, subProjectIndex=subProjectIndex,
             makeReference=makeReference)
+        if not info:
+            return [-1, '']
 
         sceneDir = info['sceneDir']
         sceneFile = info['sceneFile']

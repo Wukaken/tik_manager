@@ -1921,9 +1921,14 @@ Elapsed Time:{6}
                           subVersion, sceneFormat, checkUniqueBaseName=0,
                           subProjectIndex=0, makeReference=True,
                           *args, **kwargs):
+        if checkUniqueBaseName:
+            rec = self.checkBaseNameUnique(categoryName, baseName, subProjectIndex=0)
+            if isinstance(rec, tuple) and rec[0] == -1:
+                return None
+            
         sceneDir = self.getOutputSceneFolder(
             categoryName, baseName, subProjectIndex=subProjectIndex,
-            checkUniqueBaseName=checkUniqueBaseName)
+            checkUniqueBaseName=0)
         sceneName = self.getOutputFileName(baseName, nickname,
                                            version, subVersion, sceneFormat)
         sceneFile = os.path.normpath(os.path.join(sceneDir, sceneName))
