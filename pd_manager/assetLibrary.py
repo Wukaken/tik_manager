@@ -267,7 +267,7 @@ class AssetLibrary(AssetEditor):
     def addNote(self, assetName, note):
         """Adds a note to the version at current position"""
         data = self._getData(assetName)
-        now = datetime.datetime.now().strftime("%d/%m/%Y-%H:%M")
+        now = datetime.datetime.now().strftime("%H:%M - %Y/%m/%d")
         data["notes"] = "%s %s\n%s\n" % (data["notes"], now, note)
         self._setData(assetName, data)
 

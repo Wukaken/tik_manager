@@ -173,7 +173,7 @@ class MayaManager(RootManager):
         logger.debug("Func: saveBaseScene")
 
         projectPath = self.projectDir
-        now = datetime.datetime.now().strftime("%d/%m/%Y-%H:%M")
+        now = datetime.datetime.now().strftime("%H:%M - %Y/%m/%d")
         completeNote = "[%s] on %s\n%s\n" % (self.currentUser, now, versionNotes)
 
         info = self.getOutputFileInfo(
@@ -253,7 +253,7 @@ class MayaManager(RootManager):
                 
             projectPath = self.projectDir
             
-            now = datetime.datetime.now().strftime("%d/%m/%Y-%H:%M")
+            now = datetime.datetime.now().strftime("%H:%M - %Y/%m/%d")
             completeNote = "[%s] on %s\n%s\n" % (self.currentUser, now, versionNotes)
 
             jsonFile = sceneInfo["jsonFile"]

@@ -195,7 +195,7 @@ class NukeManager(RootManager):
         """
         logger.debug("Func: saveBaseScene")
 
-        now = datetime.datetime.now().strftime("%d/%m/%Y-%H:%M")
+        now = datetime.datetime.now().strftime("%H:%M - %Y/%m/%d")
         completeNote = "[%s] on %s\n%s\n" % (self.currentUser, now, versionNotes)
 
         # Check if the base name is unique
@@ -300,7 +300,7 @@ class NukeManager(RootManager):
 
 
 
-        now = datetime.datetime.now().strftime("%d/%m/%Y-%H:%M")
+        now = datetime.datetime.now().strftime("%H:%M - %Y/%m/%d")
         completeNote = "[%s] on %s\n%s\n" % (self.currentUser, now, versionNotes)
 
         sceneName = self.getSceneFile()

@@ -960,7 +960,7 @@ Elapsed Time:{6}
         if self._currentVersionIndex == -1 or self._currentSubVersionIndex == -1:
             logger.warning("No Version selected")
             return
-        now = datetime.datetime.now().strftime("%d/%m/%Y-%H:%M")
+        now = datetime.datetime.now().strftime("%H:%M - %Y/%m/%d")
         self._currentNotes = "%s\n[%s] on %s\n%s\n" % (self._currentNotes, self.currentUser, now, note)
         idx = self.getRealVersionIndex()
         self._currentSceneInfo["Versions"][idx]["Note"] = self._currentNotes
@@ -1431,7 +1431,7 @@ Elapsed Time:{6}
         logger.setLevel(logging.DEBUG)
 
         now = datetime.datetime.now()
-        timeInfo = now.strftime("%d.%m.%Y - %H:%M")
+        timeInfo = now.strftime("%H:%M - %Y/%m/%d")
         userInfo = self.currentUser
         machineInfo = socket.gethostname()
         ## stuff
