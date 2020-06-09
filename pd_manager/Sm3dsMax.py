@@ -133,7 +133,7 @@ class MaxManager(RootManager):
         self._saveProjects(projectsDict)
         self.projectDir = path
 
-    def saveBaseScene(self, categoryName, baseName, subProjectIndex=0, makeReference=True, versionNotes="", sceneFormat="max", *args, **kwargs):
+    def saveBaseScene(self, categoryName, nickname, baseName, subProjectIndex=0, makeReference=True, versionNotes="", sceneFormat="max", *args, **kwargs):
         """
         Saves the scene with formatted name and creates a json file for the scene
         Args:
@@ -150,106 +150,65 @@ class MaxManager(RootManager):
         Returns: Scene DB Dictionary
 
         """
+        logger.debug("Func: saveBaseScene")
 
-
-        # fullName = self.userList.keys()[self.userList.values().index(userName)]
+        projectPath = self.projectDir
         now = datetime.datetime.now().strftime("%H:%M - %Y/%m/%d")
         completeNote = "[%s] on %s\n%s\n" % (self.currentUser, now, versionNotes)
 
-        # Check if the base name is unique
-        scenesToCheck = self.scanBaseScenes(categoryAs = categoryName, subProjectAs = subProjectIndex)
-        for key in scenesToCheck.keys():
-            if baseName.lower() == key.lower():
-                msg = ("Base Scene Name is not unique!\nABORTING")
-                self._exception(360, msg)
-                return -1, msg
+        info = self.getOutputFileInfo(
+            categoryName, nickname, baseName, 1, 1, sceneFormat,
+            checkUniqueBaseName=1, subProjectIndex=subProjectIndex,
+            makeReference=makeReference)
+        if not info:
+            return [-1, '']
 
-
-        projectPath = self.projectDir
-        databaseDir = self._pathsDict["databaseDir"]
-        scenesPath = self._pathsDict["scenesDir"]
-        categoryPath = os.path.normpath(os.path.join(scenesPath, categoryName))
-        self._folderCheck(categoryPath)
-
-        ## if its going to be saved as a subproject
-        if not subProjectIndex == 0:
-            subProjectPath = os.path.normpath(os.path.join(categoryPath, self._subProjectsList[subProjectIndex]))
-            self._folderCheck(subProjectPath)
-            shotPath = os.path.normpath(os.path.join(subProjectPath, baseName))
-            self._folderCheck(shotPath)
-
-
-            jsonCategoryPath = os.path.normpath(os.path.join(databaseDir, categoryName))
-            self._folderCheck(jsonCategoryPath)
-            jsonCategorySubPath = os.path.normpath(os.path.join(jsonCategoryPath, self._subProjectsList[subProjectIndex]))
-            self._folderCheck(jsonCategorySubPath)
-            jsonFile = os.path.join(jsonCategorySubPath, "{}.json".format(baseName))
-
-
-        else:
-            shotPath = os.path.normpath(os.path.join(categoryPath, baseName))
-            self._folderCheck(shotPath)
-
-
-            jsonCategoryPath = os.path.normpath(os.path.join(databaseDir, categoryName))
-            self._folderCheck(jsonCategoryPath)
-            jsonFile = os.path.join(jsonCategoryPath, "{}.json".format(baseName))
-
-
-        version = 1
-        sceneName = "{0}_{1}_{2}_v{3}".format(baseName, categoryName, self._usersDict[self.currentUser], str(version).zfill(3))
-
-        sceneFile = os.path.join(shotPath, "{0}.{1}".format(sceneName, sceneFormat))
-        ## relativity update
-        relSceneFile = os.path.relpath(sceneFile, start=projectPath)
+        sceneDir = info['sceneDir']
+        sceneFile = info['sceneFile']
+        jsonFile = info['jsonFile']
+        thumbFile = info['thumbFile']
+        referenceFile = info['referenceFile']
+        referenceVersion = info['referenceVersion']
+        referenceSubVersion = info['referenceSubVersion']
 
         fManager.Save(sceneFile)
+        self.doCreateThumbnail(thumbFile)
 
-        thumbPath = self.createThumbnail(dbPath=jsonFile, versionInt=version)
-
-        jsonInfo = {}
-
-        if makeReference:
-            referenceName = "{0}_{1}_forReference".format(baseName, categoryName)
-            referenceFile = os.path.join(shotPath, "{0}.{1}".format(referenceName, sceneFormat))
-            ## relativity update
-            relReferenceFile = os.path.relpath(referenceFile, start=projectPath)
-            shutil.copyfile(sceneFile, referenceFile)
-            jsonInfo["ReferenceFile"] = relReferenceFile
-            jsonInfo["ReferencedVersion"] = version
-        else:
-            jsonInfo["ReferenceFile"] = None
-            jsonInfo["ReferencedVersion"] = None
-
-        # version serialization:
-        # version, api, sdk = rt.maxversion()
         versionInfo = rt.maxversion()
-        # vInfo = [version, api, sdk]
         vInfo = [versionInfo[0], versionInfo[1], versionInfo[2]]
-
+        
+        jsonInfo = {}
         jsonInfo["ID"] = "Sm3dsMaxV02_sceneFile"
-        # jsonInfo["3dsMaxVersion"] = os.path.basename(os.path.split(pManager.GetMaxSysRootDir())[0])
         jsonInfo["3dsMaxVersion"] = vInfo
         jsonInfo["Name"] = baseName
-        jsonInfo["Path"] = os.path.relpath(shotPath, start=projectPath)
+        jsonInfo["Nickname"] = nickname
+        jsonInfo["Path"] = os.path.relpath(sceneDir, start=projectPath)
         jsonInfo["Category"] = categoryName
         jsonInfo["Creator"] = self.currentUser
         jsonInfo["CreatorHost"] = (socket.gethostname())
-        # jsonInfo["Versions"] = [ # PATH => Notes => User Initials => Machine ID => Playblast => Thumbnail
-        #     [relSceneFile, completeNote,  self._usersDict[self.currentUser], socket.gethostname(), {}, thumbPath]]
-        jsonInfo["Versions"] = [ # PATH => Notes => User Initials => Machine ID => Playblast => Thumbnail
-            {"RelativePath": relSceneFile,
+        if referenceFile:
+            jsonInfo["ReferenceFiles"] = [os.path.relpath(referenceFile, start=projectPath)]
+            jsonInfo["ReferencedVersions"] = [referenceVersion]
+            jsonInfo["ReferencedSubVersions"] = [referenceSubVersion]
+        else:
+            jsonInfo["ReferenceFiles"] = []
+            jsonInfo["ReferencedVersions"] = []
+            jsonInfo["ReferencedSubVersions"] = []
+
+        jsonInfo["Versions"] = [  # PATH => Notes => User Initials => Machine ID => Playblast => Thumbnail
+            {"RelativePath": os.path.relpath(sceneFile, start=projectPath),
+             "Nickname": nickname,
              "Note": completeNote,
              "User": self._usersDict[self.currentUser],
              "Workstation": socket.gethostname(),
              "Preview": {},
-             "Thumb": thumbPath,
+             "Thumb": os.path.relpath(thumbFile, start=projectPath),
              "Ranges": self._getTimelineRanges()
              }
         ]
+
         jsonInfo["SubProject"] = self._subProjectsList[subProjectIndex]
         self._dumpJson(jsonInfo, jsonFile)
-        # return jsonInfo
         return [0, ""]
 
     def saveVersion(self, makeReference=True, versionNotes="", sceneFormat="max", *args, **kwargs):
@@ -265,64 +224,67 @@ class MaxManager(RootManager):
         Returns: Scene DB Dictionary
 
         """
-
-        now = datetime.datetime.now().strftime("%H:%M - %Y/%m/%d")
-        completeNote = "[%s] on %s\n%s\n" % (self.currentUser, now, versionNotes)
-
-        sceneName = self.getSceneFile()
-        if not sceneName:
-            msg = "This is not a base scene (Untitled)"
-            logger.warning(msg)
-            return -1, msg
+        logger.debug("Func: saveVersion")
 
         sceneInfo = self.getOpenSceneInfo()
+        if sceneInfo:
+            if sceneFormat is None:
+                sceneFormat = sceneInfo['sceneFormat']
 
-        if sceneInfo: ## getCurrentJson returns None if the resolved json path is missing
+            projectPath = self.projectDir
+            
+            now = datetime.datetime.now().strftime("%H:%M - %Y/%m/%d")
+            completeNote = "[%s] on %s\n%s\n" % (self.currentUser, now, versionNotes)
+
             jsonFile = sceneInfo["jsonFile"]
-            jsonInfo = self._loadJson(jsonFile)
-            if jsonInfo == -1:
-                msg = "Database file is corrupted"
-                return -1, msg
+            versionUp = kwargs.get('versionUp', 1)
+            info = self.getOutputVersionUpFileInfo(jsonFile, versionUp, sceneFormat,
+                                                   makeReference=makeReference)
+            sceneFile = info['sceneFile']
+            thumbFile = info['thumbFile']
+            nickname = info['nickname']
+            referenceFile = info['referenceFile']
+            referenceVersion = info['referenceVersion']
+            referenceSubVersion = info['referenceSubVersion']
 
-            currentVersion = len(jsonInfo["Versions"]) + 1
-            sceneName = "{0}_{1}_{2}_v{3}".format(jsonInfo["Name"], jsonInfo["Category"], self._usersDict[self.currentUser],
-                                                  str(currentVersion).zfill(3))
-            relSceneFile = os.path.join(jsonInfo["Path"], "{0}.{1}".format(sceneName, sceneFormat))
-
-            sceneFile = os.path.join(sceneInfo["projectPath"], relSceneFile)
-
-            # killTurtle()
-            # TODO // cmds?
             fManager.Save(sceneFile)
-
-            thumbPath = self.createThumbnail(dbPath=jsonFile, versionInt=currentVersion)
-
+            self.doCreateThumbnail(thumbFile)
+                
+            jsonInfo = self._loadJson(jsonFile)
             jsonInfo["Versions"].append(
-                {"RelativePath": relSceneFile,
+                {"RelativePath": os.path.relpath(sceneFile, start=projectPath),
+                 "Nickname": nickname,
                  "Note": completeNote,
                  "User": self._usersDict[self.currentUser],
                  "Workstation": socket.gethostname(),
                  "Preview": {},
-                 "Thumb": thumbPath,
-                 "Ranges": self._getTimelineRanges()
-                 }
-                )
+                 "Thumb": os.path.relpath(thumbFile, start=projectPath),
+                 "Ranges": self._getTimelineRanges()})
 
-            if makeReference:
-                referenceName = "{0}_{1}_forReference".format(jsonInfo["Name"], jsonInfo["Category"])
-                relReferenceFile = os.path.join(jsonInfo["Path"], "{0}.{1}".format(referenceName, sceneFormat))
-                referenceFile = os.path.join(sceneInfo["projectPath"], relReferenceFile)
-
+            if referenceFile is not None:
                 shutil.copyfile(sceneFile, referenceFile)
-                jsonInfo["ReferenceFile"] = relReferenceFile
-                jsonInfo["ReferencedVersion"] = currentVersion
+                refVers = jsonInfo["ReferencedVersion"]
+                if referenceVersion in refVers:
+                    refIdx = refVers.index(referenceVersion)
+                    jsonInfo["ReferenceFiles"][refIdx] = os.path.relpath(
+                        referenceFile, start=projectPath)
+                    jsonInfo["ReferencedVersions"][refIdx] = referenceVersion
+                    jsonInfo["ReferencedSubVersions"][refIdx] = referenceSubVersion
+                else:
+                    refVers.append(referenceVersion)
+                    refVers.sort()
+                    refIdx = refVers.index(referenceVersion)
+                    jsonInfo["ReferencedVersions"] = refVers
+                    jsonInfo["ReferenceFiles"].insert(refIdx, os.path.relpath(
+                        referenceFile, start=projectPath))
+                    jsonInfo["ReferencedSubVersions"].insert(refIdx, referenceSubVersion)
+
             self._dumpJson(jsonInfo, jsonFile)
         else:
             msg = "This is not a base scene (Json file cannot be found)"
             logger.warning(msg)
             return -1, msg
         return jsonInfo
-
 
     def createPreview(self, *args, **kwargs):
         """Creates a Playblast preview from currently open scene"""
@@ -464,15 +426,15 @@ class MaxManager(RootManager):
         self._dumpJson(jsonInfo, openSceneInfo["jsonFile"])
         return 0, ""
 
-
     def loadBaseScene(self, force=False):
         """Loads the scene at cursor position"""
         # TODO // TEST IT
-        relSceneFile = self._currentSceneInfo["Versions"][self._currentVersionIndex-1]["RelativePath"]
+        logger.debug("Func: loadBaseScene")
+        idx = self.getRealVersionIndex()
+        relSceneFile = self._currentSceneInfo["Versions"][idx]["RelativePath"]
         absSceneFile = os.path.join(self.projectDir, relSceneFile)
         if os.path.isfile(absSceneFile):
             fManager.Open(absSceneFile)
-            # cmds.file(absSceneFile, o=True, force=force)
             return 0
         else:
             msg = "File in Scene Manager database doesnt exist"
@@ -481,7 +443,9 @@ class MaxManager(RootManager):
 
     def importBaseScene(self):
         """Imports the scene at cursor position"""
-        relSceneFile = self._currentSceneInfo["Versions"][self._currentVersionIndex-1]["RelativePath"]
+        logger.debug("Func: importBaseScene")
+        idx = self.getRealVersionIndex()
+        relSceneFile = self._currentSceneInfo["Versions"][idx]["RelativePath"]
         absSceneFile = os.path.join(self.projectDir, relSceneFile)
         if os.path.isfile(absSceneFile):
             # fManager.Merge(absSceneFile, mergeAll=True, selectMerged=True)
@@ -495,11 +459,16 @@ class MaxManager(RootManager):
 
     def referenceBaseScene(self):
         """Creates reference from the scene at cursor position"""
-
+        logger.debug("Func: referenceBaseScene")
         projectPath = self.projectDir
-        relReferenceFile = self._currentSceneInfo["ReferenceFile"]
-
-
+        relReferenceFiles = self._currentSceneInfo["ReferenceFiles"]
+        relReferenceVersions = self._currentSceneInfo["ReferencedVersions"]
+        relReferenceFile = ''
+        idx = 0
+        if self._currentVersionIndex in relReferenceVersions:
+            idx = relReferenceVersions.index(self._currentVersionIndex)
+            relReferenceFile = relReferenceFiles[idx]
+        
         if relReferenceFile:
             referenceFile = os.path.join(projectPath, relReferenceFile)
 
@@ -507,7 +476,7 @@ class MaxManager(RootManager):
             Xrefobjs = rt.getMAXFileObjectNames(referenceFile)
             rt.xrefs.addNewXRefObject(referenceFile, Xrefobjs)
             try:
-                ranges = self._currentSceneInfo["Versions"][self._currentSceneInfo["ReferencedVersion"]-1]["Ranges"]
+                ranges = self._currentSceneInfo["Versions"][idx]["Ranges"]
                 q = self._question("Do You want to set the Time ranges same with the reference?")
                 if q:
                     self._setTimelineRanges(ranges)
@@ -517,6 +486,30 @@ class MaxManager(RootManager):
         else:
             logger.warning("There is no reference set for this scene. Nothing changed")
 
+    def doCreateThumbnail(thumbFile):
+        oWidth = 221
+        oHeight = 124
+
+        grab = rt.gw.getViewportDib()
+        ratio = float(grab.width) / float(grab.height)
+
+        if ratio <= 1.782:
+            new_width = oHeight * ratio
+            new_height = oHeight
+        else:
+            new_width = oWidth
+            new_height = oWidth / ratio
+
+        resizeFrame = rt.bitmap(new_width, new_height, color=rt.color(0, 0, 0))
+        rt.copy(grab, resizeFrame)
+        thumbFrame = rt.bitmap(oWidth, oHeight, color=rt.color(0, 0, 0))
+        xOffset = (oWidth - resizeFrame.width) / 2
+        yOffset = (oHeight - resizeFrame.height) / 2
+
+        rt.pasteBitmap(resizeFrame, thumbFrame, rt.point2(0, 0), rt.point2(xOffset, yOffset))
+        thumbFrame.filename = thumbFile
+        rt.save(thumbFrame)
+        rt.close(thumbFrame)
 
     def createThumbnail(self, useCursorPosition=False, dbPath = None, versionInt = None):
         """
@@ -579,25 +572,33 @@ class MaxManager(RootManager):
 
         return relThumbPath
 
-
-    def replaceThumbnail(self, filePath=None ):
+    def replaceThumbnail(self, filePath=None):
         """
         Replaces the thumbnail with given file or current view
         :param filePath: (String)  if a filePath is defined, this image (.jpg or .gif) will be used as thumbnail
         :return: None
         """
+        logger.debug("Func: replaceThumbnail")
+        thumbName = self.getThumbnailName(
+            self._currentSceneInfo['Name'], self._currentVersionIndex,
+            self._currentSubVersionIndex)
+        jsonDir = os.path.dirname(self.currentDatabasePath)
+        thumbFile = os.path.normpath(os.path.join(jsonDir, thumbName))
         if not filePath:
-            filePath = self.createThumbnail(useCursorPosition=True)
+            self.doCreateThumbnail(thumbFile)
+        else:
+            shutil.copy(filePath, thumbFile)
 
-        self._currentSceneInfo["Versions"][self.currentVersionIndex-1]["Thumb"]=filePath
-
-
-        # try:
-        #     self._currentSceneInfo["Versions"][self.currentVersionIndex-1][5]=filePath
-        # except IndexError: # if this is an older file without thumbnail
-        #     self._currentSceneInfo["Versions"][self.currentVersionIndex-1].append(filePath)
+        idx = self.getRealVersionIndex()
+        projectPath = self.projectDir
+        self._currentSceneInfo["Versions"][idx]["Thumb"] = os.path.relpath(
+            thumbFile, start=projectPath)
 
         self._dumpJson(self._currentSceneInfo, self.currentDatabasePath)
+
+    def getSoftwareVersion(self):
+        versionInfo = rt.maxversion()
+        return [versionInfo[0], versionInfo[1], versionInfo[2]]
 
     def compareVersions(self):
         """Compares the versions of current session and database version at cursor position"""
@@ -615,7 +616,9 @@ class MaxManager(RootManager):
                        17000: "v2015",
                        18000: "v2016",
                        19000: "v2017",
-                       20000: "v2018"
+                       20000: "v2018",
+                       21000: "v2019",
+                       22000: "v2020",
                        }
 
         #version serialization:
@@ -711,6 +714,7 @@ class MaxManager(RootManager):
     def _killCallbacks(self, callbackIDList):
         logger.warning("_killCallbacks Function not yet implemented")
 
+
 class MainUI(baseUI):
     def __init__(self):
         super(MainUI, self).__init__()
@@ -727,21 +731,3 @@ class MainUI(baseUI):
 
     def extraMenus(self):
         self.scenes_rcItem_0.setText('Merge Scene')
-
-    def onModeChange(self):
-        """OVERRIDEN METHOD - This method is overriden to make the color changing compatible with 3ds max"""
-        self._vEnableDisable()
-
-        if self.load_radioButton.isChecked():
-            self.loadScene_pushButton.setText("Load Scene")
-            # self.scenes_listWidget.setStyleSheet("border-style: solid; border-width: 2px; border-color: grey;")
-            self.scenes_listWidget.setStyleSheet("background-color: rgb(100,100,100); border-style: solid; border-width: 2px; border-color: grey;")
-        else:
-            self.loadScene_pushButton.setText("Reference Scene")
-            # self.scenes_listWidget.setStyleSheet("background-color: rgb(100,100,100);")
-            self.scenes_listWidget.setStyleSheet("background-color: rgb(80,120,120); border-style: solid ; border-width: 2px; border-color: cyan;")
-        self.populateBaseScenes()
-
-
-
-
