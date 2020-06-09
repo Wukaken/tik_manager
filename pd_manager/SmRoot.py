@@ -2068,7 +2068,9 @@ Elapsed Time:{6}
 
     def createProjectDirectory(self, resolvedPath, projectType):
         defaultProjectDirs = self.getDefaultProjectDirectory()
-        projDirs = self._projectDirectoryDefaultInfo.get(projectType, defaultProjectDirs)
+        generalProjectDirectoryDefaultInfo = self._loadJson(
+            self._pathsDict['generalProjectDirectoryDatabase'])
+        projDirs = generalProjectDirectoryDefaultInfo.get(projectType, defaultProjectDirs)
         projDirs.append(resolvedPath)
         for projDir in projDirs:
             outDir = os.path.join(resolvedPath, projDir)
