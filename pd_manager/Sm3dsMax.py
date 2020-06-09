@@ -486,7 +486,7 @@ class MaxManager(RootManager):
         else:
             logger.warning("There is no reference set for this scene. Nothing changed")
 
-    def doCreateThumbnail(thumbFile):
+    def doCreateThumbnail(self, thumbFile):
         oWidth = 221
         oHeight = 124
 
