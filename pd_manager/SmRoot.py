@@ -731,7 +731,7 @@ class RootManager(object):
 
         self._dumpJson(settingsData, os.path.join(resolvedPath, "smDatabase", "projectSettings.json"))
 
-        self.createProjectWorkspaceFile(resolvedPath, projectType)
+        self.createProjectWorkspaceFile(projectName, resolvedPath, projectType)
 
         return resolvedPath
 
@@ -2076,16 +2076,6 @@ Elapsed Time:{6}
             outDir = os.path.join(resolvedPath, projDir)
             if not os.path.isdir(outDir):
                 os.makedirs(outDir)
-
-    def createProjectWorkspaceFile(self, resolvedPath, projectType):
-        wsFile = os.path.join(self._pathsDict["generalSettingsDir"],
-                              "%sWorkspace.mel" % projectType)
-        if not os.path.isfile(wsFile):
-            wsFile = os.path.join(self._pathsDict["generalSettingsDir"],
-                                  "defaultWorkspace.mel")
-
-        toWsFile = os.path.join(resolvedPath, "workspace.mel")
-        shutil.copy(wsFile, toWsFile)
 
     def checkProjectFolder(self):
         projSetting = self.loadProjectSettings()

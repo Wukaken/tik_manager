@@ -901,7 +901,17 @@ class MayaManager(RootManager):
                 projVer, swVer)
 
         return status, msg
-        
+
+    def createProjectWorkspaceFile(self, projectName, resolvedPath, projectType):
+        wsFile = os.path.join(self._pathsDict["generalSettingsDir"],
+                              "%sWorkspace.mel" % projectType)
+        if not os.path.isfile(wsFile):
+            wsFile = os.path.join(self._pathsDict["generalSettingsDir"],
+                                  "defaultWorkspace.mel")
+
+        toWsFile = os.path.join(resolvedPath, "workspace.mel")
+        shutil.copy(wsFile, toWsFile)
+
 
 class MainUI(baseUI):
     def __init__(self, callback=None):

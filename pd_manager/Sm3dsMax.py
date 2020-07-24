@@ -114,7 +114,6 @@ class MaxManager(RootManager):
             self._saveProjects(projectsDict)
             return norm_p_path
 
-
     def getSceneFile(self):
         """Overriden function"""
         # Gets the current scene path ("" if untitled)
@@ -125,6 +124,20 @@ class MaxManager(RootManager):
 
     def setProject(self, path):
         """Sets the project"""
+        logger.debug("Func: setProject")
+
+        wsMxp = os.path.join(path, '%s.mxp' % os.path.basename(path))
+        if not os.path.isfile(wsMxp):
+            msg = 'This is not a standard max project,\ndo nothing!'
+            rt.messageBox(msg, title='Error In Setting Project')
+            return
+
+        projSettingFile = os.path.join(path, 'smDatabase', 'projectSettings.json')
+        status, verMsg = self.compareProjectSoftWareVersion(projSettingFile)
+        if status:
+            rt.messageBox(verMsg, title='Error In Max Version')
+            return
+
         projectsDict = self._loadProjects()
         if not projectsDict:
             projectsDict = {"3dsMaxProject": path}
@@ -450,7 +463,6 @@ class MaxManager(RootManager):
         if os.path.isfile(absSceneFile):
             # fManager.Merge(absSceneFile, mergeAll=True, selectMerged=True)
             fManager.Merge(absSceneFile)
-            # cmds.file(absSceneFile, i=True)
             return 0
         else:
             msg = "File in Pd Manager database doesnt exist"
@@ -600,6 +612,24 @@ class MaxManager(RootManager):
         versionInfo = rt.maxversion()
         return [versionInfo[0], versionInfo[1], versionInfo[2]]
 
+    def compareProjectSoftWareVersion(self, projSettingFile):
+        swVer = self.getSoftwareVersion()
+        projSetting = self._loadJson(projSettingFile)
+        projVerKey = '3dsMaxVersion'
+        projVer = projSetting.get(projVerKey)
+        status = 0
+        msg = ''
+        if projVer is None:
+            status = 1
+            msg = 'Project not defined max version'
+        elif not swVer[0] == projVer[0]:
+            status = 2
+            msg = 'Project version: %s.%s.%s, current max version: %s.%s.%s, not match' % (
+                projVer[0], projVer[1], projVer[2],
+                swVer[0], swVer[1], swVer[2])
+
+        return status, msg
+
     def compareVersions(self):
         """Compares the versions of current session and database version at cursor position"""
         # TODO : Write compare function for 3ds max
@@ -713,6 +743,16 @@ class MaxManager(RootManager):
 
     def _killCallbacks(self, callbackIDList):
         logger.warning("_killCallbacks Function not yet implemented")
+
+    def createProjectWorkspaceFile(self, projectName, resolvedPath, projectType):
+        wsFile = os.path.join(self._pathsDict["generalSettingsDir"],
+                              "%sWorkspace.mxp" % projectType)
+        if not os.path.isfile(wsFile):
+            wsFile = os.path.join(self._pathsDict["generalSettingsDir"],
+                                  "defaultWorkspace.mxp")
+
+        toWsFile = os.path.join(resolvedPath, "%s.mxp" % projectName)
+        shutil.copy(wsFile, toWsFile)
 
 
 class MainUI(baseUI):
