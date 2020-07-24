@@ -132,10 +132,10 @@ class RootManager(object):
 
         self._pathsDict["generalSettingsDir"] = os.path.dirname(os.path.abspath(__file__))
 
-        self._pathsDict["usersFile"] = os.path.normpath(os.path.join(self._pathsDict["generalSettingsDir"], "sceneManagerUsers.json"))
+        self._pathsDict["usersFile"] = os.path.normpath(os.path.join(self._pathsDict["generalSettingsDir"], "pdManagerUsers.json"))
 
         self._pathsDict["softwareDatabase"] = os.path.normpath(os.path.join(self._pathsDict["generalSettingsDir"], "softwareDatabase.json"))
-        self._pathsDict["sceneManagerDefaults"] = os.path.normpath(os.path.join(self._pathsDict["generalSettingsDir"], "sceneManagerDefaults.json"))
+        self._pathsDict["pdManagerDefaults"] = os.path.normpath(os.path.join(self._pathsDict["generalSettingsDir"], "pdManagerDefaults.json"))
         self._pathsDict["generalProjectDirectoryDatabase"] = os.path.normpath(os.path.join(self._pathsDict["generalSettingsDir"], "projectDirectoryDatabase.json"))
         self._pathsDict["generalProjectCategoryDetailInfo"] = os.path.normpath(os.path.join(self._pathsDict["generalSettingsDir"], "projectCategoryDetailInfo.json"))
 
@@ -161,7 +161,7 @@ class RootManager(object):
         logger.debug("Func: init_database")
 
         # defaults dictionary holding "defaultCategories", "defaultPreviewSettings", "defaultUsers"
-        self._sceneManagerDefaults = self._loadJson(self._pathsDict["sceneManagerDefaults"])
+        self._pdManagerDefaults = self._loadJson(self._pathsDict["pdManagerDefaults"])
         self._projectDirectoryDefaultInfo = self._loadProjectDirectoryInfo()
         if not os.path.isfile(self._pathsDict["projectDirectoryDatabase"]):
             self._projectDirectoryDefaultInfo = self._loadJson(
@@ -1424,7 +1424,7 @@ Elapsed Time:{6}
         :return:
         """
         #
-        logger = logging.getLogger('SceneManager')
+        logger = logging.getLogger('PdManager')
         filePath = os.path.join(self._pathsDict["masterDir"], "sm_logs.log")
         file_logger = logging.FileHandler(filePath)
         logger.addHandler(file_logger)
@@ -1675,7 +1675,7 @@ Elapsed Time:{6}
             if categoriesData == -2:
                 return -2
         else:
-            categoriesData = self._sceneManagerDefaults["defaultCategories"]
+            categoriesData = self._pdManagerDefaults["defaultCategories"]
             # categoriesData = ["Model", "Shading", "Rig", "Layout", "Animation", "Render", "Other"]
             self._dumpJson(categoriesData, self._pathsDict["categoriesFile"])
         return categoriesData
@@ -1778,7 +1778,7 @@ Elapsed Time:{6}
             #                    "WireOnShaded": False,
             #                    "UseDefaultMaterial": False,
             #                    }
-            defaultSettings = self._sceneManagerDefaults["defaultPreviewSettings"]
+            defaultSettings = self._pdManagerDefaults["defaultPreviewSettings"]
             self._dumpJson(defaultSettings, self._pathsDict["pbSettingsFile"])
             return defaultSettings
         else:

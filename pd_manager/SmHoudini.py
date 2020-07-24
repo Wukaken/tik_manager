@@ -91,7 +91,7 @@ class HoudiniManager(RootManager):
         #         "scenesDir": "scenes_houdini",
         #         "pbSettingsFile": "pbSettings_houdini.json",
         #         "categoriesFile": "categoriesHoudini.json",
-        #         "userSettingsDir": "SceneManager\\Houdini"}
+        #         "userSettingsDir": "PdManager/Houdini"}
 
     def getProjectDir(self):
         """Overriden function"""

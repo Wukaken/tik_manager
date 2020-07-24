@@ -833,7 +833,7 @@ class ProjectMaterials(RootManager):
 
         self._pathsDict["generalSettingsDir"] = os.path.dirname(os.path.abspath(__file__))
         self._pathsDict["usersFile"] = os.path.normpath(
-            os.path.join(self._pathsDict["generalSettingsDir"], "sceneManagerUsers.json"))
+            os.path.join(self._pathsDict["generalSettingsDir"], "pdManagerUsers.json"))
 
         # project material specific
         self._pathsDict["Storyboard"] = os.path.join(self.projectDir, "_REF", "storyboard")

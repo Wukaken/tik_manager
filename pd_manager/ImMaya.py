@@ -30,7 +30,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 # -----------------------------------------------------------------------------
 
-"""As a part of SceneManager, ImageManager checks the scene for possible errors before
+"""As a part of PdManager, ImageManager checks the scene for possible errors before
 sending it to Deadline render manager.
 On initialization, script changes the image name template according to the defined template
 and checks the scene for possible errors
@@ -118,7 +118,7 @@ class ImageManager(RootManager):
 
         self.sceneInfo = self.getOpenSceneInfo()
         if not self.sceneInfo:
-            msg = "Scene is not a Base Scene. Save it using SceneManager"
+            msg = "Scene is not a Base Scene. Save it using PdManager"
             self._exception(360, msg)
             # logger.warning("This is not a Base Scene")
             return
@@ -154,7 +154,7 @@ class ImageManager(RootManager):
                 "scenesDir": "scenes",
                 "pbSettingsFile": "pbSettings.json",
                 "categoriesFile": "categoriesMaya.json",
-                "userSettingsDir": "SceneManager\\Maya"}
+                "userSettingsDir": "PdManager/Maya"}
 
     def getProjectDir(self):
         """Overriden function"""
@@ -710,7 +710,7 @@ class MainUI(QtWidgets.QMainWindow):
         super(MainUI, self).__init__(parent=parent)
         self.imanager = ImageManager()
         if not self.imanager.sceneInfo:
-            # self.infoPop(textTitle="Warning - Not a Base Scene", textHeader="Scene is not a Base Scene. Save it using SceneManager")
+            # self.infoPop(textTitle="Warning - Not a Base Scene", textHeader="Scene is not a Base Scene. Save it using PdManager")
             return
 
         # if not self.imanager.sceneInfo["category"] == "Render":

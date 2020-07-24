@@ -30,7 +30,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 #
-# MODIFIED BY Arda Kutlu to use with imageViewer, a module for sceneManager
+# MODIFIED BY Arda Kutlu to use with imageViewer, a module for pdManager
 # Last Modified: 21 July 2018
 # Modification History:
     # added filtering to the 'walk method'

@@ -128,7 +128,7 @@ class NukeManager(RootManager):
         #         "scenesDir": "scenes_Nuke",
         #         "pbSettingsFile": "pbSettings_Nuke.json",
         #         "categoriesFile": "categoriesNuke.json",
-        #         "userSettingsDir": "SceneManager\\Nuke",
+        #         "userSettingsDir": "PdManager/Nuke",
         #         }
 
 

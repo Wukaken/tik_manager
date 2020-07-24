@@ -89,7 +89,7 @@ class MaxManager(RootManager):
         #         "scenesDir": "scenes_3dsMax",
         #         "pbSettingsFile": "pbSettings_3dsMax.json",
         #         "categoriesFile": "categories3dsMax.json",
-        #         "userSettingsDir": "SceneManager\\3dsMax"} # this is just for 3ds max. expanduser"~" returns different in max
+        #         "userSettingsDir": "PdManager/3dsMax"} # this is just for 3ds max. expanduser"~" returns different in max
 
     def getProjectDir(self):
         """Overriden function"""

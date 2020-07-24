@@ -84,7 +84,7 @@ class MayaManager(RootManager):
         #         "scenesDir": "scenes",
         #         "pbSettingsFile": "pbSettings.json",
         #         "categoriesFile": "categoriesMaya.json",
-        #         "userSettingsDir": "SceneManager/Maya",
+        #         "userSettingsDir": "PdManager/Maya",
         #         }
 
 
@@ -842,7 +842,7 @@ class MayaManager(RootManager):
                     for file in jsonFiles:
                         fileData = self._loadJson(file)
                         # figure out the subproject
-                        fileData["ID"] = fileData["ID"].replace("SceneManager", "SmMaya")
+                        fileData["ID"] = fileData["ID"].replace("PdManager", "SmMaya")
                         path = fileData["Path"]
                         name = fileData["Name"]
                         cate = fileData["Category"]

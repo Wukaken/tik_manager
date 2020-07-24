@@ -76,7 +76,7 @@ logger.setLevel(logging.WARNING)
 #         "scenesDir": "scenes",
 #         "pbSettingsFile": "pbSettings.json",
 #         "categoriesFile": "categoriesMaya.json",
-#         "userSettingsDir": "SceneManager\\Maya"
+#         "userSettingsDir": "PdManager\\Maya"
 #     },
 #     "3dsMax":
 #         {
@@ -89,7 +89,7 @@ logger.setLevel(logging.WARNING)
 #             "scenesDir": "scenes_3dsMax",
 #             "pbSettingsFile": "pbSettings_3dsMax.json",
 #             "categoriesFile": "categories3dsMax.json",
-#             "userSettingsDir": "SceneManager\\3dsMax"
+#             "userSettingsDir": "PdManager\\3dsMax"
 #         },
 #     "Houdini":
 #         {
@@ -102,7 +102,7 @@ logger.setLevel(logging.WARNING)
 #             "scenesDir": "scenes_houdini",
 #             "pbSettingsFile": "pbSettings_houdini.json",
 #             "categoriesFile": "categoriesHoudini.json",
-#             "userSettingsDir": "SceneManager\\Houdini"
+#             "userSettingsDir": "PdManager\\Houdini"
 #         },
 #     "Nuke":
 #         {
@@ -115,7 +115,7 @@ logger.setLevel(logging.WARNING)
 #             "scenesDir": "scenes_nuke",
 #             "pbSettingsFile": "pbSettings_nuke.json",
 #             "categoriesFile": "categoriesNuke.json",
-#             "userSettingsDir": "SceneManager\\Nuke"
+#             "userSettingsDir": "PdManager\\Nuke"
 #         }
 # }
 
@@ -180,15 +180,15 @@ class SwViewer(RootManager):
 
         self._pathsDict["generalSettingsDir"] = commonFolder
 
-        self._pathsDict["usersFile"] = os.path.normpath(os.path.join(self._pathsDict["generalSettingsDir"], "sceneManagerUsers.json"))
+        self._pathsDict["usersFile"] = os.path.normpath(os.path.join(self._pathsDict["generalSettingsDir"], "pdManagerUsers.json"))
 
         self._pathsDict["softwareDatabase"] = os.path.normpath(os.path.join(self._pathsDict["generalSettingsDir"], "softwareDatabase.json"))
-        self._pathsDict["sceneManagerDefaults"] = os.path.normpath(os.path.join(self._pathsDict["generalSettingsDir"], "sceneManagerDefaults.json"))
+        self._pathsDict["pdManagerDefaults"] = os.path.normpath(os.path.join(self._pathsDict["generalSettingsDir"], "pdManagerDefaults.json"))
 
     #
     # def init_paths(self, commonFolder):
     #     """Overriden function"""
-    #     self._pathsDict["userSettingsDir"] = os.path.normpath(os.path.join(os.path.expanduser("~"), "Documents", "SceneManager", "Standalone"))
+    #     self._pathsDict["userSettingsDir"] = os.path.normpath(os.path.join(os.path.expanduser("~"), "Documents", "PdManager", "Standalone"))
     #     self._folderCheck(self._pathsDict["userSettingsDir"])
     #
     #     self._pathsDict["bookmarksFile"] = os.path.normpath(os.path.join(self._pathsDict["userSettingsDir"], "smBookmarks.json"))
@@ -208,10 +208,10 @@ class SwViewer(RootManager):
     #
     #     self._pathsDict["generalSettingsDir"] = os.path.dirname(os.path.abspath(__file__))
     #
-    #     self._pathsDict["usersFile"] = os.path.normpath(os.path.join(self._pathsDict["generalSettingsDir"], "sceneManagerUsers.json"))
+    #     self._pathsDict["usersFile"] = os.path.normpath(os.path.join(self._pathsDict["generalSettingsDir"], "pdManagerUsers.json"))
     #
     #     self._pathsDict["softwareDatabase"] = os.path.normpath(os.path.join(self._pathsDict["generalSettingsDir"], "softwareDatabase.json"))
-    #     self._pathsDict["sceneManagerDefaults"] = os.path.normpath(os.path.join(self._pathsDict["generalSettingsDir"], "sceneManagerDefaults.json"))
+    #     self._pathsDict["pdManagerDefaults"] = os.path.normpath(os.path.join(self._pathsDict["generalSettingsDir"], "pdManagerDefaults.json"))
     #
 
     def getSoftwarePaths(self):
@@ -497,24 +497,24 @@ class StandaloneManager(RootManager):
         #                     "scenesDir": "scenes_3dsMax",
         #                     "pbSettingsFile": "pbSettings_3dsMax.json",
         #                     "categoriesFile": "categories3dsMax.json",
-        #                     "userSettingsDir": "Documents\\SceneManager\\3dsMax"},
+        #                     "userSettingsDir": "Documents\\PdManager\\3dsMax"},
         #
         #                    {"niceName": "Maya",
         #                     "databaseDir": "mayaDB",
         #                     "scenesDir": "scenes",
         #                     "pbSettingsFile": "pbSettings.json",
         #                     "categoriesFile": "categoriesMaya.json",
-        #                     "userSettingsDir": "Documents\\SceneManager\\Maya"},
+        #                     "userSettingsDir": "Documents\\PdManager\\Maya"},
         #
         #                    {"niceName": "Houdini",
         #                     "databaseDir": "houdiniDB",
         #                     "scenesDir": "scenes_houdini",
         #                     "pbSettingsFile": "pbSettings_houdini.json",
         #                     "categoriesFile": "categoriesHoudini.json",
-        #                     "userSettingsDir": "Documents\\SceneManager\\Houdini"}
+        #                     "userSettingsDir": "Documents\\PdManager\\Houdini"}
         #                    ]
 
-        # self._pathsDict["userSettingsDir"] = os.path.normpath(os.path.join(os.path.expanduser("~"), "Documents", "SceneManager", "Standalone"))
+        # self._pathsDict["userSettingsDir"] = os.path.normpath(os.path.join(os.path.expanduser("~"), "Documents", "PdManager", "Standalone"))
         # self._folderCheck(self._pathsDict["userSettingsDir"])
         #
         # self._pathsDict["bookmarksFile"] = os.path.normpath(os.path.join(self._pathsDict["userSettingsDir"], "smBookmarks.json"))
@@ -538,7 +538,7 @@ class StandaloneManager(RootManager):
         """Overriden function"""
 
 
-        self._pathsDict["userSettingsDir"] = os.path.normpath(os.path.join(os.path.expanduser("~"), "Documents", "SceneManager", "Standalone"))
+        self._pathsDict["userSettingsDir"] = os.path.normpath(os.path.join(os.path.expanduser("~"), "Documents", "PdManager", "Standalone"))
         self._folderCheck(self._pathsDict["userSettingsDir"])
 
         self._pathsDict["bookmarksFile"] = os.path.normpath(os.path.join(self._pathsDict["userSettingsDir"], "smBookmarks.json"))
@@ -559,10 +559,10 @@ class StandaloneManager(RootManager):
             self._exception(201, "Cannot Continue Without Common Database")
             return -1
 
-        self._pathsDict["usersFile"] = os.path.normpath(os.path.join(self._pathsDict["generalSettingsDir"], "sceneManagerUsers.json"))
+        self._pathsDict["usersFile"] = os.path.normpath(os.path.join(self._pathsDict["generalSettingsDir"], "pdManagerUsers.json"))
 
         self._pathsDict["softwareDatabase"] = os.path.normpath(os.path.join(self._pathsDict["generalSettingsDir"], "softwareDatabase.json"))
-        self._pathsDict["sceneManagerDefaults"] = os.path.normpath(os.path.join(self._pathsDict["generalSettingsDir"], "sceneManagerDefaults.json"))
+        self._pathsDict["pdManagerDefaults"] = os.path.normpath(os.path.join(self._pathsDict["generalSettingsDir"], "pdManagerDefaults.json"))
 
     def init_database(self):
         """OVERRIDEN FUNCTION"""
@@ -619,7 +619,7 @@ class StandaloneManager(RootManager):
         dbFolder = self._pathsDict["masterDir"]
         if not os.path.isdir(dbFolder):
             self.swList = [] # empty software list
-            return self.swList#this is not a sceneManager project
+            return self.swList#this is not a pdManager project
         # for swDict in self.swDictList:
         #     searchPath = (os.path.join(self.projectDir, "smDatabase", swDict["databaseDir"]))
         #     if os.path.isdir(searchPath):
@@ -685,8 +685,8 @@ class StandaloneManager(RootManager):
             raise Exception(code, msg)
 
     def _checkCommonFolder(self, folder):
-        checkList = [os.path.join(folder, "sceneManagerDefaults.json"),
-                     os.path.join(folder, "sceneManagerUsers.json"),
+        checkList = [os.path.join(folder, "pdManagerDefaults.json"),
+                     os.path.join(folder, "pdManagerUsers.json"),
                      os.path.join(folder, "softwareDatabase.json")]
         missingList = [os.path.basename(path) for path in checkList if not os.path.isfile(path)]
         if len(missingList) > 0:
@@ -716,8 +716,8 @@ class StandaloneManager(RootManager):
             q.setWindowTitle("Select the Common Database Folder")
             q.setDetailedText(
                 "Common Database Folder is the one which has the common modules for all software modules. Common Database Folder must include:\n"
-                "sceneManagerDefaults.json\n"
-                "sceneManagerUsers.json\n"
+                "pdManagerDefaults.json\n"
+                "pdManagerUsers.json\n"
                 "softwareDatabase.json")
             q.setStandardButtons(
                 QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Abort)

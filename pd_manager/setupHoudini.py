@@ -7,9 +7,9 @@ selfLocation = os.path.dirname(os.path.abspath(__file__))
 iconsLocation = os.path.join(selfLocation, "icons")
 
 try:
-    smShelf = hou.shelves.shelves()["SceneManager"]
+    smShelf = hou.shelves.shelves()["PdManager"]
 except KeyError:
-    smShelf = hou.shelves.newShelf(name="SceneManager", label="SceneManager")
+    smShelf = hou.shelves.newShelf(name="PdManager", label="PdManager")
 
 smShelf.setTools([])
 
@@ -21,7 +21,7 @@ SmHoudini.MainUI().show()
 """
 smIcon = os.path.join(iconsLocation, "manager_ICON.png")
 
-smTool = hou.shelves.newTool(name="SceneManager", label="SManager", script=smScript, icon=smIcon)
+smTool = hou.shelves.newTool(name="PdManager", label="PdManager", script=smScript, icon=smIcon)
 
 tools.append(smTool)
 

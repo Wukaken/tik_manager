@@ -3,7 +3,7 @@ import os
 
 selfLocation = os.path.dirname(os.path.abspath(__file__))
 iconsLocation = os.path.join(selfLocation, "icons")
-shelfName = "SceneManager"
+shelfName = "PdManager"
 labelBackground = (0, 0, 0, 0)
 labelColour = (.9, .9, .9)
 
@@ -33,7 +33,7 @@ icon = os.path.join(iconsLocation, "manager_ICON.png")
 if not os.path.isfile(icon):
     mc.warning("Icon cannot found - %s" %icon)
     icon = None
-addButton("SceneManager", command=cmd, icon=icon )
+addButton("PdManager", command=cmd, icon=icon )
 
 ## add saveVersion button
 cmd = """

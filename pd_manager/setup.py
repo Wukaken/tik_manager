@@ -272,7 +272,7 @@ def nukeSetup(prompt=True):
     menuContent = [
         "# start Scene Manager\n",
         "toolbar = nuke.menu('Nodes')\n",
-        "smMenu = toolbar.addMenu('SceneManager', icon='manager_ICON.png')\n",
+        "smMenu = toolbar.addMenu('PdManager', icon='manager_ICON.png')\n",
         "smMenu.addCommand('Scene Manager', 'from pd_manager import SmNuke\\nSmNuke.MainUI().show()', icon='manager_ICON.png')\n",
         "smMenu.addCommand('Save Version', 'from pd_manager import SmNuke\\nSmNuke.MainUI().saveAsVersionDialog()', icon='saveVersion_ICON.png')\n",
         "smMenu.addCommand('Image Viewer', 'from pd_manager import SmNuke\\npd_imageViewer = SmNuke.MainUI()\\npd_imageViewer.onIviewer()', icon='imageViewer_ICON.png')\n",
@@ -387,7 +387,7 @@ def mayaSetup(prompt=True):
     takePreviewIcon = os.path.join(networkDir, "icons", "takePreview_ICON.png").replace("\\", "\\\\")
     projectMaterialsIcon = os.path.join(networkDir, "icons", "projectMaterials_ICON.png").replace("\\", "\\\\")
     assetLibraryIcon = os.path.join(networkDir, "icons", "assetLibrary_ICON.png").replace("\\", "\\\\")
-    shelfContent = """global proc shelf_SceneManager () {
+    shelfContent = """global proc shelf_PdManager () {
     global string $gBuffStr;
     global string $gBuffStr0;
     global string $gBuffStr1;
@@ -401,10 +401,10 @@ def mayaSetup(prompt=True):
         -manage 1
         -visible 1
         -preventOverride 0
-        -annotation "SceneManager" 
+        -annotation "PdManager" 
         -enableBackground 0
         -align "center" 
-        -label "SceneManager" 
+        -label "PdManager" 
         -labelOffset 0
         -font "plainLabelFont" 
         -overlayLabelColor 0.9 0.9 0.9 
@@ -581,7 +581,7 @@ def mayaSetup(prompt=True):
     for v in mayaVersions:
         shelfDir = os.path.join(userMayaDir, v, "prefs", "shelves")
         folderCheck(shelfDir)
-        shelfFile = os.path.join(shelfDir, "shelf_SceneManager.mel")
+        shelfFile = os.path.join(shelfDir, "shelf_PdManager.mel")
         _dumpContent(shelfFile, shelfContent)
         print "Shelf created for %s" %v
 
@@ -670,15 +670,15 @@ def houdiniSetup(prompt=True):
  Note, that two definitions of the same element are not allowed in
  a single file. -->
 
-  <toolshelf name="sceneManager" label="Scene Manager">
-    <memberTool name="sceneManager"/>
+  <toolshelf name="pdManager" label="Pd Manager">
+    <memberTool name="pdManager"/>
     <memberTool name="saveVersion"/>
     <memberTool name="imageViewer"/>
     <memberTool name="takePreview"/>
     <memberTool name="projectMaterials"/>
   </toolshelf>
 
-  <tool name="sceneManager" label="Manager" icon="%s">
+  <tool name="pdManager" label="Manager" icon="%s">
     <script scriptType="python"><![CDATA[from pd_manager import SmHoudini
 reload(SmHoudini)
 SmHoudini.MainUI().show()]]></script>
@@ -721,7 +721,7 @@ projectMaterials.MainUI().show()]]></script>
         shelfDir = os.path.join(userDocDir, v, "toolbar")
         # create the directory if does not exist
         folderCheck(shelfDir)
-        shelfFile = os.path.join(shelfDir, "sceneManager.shelf")
+        shelfFile = os.path.join(shelfDir, "pdManager.shelf")
         _dumpContent(shelfFile, shelfContent)
 
         print "Scene manager shelf created or updated at %s" % shelfFile
@@ -775,22 +775,22 @@ def maxSetup(prompt=True):
     userMaxDir = os.path.join(userHomeDir, "AppData", "Local", "Autodesk", "3dsMax")
 
     # ICON PATHS
-    pack_16a = os.path.join(networkDir, "icons", "SceneManager_16a.bmp").replace("\\", "\\\\")
-    pack_16i = os.path.join(networkDir, "icons", "SceneManager_16i.bmp").replace("\\", "\\\\")
-    pack_24a = os.path.join(networkDir, "icons", "SceneManager_24a.bmp").replace("\\", "\\\\")
-    pack_24i = os.path.join(networkDir, "icons", "SceneManager_24i.bmp").replace("\\", "\\\\")
+    pack_16a = os.path.join(networkDir, "icons", "PdManager_16a.bmp").replace("\\", "\\\\")
+    pack_16i = os.path.join(networkDir, "icons", "PdManager_16i.bmp").replace("\\", "\\\\")
+    pack_24a = os.path.join(networkDir, "icons", "PdManager_24a.bmp").replace("\\", "\\\\")
+    pack_24i = os.path.join(networkDir, "icons", "PdManager_24i.bmp").replace("\\", "\\\\")
 
-    workSpaceInjection ="""        <Window name="sceneManager" type="T" rank="0" subRank="2" hidden="0" dPanel="1" tabbed="0" curTab="-1" cType="1" toolbarRows="1" toolbarType="3">
+    workSpaceInjection ="""        <Window name="pdManager" type="T" rank="0" subRank="2" hidden="0" dPanel="1" tabbed="0" curTab="-1" cType="1" toolbarRows="1" toolbarType="3">
             <FRect left="198" top="125" right="350" bottom="199" />
             <DRect left="1395" top="53" right="1504" bottom="92" />
             <DRectPref left="2147483647" top="2147483647" right="-2147483648" bottom="-2147483648" />
             <CurPos left="198" top="125" right="600" bottom="199" floating="1" panelID="16" />
             <Items>
-                <Item typeID="2" type="CTB_MACROBUTTON" width="0" height="0" controlID="0" macroTypeID="3" macroType="MB_TYPE_ACTION" actionTableID="647394" imageID="-1" imageName="" actionID="manager`SceneManager" tip="Scene Manager" label="Scene Manager" />
-                <Item typeID="2" type="CTB_MACROBUTTON" width="0" height="0" controlID="0" macroTypeID="3" macroType="MB_TYPE_ACTION" actionTableID="647394" imageID="-1" imageName="" actionID="saveVersion`SceneManager" tip="Scene Manager - Version Save" label="Save Version" />
-                <Item typeID="2" type="CTB_MACROBUTTON" width="0" height="0" controlID="0" macroTypeID="3" macroType="MB_TYPE_ACTION" actionTableID="647394" imageID="-1" imageName="" actionID="imageViewer`SceneManager" tip="Scene Manager - Image Viewer" label="Image Viewer" />
-                <Item typeID="2" type="CTB_MACROBUTTON" width="0" height="0" controlID="0" macroTypeID="3" macroType="MB_TYPE_ACTION" actionTableID="647394" imageID="-1" imageName="" actionID="makePreview`SceneManager" tip="Scene Manager - Make Preview" label="Make Preview" />
-                <Item typeID="2" type="CTB_MACROBUTTON" width="0" height="0" controlID="0" macroTypeID="3" macroType="MB_TYPE_ACTION" actionTableID="647394" imageID="-1" imageName="" actionID="projectMaterials`SceneManager" tip="Scene Manager - Project Materials" label="Project Materials" />
+                <Item typeID="2" type="CTB_MACROBUTTON" width="0" height="0" controlID="0" macroTypeID="3" macroType="MB_TYPE_ACTION" actionTableID="647394" imageID="-1" imageName="" actionID="manager`PdManager" tip="Pd Manager" label="Pd Manager" />
+                <Item typeID="2" type="CTB_MACROBUTTON" width="0" height="0" controlID="0" macroTypeID="3" macroType="MB_TYPE_ACTION" actionTableID="647394" imageID="-1" imageName="" actionID="saveVersion`PdManager" tip="Pd Manager - Version Save" label="Save Version" />
+                <Item typeID="2" type="CTB_MACROBUTTON" width="0" height="0" controlID="0" macroTypeID="3" macroType="MB_TYPE_ACTION" actionTableID="647394" imageID="-1" imageName="" actionID="imageViewer`PdManager" tip="Pd Manager - Image Viewer" label="Image Viewer" />
+                <Item typeID="2" type="CTB_MACROBUTTON" width="0" height="0" controlID="0" macroTypeID="3" macroType="MB_TYPE_ACTION" actionTableID="647394" imageID="-1" imageName="" actionID="makePreview`PdManager" tip="Pd Manager - Make Preview" label="Make Preview" />
+                <Item typeID="2" type="CTB_MACROBUTTON" width="0" height="0" controlID="0" macroTypeID="3" macroType="MB_TYPE_ACTION" actionTableID="647394" imageID="-1" imageName="" actionID="projectMaterials`PdManager" tip="Pd Manager - Project Materials" label="Project Materials" />
             </Items>
         </Window>\n"""
 
@@ -814,10 +814,10 @@ def maxSetup(prompt=True):
         folderCheck(macrosDir)
         print "Copying Icon sets..."
         print iconsDir
-        shutil.copy(pack_16a, os.path.normpath(os.path.join(iconsDir, "SceneManager_16a.bmp")))
-        shutil.copy(pack_16i, os.path.normpath(os.path.join(iconsDir, "SceneManager_16i.bmp")))
-        shutil.copy(pack_24a, os.path.normpath(os.path.join(iconsDir, "SceneManager_24a.bmp")))
-        shutil.copy(pack_24i, os.path.normpath(os.path.join(iconsDir, "SceneManager_24i.bmp")))
+        shutil.copy(pack_16a, os.path.normpath(os.path.join(iconsDir, "PdManager_16a.bmp")))
+        shutil.copy(pack_16i, os.path.normpath(os.path.join(iconsDir, "PdManager_16i.bmp")))
+        shutil.copy(pack_24a, os.path.normpath(os.path.join(iconsDir, "PdManager_24a.bmp")))
+        shutil.copy(pack_24i, os.path.normpath(os.path.join(iconsDir, "PdManager_24i.bmp")))
 
         workspaceDir =  os.path.join(userMaxDir, v, "ENU", "en-US", "UI", "Workspaces", "usersave")
         folderCheck(workspaceDir)
@@ -841,10 +841,10 @@ python.Execute "MaxPlus.NotificationManager.Register(14, smUpdate)"
         print "Creating Macroscripts"
         manager = """
 macroScript manager
-category: "SceneManager"
-tooltip: "Scene Manager"
-ButtonText: "SM"
-icon: #("SceneManager",1)
+category: "PdManager"
+tooltip: "Pd Manager"
+ButtonText: "PdM"
+icon: #("PdManager",1)
 (
 	python.Execute "from pd_manager import Sm3dsMax"
 	python.Execute "Sm3dsMax.MainUI().show()"
@@ -852,20 +852,20 @@ icon: #("SceneManager",1)
 """
         saveVersion = """
 macroScript saveVersion
-category: "SceneManager"
-tooltip: "Scene Manager - Save Version"
-ButtonText: "SM_SaveV"
-icon: #("SceneManager",2)
+category: "PdManager"
+tooltip: "Pd Manager - Save Version"
+ButtonText: "PdM_SaveV"
+icon: #("PdManager",2)
 (
 	python.Execute "from pd_manager import Sm3dsMax"
 	python.Execute "Sm3dsMax.MainUI().saveAsVersionDialog()"
 )"""
         imageViewer = """
 macroScript imageViewer
-category: "SceneManager"
-tooltip: "Scene Manager - Image Viewer"
+category: "PdManager"
+tooltip: "Pd Manager - Image Viewer"
 ButtonText: "ImageViewer"
-icon: #("SceneManager",4)
+icon: #("PdManager",4)
 (
     python.Execute "from pd_manager import Sm3dsMax"
     python.Execute "pd_imageViewer = Sm3dsMax.MainUI()"
@@ -873,10 +873,10 @@ icon: #("SceneManager",4)
 )"""
         makePreview = """
 macroScript makePreview
-category: "SceneManager"
-tooltip: "Scene Manager - Make Preview"
+category: "PdManager"
+tooltip: "Pd Manager - Make Preview"
 ButtonText: "Make Preview"
-icon: #("SceneManager",5)
+icon: #("PdManager",5)
 (
 	python.Execute "from pd_manager import Sm3dsMax"
 	python.Execute "reload(Sm3dsMax)"
@@ -884,23 +884,23 @@ icon: #("SceneManager",5)
 )"""
         projectMaterials = """
 macroScript projectMaterials
-category: "SceneManager"
-tooltip: "Scene Manager - Project Materials"
+category: "PdManager"
+tooltip: "Pd Manager - Project Materials"
 ButtonText: "Project Materials"
-icon: #("SceneManager",6)
+icon: #("PdManager",6)
 (
 	python.Execute "from pd_manager import Sm3dsMax"
 	python.Execute "pd_projectMaterials = Sm3dsMax.MainUI()"
 	python.Execute "pd_projectMaterials.onPMaterials()"
 )"""
-        _dumpContent(os.path.join(macrosDir, "SceneManager-manager.mcr"), manager)
-        _dumpContent(os.path.join(macrosDir, "SceneManager-saveVersion.mcr"), saveVersion)
-        _dumpContent(os.path.join(macrosDir, "SceneManager-imageViewer.mcr"), imageViewer)
-        _dumpContent(os.path.join(macrosDir, "SceneManager-makePreview.mcr"), makePreview)
-        _dumpContent(os.path.join(macrosDir, "SceneManager-projectMaterials.mcr"), projectMaterials)
+        _dumpContent(os.path.join(macrosDir, "PdManager-manager.mcr"), manager)
+        _dumpContent(os.path.join(macrosDir, "PdManager-saveVersion.mcr"), saveVersion)
+        _dumpContent(os.path.join(macrosDir, "PdManager-imageViewer.mcr"), imageViewer)
+        _dumpContent(os.path.join(macrosDir, "PdManager-makePreview.mcr"), makePreview)
+        _dumpContent(os.path.join(macrosDir, "PdManager-projectMaterials.mcr"), projectMaterials)
 
-        searchLines = ['"sceneManager"', "</Window>"]
-        print "Injecting the Scene Manager toolbar to the workspace"
+        searchLines = ['"pdManager"', "</Window>"]
+        print "Injecting the Pd Manager toolbar to the workspace"
         state = inject(workspaceFile, workSpaceInjection, between=searchLines , matchMode="includes", force=False)
         if not state: # fresh install
             state = inject(workspaceFile, workSpaceInjection, before="</CUIWindows>", matchMode="includes")
