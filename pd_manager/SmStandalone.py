@@ -50,7 +50,7 @@ import pprint
 import logging
 
 __author__ = "Arda Kutlu"
-__copyright__ = "Copyright 2018, Scene Manager for Maya Project"
+__copyright__ = "Copyright 2018, Pd Manager for Maya Project"
 __credits__ = []
 __version__ = "2.0.0"
 __license__ = "GPL"
@@ -58,7 +58,7 @@ __maintainer__ = "Arda Kutlu"
 __email__ = "ardakutlu@gmail.com"
 __status__ = "Development"
 
-SM_Version = "Scene Manager Standalone v%s" %_version.__version__
+SM_Version = "Pd Manager Standalone v%s" %_version.__version__
 
 logging.basicConfig()
 logger = logging.getLogger('smStandalone')
@@ -491,7 +491,7 @@ class StandaloneManager(RootManager):
     def __init__(self):
         super(StandaloneManager, self).__init__()
 
-        # Dictionary with items for each software supported by Scene Manager
+        # Dictionary with items for each software supported by Pd Manager
         # self.swDictList = [{"niceName": "3dsMax",
         #                     "databaseDir": "maxDB",
         #                     "scenesDir": "scenes_3dsMax",

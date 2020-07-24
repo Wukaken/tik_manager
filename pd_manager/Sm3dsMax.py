@@ -55,7 +55,7 @@ import pprint
 
 
 __author__ = "Arda Kutlu"
-__copyright__ = "Copyright 2018, Scene Manager for 3dsMax Projects"
+__copyright__ = "Copyright 2018, Pd Manager for 3dsMax Projects"
 __credits__ = []
 __version__ = "2.0.0"
 __license__ = "GPL"
@@ -63,7 +63,7 @@ __maintainer__ = "Arda Kutlu"
 __email__ = "ardakutlu@gmail.com"
 __status__ = "Development"
 
-SM_Version = "Scene Manager 3ds Max v%s" %_version.__version__
+SM_Version = "Pd Manager 3ds Max v%s" %_version.__version__
 
 logging.basicConfig()
 logger = logging.getLogger('sm3dsMax')
@@ -437,7 +437,7 @@ class MaxManager(RootManager):
             fManager.Open(absSceneFile)
             return 0
         else:
-            msg = "File in Scene Manager database doesnt exist"
+            msg = "File in Pd Manager database doesnt exist"
             logger.error(msg)
             return -1, msg
 
@@ -453,7 +453,7 @@ class MaxManager(RootManager):
             # cmds.file(absSceneFile, i=True)
             return 0
         else:
-            msg = "File in Scene Manager database doesnt exist"
+            msg = "File in Pd Manager database doesnt exist"
             logger.error(msg)
             return -1, msg
 

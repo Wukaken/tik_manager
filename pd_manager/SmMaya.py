@@ -513,7 +513,7 @@ class MayaManager(RootManager):
             cmds.file(absSceneFile, o=True, force=force)
             return 0
         else:
-            msg = "File in Scene Manager database doesnt exist"
+            msg = "File in Pd Manager database doesnt exist"
             cmds.error(msg)
             return -1, msg
 
@@ -527,7 +527,7 @@ class MayaManager(RootManager):
             cmds.file(absSceneFile, i=True)
             return 0
         else:
-            msg = "File in Scene Manager database doesnt exist"
+            msg = "File in Pd Manager database doesnt exist"
             cmds.error(msg)
             return -1, msg
 

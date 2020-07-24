@@ -56,7 +56,7 @@ from Qt import QtCore
 # from PySide2 import QtGui
 
 __author__ = "Arda Kutlu"
-__copyright__ = "Copyright 2018, Scene Manager for Maya Project"
+__copyright__ = "Copyright 2018, Pd Manager for Maya Project"
 __credits__ = []
 __version__ = _version.__version__
 __license__ = "GPL"
@@ -64,7 +64,7 @@ __maintainer__ = "Arda Kutlu"
 __email__ = "ardakutlu@gmail.com"
 __status__ = "Development"
 
-SM_Version = "Scene Manager Houdini v%s" %_version.__version__
+SM_Version = "Pd Manager Houdini v%s" %_version.__version__
 
 logging.basicConfig()
 logger = logging.getLogger('smMaya')
@@ -569,7 +569,7 @@ class HoudiniManager(RootManager):
             self._setEnvVariable('HIP', os.path.split(absSceneFile)[0])
             return 0
         else:
-            msg = "File in Scene Manager database doesnt exist"
+            msg = "File in Pd Manager database doesnt exist"
             # cmds.error(msg)
             return -1, msg
 
@@ -586,7 +586,7 @@ class HoudiniManager(RootManager):
             hou.hipFile.merge(absSceneFile, node_pattern="*", overwrite_on_conflict=False, ignore_load_warnings=False)
             return 0
         else:
-            msg = "File in Scene Manager database doesnt exist"
+            msg = "File in Pd Manager database doesnt exist"
             return -1, msg
 
     def referenceBaseScene(self):
@@ -791,7 +791,7 @@ class HoudiniManager(RootManager):
         if currentOs != "Linux" and currentOs != "Windows":
             self._exception(210, "Operating System is not supported\nCurrently only Windows and Linux supported")
             return -1, ["OS Error", "Operating System is not supported",
-                        "Scene Manager only supports Windows and Linux Operating Systems"]
+                        "Pd Manager only supports Windows and Linux Operating Systems"]
 
         return None, None
 

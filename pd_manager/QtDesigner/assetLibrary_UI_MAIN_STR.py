@@ -87,7 +87,7 @@ class Ui_pdManager_MainWindow(object):
         QtCore.QMetaObject.connectSlotsByName(pdManager_MainWindow)
 
     def retranslateUi(self, pdManager_MainWindow):
-        pdManager_MainWindow.setWindowTitle(_translate("pdManager_MainWindow", "Scene Manager", None))
+        pdManager_MainWindow.setWindowTitle(_translate("pdManager_MainWindow", "Pd Manager", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("pdManager_MainWindow", "Tab 2", None))
         self.menuFile.setTitle(_translate("pdManager_MainWindow", "File", None))
         self.menuTools.setTitle(_translate("pdManager_MainWindow", "Tools", None))

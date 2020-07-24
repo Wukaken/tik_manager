@@ -226,8 +226,8 @@ class MainUI(QtWidgets.QMainWindow):
         self.databaseDir = os.path.normpath(os.path.join(self.projectPath, "smDatabase"))
 
         if not os.path.isdir(self.databaseDir):
-            msg = ["Nothing to view", "No Scene Manager Database",
-                   "There is no Scene Manager Database Folder in this project path"]
+            msg = ["Nothing to view", "No Pd Manager Database",
+                   "There is no Pd Manager Database Folder in this project path"]
             q = QtWidgets.QMessageBox()
             q.setIcon(QtWidgets.QMessageBox.Information)
             q.setText(msg[0])

@@ -64,7 +64,7 @@ logger.setLevel(logging.WARNING)
 
 
 class RootManager(object):
-    """Base of all Scene Manager Command Classes"""
+    """Base of all Pd Manager Command Classes"""
     def __init__(self):
         # super(RootManager, self).__init__()
 
@@ -736,7 +736,7 @@ class RootManager(object):
         return resolvedPath
 
     def createSubproject(self, nameOfSubProject):
-        """Creates a Scene Manager Sub-project"""
+        """Creates a Pd Manager Sub-project"""
         logger.debug("Func: createSubproject")
 
         if nameOfSubProject in self._subProjectsList:
@@ -883,7 +883,7 @@ class RootManager(object):
         formattedUsedSoftwares = ", ".join(usedSofwares)
 
         ReportText = """
-Scene Manager Report - by {0} on {1}
+Pd Manager Report - by {0} on {1}
 ---------------
 Participants:{2}
 Softwares Used:{3}
@@ -1347,7 +1347,7 @@ Elapsed Time:{6}
                     # copy over the forReference file
                     try:
                         shutil.copyfile(self._pathsDict["sceneFile"], absRefFile)
-                        print "Scene Manager Update:\nReference File Updated"
+                        print "Pd Manager Update:\nReference File Updated"
                     except:
                         pass
         '''
@@ -1512,7 +1512,7 @@ Elapsed Time:{6}
         if currentOs != "Linux" and currentOs != "Windows":
             self._exception(210, "Operating System is not supported\nCurrently only Windows and Linux supported")
             return -1, ["OS Error", "Operating System is not supported",
-                        "Scene Manager only supports Windows and Linux Operating Systems"]
+                        "Pd Manager only supports Windows and Linux Operating Systems"]
         '''
         ## check admin rights
         # try:
@@ -1520,9 +1520,9 @@ Elapsed Time:{6}
         # except AttributeError:
         #     is_admin = ctypes.windll.shell32.IsUserAnAdmin() != 0
         # if not is_admin:
-        #     self._exception(360, "Admin Rights Needed\nSoftware needs to be run as administrator in order to work with Scene Manager")
+        #     self._exception(360, "Admin Rights Needed\nSoftware needs to be run as administrator in order to work with Pd Manager")
         #     return -1, ["Admin Rights", "You dont have the administrator rights",
-        #                 "You need to run the Software as administrator to work with Scene Manager"]
+        #                 "You need to run the Software as administrator to work with Pd Manager"]
         return None, None
 
     def _folderCheck(self, folder):

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>sceneManager_MainWindow</class>
- <widget class="QMainWindow" name="sceneManager_MainWindow">
+ <class>pdManager_MainWindow</class>
+ <widget class="QMainWindow" name="pdManager_MainWindow">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Scene Manager</string>
+   <string>Pd Manager</string>
   </property>
   <property name="toolTip">
    <string notr="true"/>

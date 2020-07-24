@@ -160,7 +160,7 @@ def inject(file, newContentList, between=None, after=None, before=None, matchMod
     return True
 
 
-# def createOrReplace(file, newContentList, startLine="# start Scene Manager\n", endLine="# end Scene Manager\n"):
+# def createOrReplace(file, newContentList, startLine="# start Pd Manager\n", endLine="# end Pd Manager\n"):
 #     # if there is no file
 #     if os.path.isfile(file):
 #         contentList = _loadContent(file)
@@ -251,7 +251,7 @@ def nukeSetup(prompt=True):
     shutil.copyfile(projectMaterialsIcon, os.path.join(pluginDir, "projectMaterials_ICON.png"))
 
     initContent = [
-        "# start Scene Manager\n",
+        "# start Pd Manager\n",
         "import os\n",
         "import sys\n",
         "\n",
@@ -263,23 +263,23 @@ def nukeSetup(prompt=True):
         "    sys.path.append(targetFolder)\n",
         "\n",
         "initFolder('{0}')\n".format((upNetworkDir.replace("\\", "//"))),
-        "# end Scene Manager\n"
+        "# end Pd Manager\n"
     ]
 
-    inject(initFile, initContent, between=("# start Scene Manager\n", "# end Scene Manager\n"))
+    inject(initFile, initContent, between=("# start Pd Manager\n", "# end Pd Manager\n"))
     print "init.py file updated at: %s" %(initFile)
 
     menuContent = [
-        "# start Scene Manager\n",
+        "# start Pd Manager\n",
         "toolbar = nuke.menu('Nodes')\n",
         "smMenu = toolbar.addMenu('PdManager', icon='manager_ICON.png')\n",
-        "smMenu.addCommand('Scene Manager', 'from pd_manager import SmNuke\\nSmNuke.MainUI().show()', icon='manager_ICON.png')\n",
+        "smMenu.addCommand('Pd Manager', 'from pd_manager import SmNuke\\nSmNuke.MainUI().show()', icon='manager_ICON.png')\n",
         "smMenu.addCommand('Save Version', 'from pd_manager import SmNuke\\nSmNuke.MainUI().saveAsVersionDialog()', icon='saveVersion_ICON.png')\n",
         "smMenu.addCommand('Image Viewer', 'from pd_manager import SmNuke\\npd_imageViewer = SmNuke.MainUI()\\npd_imageViewer.onIviewer()', icon='imageViewer_ICON.png')\n",
         "smMenu.addCommand('Project Materials', 'from pd_manager import SmNuke\\npd_projectMaterials = SmNuke.MainUI()\\npd_projectMaterials.onPMaterials()', icon='projectMaterials_ICON.png')\n",
-        "# end Scene Manager\n"
+        "# end Pd Manager\n"
     ]
-    inject(menuFile, menuContent, between=("# start Scene Manager\n", "# end Scene Manager\n"))
+    inject(menuFile, menuContent, between=("# start Pd Manager\n", "# end Pd Manager\n"))
     print "menu.py updated at: %s" %(menuFile)
 
     print "Successfull => Nuke Setup"
@@ -348,7 +348,7 @@ def mayaSetup(prompt=True):
         return
 
     newUserSetupContent = [
-        "# start Scene Manager\n",
+        "# start Pd Manager\n",
         "import os\n",
         "import sys\n",
         "import maya.utils\n",
@@ -371,10 +371,10 @@ def mayaSetup(prompt=True):
         "\n",
         "initFolder('{0}')\n".format((upNetworkDir.replace("\\", "//"))),
         "maya.utils.executeDeferred('SMid = OpenMaya.MSceneMessage.addCallback(OpenMaya.MSceneMessage.kAfterSave, smUpdate)')\n",
-        "# end Scene Manager\n"
+        "# end Pd Manager\n"
     ]
     # createOrReplace(userSetupFile, newUserSetupContent)
-    inject(userSetupFile, newUserSetupContent, between=("# start Scene Manager\n", "# end Scene Manager\n"))
+    inject(userSetupFile, newUserSetupContent, between=("# start Pd Manager\n", "# end Pd Manager\n"))
     print "userSetup updated at: %s" %(userSetupFile)
 
     ## SHELF
@@ -648,7 +648,7 @@ def houdiniSetup(prompt=True):
     projectMaterialsIcon = os.path.join(networkDir, "icons", "projectMaterials_ICON.png").replace("\\", "\\\\")
 
     sScriptContent = [
-        "# start Scene Manager\n",
+        "# start Pd Manager\n",
         "import os\n"
         "import sys\n"
         "\n"
@@ -660,7 +660,7 @@ def houdiniSetup(prompt=True):
         "    sys.path.append(targetFolder)\n"
         "\n"
         "initFolder('{0}')\n".format((upNetworkDir.replace("\\", "//"))),
-        "# end Scene Manager\n"
+        "# end Pd Manager\n"
     ]
 
     shelfContent = """<?xml version="1.0" encoding="UTF-8"?>
@@ -713,7 +713,7 @@ projectMaterials.MainUI().show()]]></script>
         folderCheck(scriptsFolder)
         sScriptFile = os.path.join(scriptsFolder, "456.py")
         # createOrReplace(sScriptFile, sScriptContent)
-        inject(sScriptFile, sScriptContent, between=("# start Scene Manager\n", "# end Scene Manager\n"))
+        inject(sScriptFile, sScriptContent, between=("# start Pd Manager\n", "# end Pd Manager\n"))
 
         print "Path config appended to %s" %sScriptFile
 
@@ -724,9 +724,9 @@ projectMaterials.MainUI().show()]]></script>
         shelfFile = os.path.join(shelfDir, "pdManager.shelf")
         _dumpContent(shelfFile, shelfContent)
 
-        print "Scene manager shelf created or updated at %s" % shelfFile
+        print "Pd manager shelf created or updated at %s" % shelfFile
 
-    print "\nInside Houdini, Scene Manager shelf should be enabled for the desired shelf set by clicking to '+' icon and selecting 'shelves' sub menu."
+    print "\nInside Houdini, Pd Manager shelf should be enabled for the desired shelf set by clicking to '+' icon and selecting 'shelves' sub menu."
 
     print "Successfull => Houdini Setup"
 
@@ -928,10 +928,10 @@ def folderCheck(folder):
 
 header = """
 ---------------------------
-Scene Manager Setup v%s
+Pd Manager Setup v%s
 ---------------------------
 
-Choose the software you want to setup Scene Manager:""" % _version.__version__
+Choose the software you want to setup Pd Manager:""" % _version.__version__
 
 
 menuItems = [

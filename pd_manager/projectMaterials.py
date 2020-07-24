@@ -68,7 +68,7 @@ logger = logging.getLogger('projectMaterials')
 logger.setLevel(logging.WARNING)
 
 __author__ = "Arda Kutlu"
-__copyright__ = "Copyright 2018, Scene Manager - Project materials"
+__copyright__ = "Copyright 2018, Pd Manager - Project materials"
 __credits__ = []
 __license__ = "GPL"
 __maintainer__ = "Arda Kutlu"
@@ -1046,8 +1046,8 @@ class MainUI(QtWidgets.QMainWindow):
 
         pStatus = self.promat.init_paths()
         if not pStatus:
-            msg = ["Nothing to view", "No Scene Manager Database",
-                   "There is no Scene Manager Database Folder in this project path"]
+            msg = ["Nothing to view", "No Pd Manager Database",
+                   "There is no Pd Manager Database Folder in this project path"]
             q = QtWidgets.QMessageBox()
             q.setIcon(QtWidgets.QMessageBox.Information)
             q.setText(msg[0])
@@ -1081,8 +1081,8 @@ class MainUI(QtWidgets.QMainWindow):
         # self.databaseDir = os.path.normpath(os.path.join(self.projectPath, "smDatabase"))
         #
         # if not os.path.isdir(self.databaseDir):
-        #     msg=["Nothing to view", "No Scene Manager Database",
-        #      "There is no Scene Manager Database Folder in this project path"]
+        #     msg=["Nothing to view", "No Pd Manager Database",
+        #      "There is no Pd Manager Database Folder in this project path"]
         #     q = QtWidgets.QMessageBox()
         #     q.setIcon(QtWidgets.QMessageBox.Information)
         #     q.setText(msg[0])

@@ -1,28 +1,28 @@
 macroScript manager
-category: "SceneManager"
-tooltip: "Scene Manager"
+category: "PdManager"
+tooltip: "Pd Manager"
 ButtonText: "SM"
-icon: #("SceneManager",1)
+icon: #("PdManager",1)
 (
 	python.Execute "from pd_manager import Sm3dsMax"
 	python.Execute "Sm3dsMax.MainUI().show()"
 )
 
 macroScript saveVersion
-category: "SceneManager"
-tooltip: "Scene Manager - Save Version"
+category: "PdManager"
+tooltip: "Pd Manager - Save Version"
 ButtonText: "SM_SaveV"
-icon: #("SceneManager",2)
+icon: #("PdManager",2)
 (
 	python.Execute "from pd_manager import Sm3dsMax"
 	python.Execute "Sm3dsMax.MainUI().saveAsVersionDialog()"
 )
 
 macroScript imageViewer
-category: "SceneManager"
-tooltip: "Scene Manager - Image Viewer"
+category: "PdManager"
+tooltip: "Pd Manager - Image Viewer"
 ButtonText: "ImageViewer"
-icon: #("SceneManager",4)
+icon: #("PdManager",4)
 (
     python.Execute "from pd_manager import Sm3dsMax"
     python.Execute "pd_imageViewer = Sm3dsMax.MainUI()"
@@ -30,10 +30,10 @@ icon: #("SceneManager",4)
 )
 
 macroScript makePreview
-category: "SceneManager"
-tooltip: "Scene Manager - Make Preview"
+category: "PdManager"
+tooltip: "Pd Manager - Make Preview"
 ButtonText: "Make Preview"
-icon: #("SceneManager",5)
+icon: #("PdManager",5)
 (
 	python.Execute "from pd_manager import Sm3dsMax"
 	python.Execute "reload(Sm3dsMax)"
@@ -41,10 +41,10 @@ icon: #("SceneManager",5)
 )
 
 macroScript projectMaterials
-category: "SceneManager"
-tooltip: "Scene Manager - Project Materials"
+category: "PdManager"
+tooltip: "Pd Manager - Project Materials"
 ButtonText: "Project Materials"
-icon: #("SceneManager",6)
+icon: #("PdManager",6)
 (
 	python.Execute "from pd_manager import Sm3dsMax"
 	python.Execute "pd_projectMaterials = Sm3dsMax.MainUI()"

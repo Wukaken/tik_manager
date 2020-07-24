@@ -40,7 +40,7 @@ Tik Manager has following features / tools:
 
 Tik Manager follows a simple folder hierarchy. 
 The folder structure makes sense for manual browsing. There are minimal nested folders. If at some
-point, the user decides to stop using Scene Manager, it is possible to continue working without it.
+point, the user decides to stop using Pd Manager, it is possible to continue working without it.
 However, Scenes saved after this point wont be included in the manager database
 
 Tik Manager has the following hierarchy:
@@ -52,5 +52,5 @@ Tik Manager has the following hierarchy:
                 * Version 02
                 * ...
                 
-Scene Manager main window is not a browser window. It is NOT POSSIBLE TO OVERWRITE ANY PREVIOUS FILE.
+Pd Manager main window is not a browser window. It is NOT POSSIBLE TO OVERWRITE ANY PREVIOUS FILE.
 With admin password, it is possible to delete entire base scene along with all versions. This should not be necessary in most cases.

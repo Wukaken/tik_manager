@@ -51,7 +51,7 @@ logger = logging.getLogger('smMaya')
 logger.setLevel(logging.WARNING)
 
 __author__ = "Arda Kutlu"
-__copyright__ = "Copyright 2018, Scene Manager for Maya Project"
+__copyright__ = "Copyright 2018, Pd Manager for Maya Project"
 __credits__ = []
 __version__ = "2.0.0"
 __license__ = "GPL"
@@ -59,7 +59,7 @@ __maintainer__ = "Arda Kutlu"
 __email__ = "ardakutlu@gmail.com"
 __status__ = "Development"
 
-SM_Version = "Scene Manager Nuke v%s" %_version.__version__
+SM_Version = "Pd Manager Nuke v%s" %_version.__version__
 
 logging.basicConfig()
 logger = logging.getLogger('smNuke')
@@ -367,7 +367,7 @@ class NukeManager(RootManager):
             nuke.scriptOpen(absSceneFile)
             return 0
         else:
-            msg = "File in Scene Manager database doesnt exist"
+            msg = "File in Pd Manager database doesnt exist"
             self._exception(201, msg)
             return -1, msg
     #
@@ -381,7 +381,7 @@ class NukeManager(RootManager):
             nuke.nodePaste(absSceneFile)
             return 0
         else:
-            msg = "File in Scene Manager database doesnt exist"
+            msg = "File in Pd Manager database doesnt exist"
             self._exception(210, msg)
             return -1, msg
 
@@ -531,7 +531,7 @@ class NukeManager(RootManager):
             if categoriesData == -2:
                 return -2
         else:
-            # categoriesData = self._sceneManagerDefaults["defaultCategories"]
+            # categoriesData = self._pdManagerDefaults["defaultCategories"]
             categoriesData = ["Comp"]
             self._dumpJson(categoriesData, self._pathsDict["categoriesFile"])
         return categoriesData

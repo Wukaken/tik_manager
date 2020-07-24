@@ -78,10 +78,10 @@ logger = logging.getLogger('sm3dsMax')
 logger.setLevel(logging.WARNING)
 
 
-# Below is the standard dictionary for Scene Manager Standalone
+# Below is the standard dictionary for Pd Manager Standalone
 BoilerDict = {"Environment": "Standalone",
               "MainWindow": None,
-              "WindowTitle": "Scene Manager Standalone v%s" %_version.__version__,
+              "WindowTitle": "Pd Manager Standalone v%s" %_version.__version__,
               "Stylesheet": "mayaDark.stylesheet",
               "SceneFormats": None
               }
@@ -90,7 +90,7 @@ BoilerDict = {"Environment": "Standalone",
 try:
     from maya import OpenMayaUI as omui
     BoilerDict["Environment"] = "Maya"
-    BoilerDict["WindowTitle"] = "Scene Manager Maya v%s" %_version.__version__
+    BoilerDict["WindowTitle"] = "Pd Manager Maya v%s" %_version.__version__
     BoilerDict["SceneFormats"] = ["ma", "mb"]
     if Qt.__binding__ == "PySide":
         from shiboken import wrapInstance
@@ -104,7 +104,7 @@ except ImportError:
 try:
     import MaxPlus
     BoilerDict["Environment"] = "3dsMax"
-    BoilerDict["WindowTitle"] = "Scene Manager 3ds Max v%s" %_version.__version__
+    BoilerDict["WindowTitle"] = "Pd Manager 3ds Max v%s" %_version.__version__
     BoilerDict["SceneFormats"] = ["max"]
 except ImportError:
     pass
@@ -112,7 +112,7 @@ except ImportError:
 try:
     import hou
     BoilerDict["Environment"] = "Houdini"
-    BoilerDict["WindowTitle"] = "Scene Manager Houdini v%s" %_version.__version__
+    BoilerDict["WindowTitle"] = "Pd Manager Houdini v%s" %_version.__version__
     BoilerDict["SceneFormats"] = ["hip"]
 except ImportError:
     pass
@@ -120,7 +120,7 @@ except ImportError:
 try:
     import nuke
     BoilerDict["Environment"] = "Nuke"
-    BoilerDict["WindowTitle"] = "Scene Manager Nuke v%s" % _version.__version__
+    BoilerDict["WindowTitle"] = "Pd Manager Nuke v%s" % _version.__version__
     BoilerDict["SceneFormats"] = ["nk"]
 except ImportError:
     pass
@@ -150,7 +150,7 @@ def getMainWindow():
 
 
 class MainUI(QtWidgets.QMainWindow):
-    """Main UI Class for Tik Scene Manager"""
+    """Main UI Class for Tik Pd Manager"""
     def __init__(self, callback=None):
         self.isCallback = callback
         self.windowName = BoilerDict["WindowTitle"]
