@@ -445,7 +445,17 @@ class NukeManager(RootManager):
     #     self._currentSceneInfo["Versions"][self.currentVersionIndex-1]["Thumb"]=filePath
     #
     #     self._dumpJson(self._currentSceneInfo, self.currentDatabasePath)
-    #
+
+    def getSoftwareVersion(self):
+        cMajorV = nuke.NUKE_VERSION_MAJOR
+        cMinorV = nuke.NUKE_VERSION_MINOR
+        currentVersion = float("{0}.{1}".format(cMajorV, cMinorV))
+        return currentVersion
+
+    def getSoftwareMainVersion(self):
+        mainVer = str(nuke.NUKE_VERSION_MAJOR)
+        return mainVer
+    
     def compareVersions(self):
         """Compares the versions of current session and database version at cursor position"""
         logger.debug("Func: compareVersions")

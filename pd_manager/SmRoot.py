@@ -92,8 +92,9 @@ class RootManager(object):
         logger.debug("Func: init_paths")
         # all paths in here must be absolute paths
         _softwarePathsDict = self.getSoftwarePaths()
+        mainSwVersion = self.getSoftwareMainVersion()
 
-        self._pathsDict["userSettingsDir"] = os.path.normpath(os.path.join(self.getUserDirectory(), _softwarePathsDict["userSettingsDir"]))
+        self._pathsDict["userSettingsDir"] = os.path.normpath(os.path.join(self.getUserDirectory(), _softwarePathsDict["userSettingsDir"], mainSwVersion))
         self._folderCheck(self._pathsDict["userSettingsDir"])
 
         self._pathsDict["bookmarksFile"] = os.path.normpath(os.path.join(self._pathsDict["userSettingsDir"], "smBookmarks.json"))
@@ -144,6 +145,13 @@ class RootManager(object):
         # This function should return a dictionary which includes string values for:
         # databaseDir, scenesDir, pbSettingsFile keys. Software specific paths will be resolved with these strings
         logger.debug("Func: getSoftwarePaths")
+        return -1
+
+    def getSoftwareMainVersion(self):
+        """This method must be overridden to return the software currently working on"""
+        # This function should return a dictionary which includes string values for:
+        # databaseDir, scenesDir, pbSettingsFile keys. Software specific paths will be resolved with these strings
+        logger.debug("Func: getSoftwareMainVersion")
         return -1
 
     def getProjectDir(self):

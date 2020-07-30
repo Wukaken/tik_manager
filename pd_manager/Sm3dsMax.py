@@ -612,6 +612,11 @@ class MaxManager(RootManager):
         versionInfo = rt.maxversion()
         return [versionInfo[0], versionInfo[1], versionInfo[2]]
 
+    def getSoftwareMainVersion(self):
+        apiVer = self.getSoftwareVersion()
+        mainVer = str((apiVer[0] - 11000) / 1000 + 2009)
+        return mainVer
+
     def compareProjectSoftWareVersion(self, projSettingFile):
         swVer = self.getSoftwareVersion()
         projSetting = self._loadJson(projSettingFile)

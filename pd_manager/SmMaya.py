@@ -885,6 +885,11 @@ class MayaManager(RootManager):
     def getSoftwareVersion(self):
         return cmds.about(api=1)
 
+    def getSoftwareMainVersion(self):
+        apiVer = self.getSoftwareVersion()
+        mainVer = str(apiVer)[:4]
+        return mainVer
+
     def compareProjectSoftWareVersion(self, projSettingFile):
         swVer = self.getSoftwareVersion()
         projSetting = self._loadJson(projSettingFile)

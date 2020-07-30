@@ -93,6 +93,16 @@ class HoudiniManager(RootManager):
         #         "categoriesFile": "categoriesHoudini.json",
         #         "userSettingsDir": "PdManager/Houdini"}
 
+    def getSoftwareVersion(self):
+        vTup = hou.applicationVersion()
+        currentVersion = "%s.%s%s" % (vTup[0], vTup[1], vTup[2])
+        return currentVersion
+
+    def getSoftwareMainVersion(self):
+        vTup = hou.applicationVersion()
+        mainVer = str(vTup[0])
+        return mainVer
+
     def getProjectDir(self):
         """Overriden function"""
         logger.debug("Func: getProjectDir")
